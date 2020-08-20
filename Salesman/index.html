@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8" />
+
+
+<link rel="stylesheet" href="/admin/css/style.css" />
+<link rel="stylesheet" href="/admin/css/other.css" />
+<!-- <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" /> -->
+<link rel="stylesheet" href="/admin/css/index.css">
+<script type="text/javascript" src="/admin/js/vue.js"></script>
+<script src="/admin/js/element.js"></script>
+<title>后台管理系统</title>
+<style>
+  .el-card {
+    height: 100px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  }
+
+  .el-dialog {
+    width: 500px;
+  }
+
+  .el-form-item label:after {
+    content: "";
+    display: inline-block;
+    width: 100%;
+  }
+
+  .el-form-item__label {
+    text-align: justify;
+    height: 50px;
+  }
+
+  .el-form-item.is-required .el-form-item__label:before {
+    content: none !important;
+  }
+
+  .el-form-item {
+    width: 75%;
+  }
+
+
+
+  /* .el-tooltip__popper,
+  .el-tooltip__popper.is-dark {
+    background: #f5f5f5 !important;
+    color: #303133 !important;
+  } */
+</style>
+
+<body>
+  <header class="header">
+    <div class="container flex">
+      <div class="left">
+        <img class="logo" src="/admin/images/2.jpg" />
+      </div>
+      <div class="right flex">
+        <p class="font">用户1</p>
+        <p class="font exit">退出</p>
+      </div>
+    </div>
+  </header>
+  <div class="body flex">
+    <div class="slider">
+      <div class="slider-body">
+        <ul>
+          <li class="ul-item active">
+            <a class="slider-link active" href="/Salesman/index.html">电话名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link " href="/Salesman/apply.html">报名名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link" href="/Salesman/interview.html">面试名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link" href="/Salesman/wait_hire.html">待入职名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link" href="/Salesman/hire.html">入职名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link" href="/Salesman/other.html">结算名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link" href="/Salesman/phoneRecords.html">电话记录</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="main">
+      <!-- 主体  -->
+      <div id="app">
+
+        <el-row style="width: 100%;">
+          <!-- 今日接通电话 -->
+          <el-col :span="12">
+            <el-card class="box-card" shadow="never" style="width: 100%">
+              <div style="margin-bottom: 10px;width: 50%;">
+                <span>今日呼叫量：</span><span class="call_num" v-text="phone.total"></span></div>
+              <div style="margin-bottom: 10px;width: 50%; float: left;">
+                <span class="day_title">今日接通量：</span><span class="recall_num" v-text="phone.throughTo"></span>
+              </div>
+              <div style="float: left; margin-bottom: 20px;">
+                <span class="day_title">今日未接通量：</span><span class="recall_num" v-text="phone.noThroughTo"></span>
+              </div>
+            </el-card>
+
+          </el-col>
+
+          <!-- 抽取名单、抽取总名单两个功能性按钮 -->
+          <el-col :span="6">
+
+            <el-card class="box-card" shadow="never" style="width: 100%">
+              <div>
+                <el-button type="primary" size="small"
+                  style="margin-left: 50px;margin-right: 50px; margin-bottom: 10px;" @click="takeOut()">抽取名单</el-button>
+                <el-button type="primary" size="small" style="margin-left: 45px;margin-right: 45px;" @click="takeOutAll()">抽取总名单</el-button>
+              </div>
+            </el-card>
+          </el-col>
+
+          <!-- 新增事务，添加名单、事务 三个功能性按钮 -->
+          <el-col :span="6">
+            <el-card class="box-card" shadow="never" style="width: 100%">
+              <div>
+                <el-col :span="12">
+                  <el-button type="primary" size="small"
+                    style="margin-left: 3px;margin-right: 3px; margin-bottom: 10px;" @click="dialogFormVisible2=true">
+                    添加名单</el-button>
+                  <el-button type="primary" size="small" style="margin-left: 3px;margin-right: 3px;"
+                    @click="dialogFormVisible1=true" style="margin-left: 0px;">新增事务
+                  </el-button>
+
+                </el-col>
+                <el-col :span="12">
+
+                  <el-popover placement="right" width="500" trigger="click">
+                    <el-table :data="affair_table">
+
+                      <el-table-column width="150" property="time" align="center" label="截止时间"></el-table-column>
+                      <el-table-column width="100" property="content" align="center" :show-overflow-tooltip="true"
+                        label="内容">
+
+                      </el-table-column>
+                      <el-table-column width="250" align="center" label="操作">
+                        <template slot-scope="scope">
+                          <el-button type="success" @click="deleteTransaction(scope.row.id)">完成</el-button>
+                          <el-button type="danger" @click="deleteTransaction(scope.row.id)">删除</el-button>
+                        </template>
+
+                      </el-table-column>
+                    </el-table>
+
+                    <el-button slot="reference" type="warning" style="margin-top: 20px; margin-left: 10px;">事务
+                    </el-button>
+
+                  </el-popover>
+                  <el-badge :value="affair_table.length" class="item" style="margin-bottom: 40px;margin-right: 5px;">
+                  </el-badge>
+                </el-col>
+              </div>
+            </el-card>
+          </el-col>
+
+          </el-col>
+        </el-row>
+
+        <!-- 添加表单 -->
+        <el-dialog title="添加表单" :visible.sync="dialogFormVisible2" @open="openAddForm">
+          <el-form :model="add_form" ref="add_form" style="margin-left: 80px;" class="demo-ruleForm">
+            <el-form-item label="姓名" :label-width="formLabelWidth">
+              <el-input v-model="add_form.name" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="性别" :label-width="formLabelWidth">
+              <el-radio-group v-model="add_form.gender">
+                <el-radio :label="0">男</el-radio>
+                <el-radio :label="1">女</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="身份证" :label-width="formLabelWidth">
+              <el-input v-model="add_form.cardNumber" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="年龄" :label-width="formLabelWidth">
+              <el-input v-model="add_form.age" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="电话" :label-width="formLabelWidth">
+              <el-input v-model="add_form.phoneNumber" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="学历" :label-width="formLabelWidth">
+              <el-select v-model="add_form.education" placeholder="请选择">
+                <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="区域" :label-width="formLabelWidth">
+              <el-input v-model="add_form.address" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+
+
+            <el-form-item label="专业技能" :label-width="formLabelWidth">
+              <el-input v-model="add_form.professionalSkills" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="证书" :label-width="formLabelWidth">
+              <el-radio-group v-model="add_form.hasCertificate">
+                <el-radio :label="0">是</el-radio>
+                <el-radio :label="1">否</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="残疾人" :label-width="formLabelWidth">
+              <el-radio-group v-model="add_form.isDisability">
+                <el-radio :label="0">是</el-radio>
+                <el-radio :label="1">否</el-radio>
+
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="数据来源" :label-width="formLabelWidth">
+              <el-select v-model="add_form.source_data" placeholder="请选择">
+                <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+
+            <el-form-item label="备注" :label-width="formLabelWidth">
+              <el-input v-model="add_form.note" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+
+          </el-form>
+          <div slot="footer" class="dialog-footer" style="text-align: center;">
+            <el-button @click="dialogFormVisible2 = false">取 消</el-button>
+            <el-button type="primary" @click="addPhone">添加</el-button>
+          </div>
+        </el-dialog>
+
+        <!-- 编辑表单 -->
+        <el-dialog title="编辑表单" :visible.sync="dialogFormVisible3">
+          <el-form :model="update_form" ref="update_form" style="margin-left: 80px;" class="demo-ruleForm">
+            <el-form-item label="姓名" :label-width="formLabelWidth">
+              <el-input v-model="update_form.name" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="性别" :label-width="formLabelWidth">
+              <el-radio-group v-model="update_form.gender">
+                <el-radio :label="0">男</el-radio>
+                <el-radio :label="1">女</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="身份证" :label-width="formLabelWidth">
+              <el-input v-model="update_form.idNumber" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="年龄" :label-width="formLabelWidth">
+              <el-input v-model="update_form.age" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="电话" :label-width="formLabelWidth">
+              <el-input v-model="update_form.phoneNumber" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="学历" :label-width="formLabelWidth">
+              <el-select v-model="update_form.education" placeholder="请选择">
+                <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="区域" :label-width="formLabelWidth">
+              <el-input v-model="update_form.address" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+
+
+            <el-form-item label="专业技能" :label-width="formLabelWidth">
+              <el-input v-model="update_form.professionalSkills" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="证书" :label-width="formLabelWidth">
+              <el-radio-group v-model="update_form.hasCertificate">
+                <el-radio :label="0">是</el-radio>
+                <el-radio :label="1">否</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="残疾人" :label-width="formLabelWidth">
+              <el-radio-group v-model="update_form.isDisability">
+                <el-radio :label="0">是</el-radio>
+                <el-radio :label="1">否</el-radio>
+
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="数据来源" :label-width="formLabelWidth">
+              <el-select v-model="update_form.sourceOfData" placeholder="请选择">
+                <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+
+            <el-form-item label="备注" :label-width="formLabelWidth">
+              <el-input v-model="update_form.note" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+
+          </el-form>
+          <div slot="footer" class="dialog-footer" style="text-align: center;">
+            <el-button @click="dialogFormVisible3 = false">取 消</el-button>
+            <el-button type="primary" @click="update">编辑</el-button>
+          </div>
+        </el-dialog>
+
+        <!-- 新增事务 -->
+
+        <el-dialog title="新增事务" :visible.sync="dialogFormVisible1" @open="openDialog">
+          <el-form :model="affair_form" ref="affair_form" style="margin-left: 20px;">
+            <el-form-item label="内容" :label-width="formLabelWidth" style="width: 90%;">
+              <el-input type="textarea" :autosize="{ minRows: 2, maxRows: 4}" placeholder="请输入内容"
+                v-model="affair_form.content">
+              </el-input>
+            </el-form-item>
+            <el-form-item label="提示时间" :label-width="formLabelWidth">
+              <div class="block">
+
+                <el-date-picker v-model="affair_form.time1" align="right" style="margin-bottom: 10px;" type="date"
+                  placeholder="选择日期" value-format="yyyy-MM-dd" :picker-options="pickerOptions">
+                </el-date-picker>
+
+                <el-time-select v-model="affair_form.time2"
+                  :picker-options="{start: '08:00',step: '00:30',end: '21:00'}" placeholder="选择时间">
+
+                </el-time-select>
+              </div>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer" style="text-align: center;">
+
+            <el-button type="primary" @click="addTransaction">确 定</el-button>
+            <el-button @click="resetForm('affair_form')">重置</el-button>
+          </div>
+        </el-dialog>
+
+
+        <hr style="margin-bottom: 1em;margin-top: 2em;">
+        <!-- 多条件查询 -->
+        <el-row>
+          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <el-input placeholder="请输入姓名" v-model="DATA.name" @keyup.enter.native="searchData">
+          </el-col>
+          <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <el-input placeholder="输入身份证号" v-model="DATA.idNumber" @keyup.enter.native="searchData">
+          </el-col>
+          <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <el-input placeholder="请输入电话号码" v-model="DATA.phoneNumber" @keyup.enter.native="searchData">
+          </el-col>
+          <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <el-input placeholder="请输入专业技能" v-model="DATA.professionalSkills" @keyup.enter.native="searchData">
+          </el-col>
+          <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <el-input placeholder="请输入数据来源" v-model="DATA.sourceOfData" @keyup.enter.native="searchData">
+          </el-col>
+          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <el-input placeholder="请输入学历" v-model="DATA.education" @keyup.enter.native="searchData">
+          </el-col>
+
+          <el-col :span="6" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <span style="font-size: 14px;">性别</span>
+            <el-radio-group v-model="DATA.gender" size="mini" @change="changeTable1">
+              <el-radio label="男">男</el-radio>
+              <el-radio label="女">女</el-radio>
+            </el-radio-group>
+          </el-col>
+
+          <el-col :span="6" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <span style="font-size: 14px;">是否有证书</span>
+            <el-radio-group v-model="DATA.hasCertificate" size="mini" @change="changeTable1">
+              <el-radio label="0">是</el-radio>
+              <el-radio label="1">否</el-radio>
+            </el-radio-group>
+          </el-col>
+
+          <el-col :span="7" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <span style="font-size: 14px;">是否为残疾人</span>
+            <el-radio-group v-model="DATA.isDisability" size="mini" @change="changeTable1">
+              <el-radio label="0">是</el-radio>
+              <el-radio label="1">否</el-radio>
+            </el-radio-group>
+          </el-col>
+
+        </el-row>
+
+        <!-- 第一个表格 -->
+        <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
+          <el-table-column fixed prop="name" label="姓名" align="center" width="80">
+          </el-table-column>
+          <el-table-column prop="idNumber" label="身份证号码" align="center" width="180">
+          </el-table-column>
+          <el-table-column prop="gender" label="性别" align="center" width="50">
+          </el-table-column>
+          <el-table-column prop="age" label="年龄" align="center" width="50">
+          </el-table-column>
+          <el-table-column label="电话号码" align="center" width="120">
+            <template slot-scope="scope">
+              <p>{{ scope.row.phoneNumber }}</p>
+
+              <el-button size="small" type="primary" icon="el-icon-phone" @click="callPhone(scope.row)">
+                <span style="font-size: 14px;">呼叫</span>
+              </el-button>
+
+            </template>
+          </el-table-column>
+          <el-table-column prop="education" label="学历" align="center" width="50">
+          </el-table-column>
+          <el-table-column prop="address" label="区域" align="center" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="professionalSkills" label="专业技能" align="center" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="hasCertificate" label="证书" align="center" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="isDisability" label="残疾人" align="center">
+          </el-table-column>
+          <el-table-column prop="recommendEnterprise" label="推荐企业" align="center" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="recommendJob" label="推荐岗位" align="center" :show-overflow-tooltip="true">
+          </el-table-column>
+
+          <el-table-column prop="isWechatAdded" label="是否已加微信" align="center">
+          </el-table-column>
+          <el-table-column prop="sourceOfData" label=" 数据来源" align="center">
+          </el-table-column>
+          <el-table-column prop="note" label="备注" align="center" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column label="操作" fixed="right" align="center" width="230">
+            <template slot-scope="scope">
+              <el-button size="small" type="primary" @click="updatePhone(scope.row)">
+                编辑
+              </el-button>
+              <el-button size="small" type="success" @click="through(scope.row)">
+                通过
+              </el-button>
+              <el-button size="small" type="danger" @click="backData(scope.row.phoneCallListId)">
+                退回
+              </el-button>
+            </template>
+          </el-table-column>
+
+        </el-table>
+        <div class="footer" style="width: 100%;margin-top:1rem;">
+          <template>
+            <el-pagination :current-page="currentPage" :page-size="pagesize" :page-sizes="10" :total="total1"
+              @current-change="handleCurrentChange" background layout="total,prev, pager, next, jumper">
+            </el-pagination>
+          </template>
+        </div>
+
+        <hr style="margin-bottom: 2em;margin-top: 2em;">
+        <!-- 第二个表格——电话总名单-多条件查询 -->
+        <strong style="margin-top: 1em;font-size: 20px;">电话总名单</strong>
+        <el-row>
+          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <el-input placeholder="请输入姓名" v-model="DATA2.name" @keyup.enter.native="searchData2">
+          </el-col>
+          <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <el-input placeholder="输入身份证号" v-model="DATA2.idNumber" @keyup.enter.native="searchData2">
+          </el-col>
+          <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <el-input placeholder="请输入电话号码" v-model="DATA2.phoneNumber" @keyup.enter.native="searchData2">
+          </el-col>
+          <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <el-input placeholder="请输入专业技能" v-model="DATA2.professionalSkills" @keyup.enter.native="searchData2">
+          </el-col>
+          <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <el-input placeholder="请输入数据来源" v-model="DATA2.sourceOfData" @keyup.enter.native="searchData2">
+          </el-col>
+          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <el-input placeholder="请输入学历" v-model="DATA2.education" @keyup.enter.native="searchData2">
+          </el-col>
+
+          <el-col :span="6" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <span style="font-size: 14px;">性别</span>
+            <el-radio-group v-model="DATA2.gender" size="mini" @change="changeTable2">
+              <el-radio label="男">男</el-radio>
+              <el-radio label="女">女</el-radio>
+            </el-radio-group>
+          </el-col>
+
+          <el-col :span="6" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <span style="font-size: 14px;">是否有证书</span>
+            <el-radio-group v-model="DATA2.hasCertificate" size="mini" @change="changeTable2">
+              <el-radio label="0">是</el-radio>
+              <el-radio label="1">否</el-radio>
+            </el-radio-group>
+          </el-col>
+
+          <el-col :span="7" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <span style="font-size: 14px;">是否为残疾人</span>
+            <el-radio-group v-model="DATA2.isDisability" size="mini" @change="changeTable2">
+              <el-radio label="0">是</el-radio>
+              <el-radio label="1">否</el-radio>
+            </el-radio-group>
+          </el-col>
+        </el-row>
+
+        <!-- 第二个表格  -->
+        <el-table :data="tableData2" border style="width: 100%;margin-top: 1em;" v-loading="loading2">
+          <el-table-column fixed prop="name" label="姓名" align="center" width="80">
+          </el-table-column>
+          <el-table-column prop="cardNumber" label="身份证号码" align="center" width="180">
+          </el-table-column>
+          <el-table-column prop="gender" label="性别" align="center" width="50">
+          </el-table-column>
+          <el-table-column prop="age" label="年龄" align="center" width="50">
+          </el-table-column>
+          <el-table-column prop="phoneNumber" label="电话号码" align="center" width="120">
+          </el-table-column>
+          <el-table-column prop="education" label="学历" align="center" width="50">
+          </el-table-column>
+          <el-table-column prop="address" label="区域" align="center" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="professionalSkills" label="专业技能" align="center" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="hasCertificate" label="证书" align="center" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="isDisability" label="残疾人" align="center">
+          </el-table-column>
+          <el-table-column prop="recommendEnterprise" label="推荐企业" align="center" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="isWechatAdded" label="是否已加微信" align="center">
+          </el-table-column>
+          <el-table-column prop="sourceOfData" label=" 数据来源" align="center">
+          </el-table-column>
+          <el-table-column prop="note" label="备注" align="center" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column label="操作" fixed="right" align="center" width="230">
+            <el-button size="small" type="primary">
+              编辑
+            </el-button>
+            <el-button size="small" type="success">
+              通过
+            </el-button>
+            <el-button size="small" type="danger">
+              退回
+            </el-button>
+          </el-table-column>
+        </el-table>
+        <div class="footer" style="width: 100%;margin-top:1rem;">
+          <template>
+            <el-pagination :current-page="currentPage2" :page-size="pagesize2" :total="total2"
+              @current-change="handleCurrentChange2" background layout="total,prev, pager, next, jumper">
+            </el-pagination>
+          </template>
+        </div>
+
+
+        <el-dialog title="电话呼叫——登录" :visible.sync="callDialog">
+          <el-form :model="callForm" ref="callForm" style="margin-left: 55px;">
+            <el-form-item label="账号" :label-width="formLabelWidth">
+              <el-input v-model="callForm.loginName" autocomplete="off" size="small" placeholder="请输入账号"></el-input>
+            </el-form-item>
+            <el-form-item label="密码" :label-width="formLabelWidth">
+              <el-input v-model="callForm.loginPasswod" autocomplete="off" size="small" placeholder="请输入密码" show-password></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer" style="text-align: center;">
+
+            <el-button type="primary" @click="callLogin">登录</el-button>
+            
+          </div>
+        </el-dialog>
+
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+  </div>
+  <script>
+    let ws = new WebSocket("ws://120.79.141.14:17115/yuntel");
+    
+    new Vue({
+      el: '#app',
+      data: function () {
+        return {
+          email: "",
+          total1: "",
+          total2: "",
+          throughForm: '',
+          mtDialogContent: "",
+          ws:"",
+          // input3: "",
+          // select: "",
+          formLabelWidth: '70px', /*表单Label长度*/
+          phone: {
+            total: 0,
+            throughTo: 0,
+            noThroughTo: 0
+          },
+          // 事务弹窗表格
+          affair_table: [
+            // { id: 1, time: '2020-08-15 22:00', content: 'asaa' },
+            // { id: 2, time: '2020-08-15 23:00', content: 'kkk' }
+          ],
+          // labelPosition: 'top',
+          loading: false,
+          loading2: false,
+          callDialog:false,
+          dialogFormVisible3: false, //编辑电话名单弹窗
+          
+          dialogFormVisible1: false, //新增事务弹窗
+          dialogFormVisible2: false, //新增电话名单的弹窗
+
+          affair_form: {
+            content: '',
+            time1: '',
+            time2: '',
+          },
+
+          callForm:{
+            loginName:'',
+            loginPasswod:''
+          },
+          /*新增事务弹窗的时间选择器*/
+          pickerOptions: {
+            disabledDate(time) {
+              return time.getTime() < Date.now();
+            },
+            shortcuts: [{
+              text: '今天',
+              onClick(picker) {
+                picker.$emit('pick', new Date());
+              }
+            }, {
+              text: '明天',
+              onClick(picker) {
+                const date = new Date();
+                date.setTime(date.getTime() + 3600 * 1000 * 24);
+                picker.$emit('pick', date);
+              }
+            },]
+          },
+
+          //编辑表单
+          update_form: {
+            name: "",
+            cardNumber: "",
+            phoneNumber: "",
+            address: "",
+            professionalSkills: "",
+            gender: "",
+            age: "",
+            education: "",
+            recommendEnterprise: "",
+            recommendJob: "",
+            isWechatAdded: "",
+            hasCertificate: "",
+            isDisability: "",
+            sourceOfData: "",
+            note: "",
+          },
+          /*添加名单表单*/
+          add_form: {
+            name: "",
+            idNumber: "",
+            phoneNumber: "",
+            address: "",
+            
+            gender: "",
+            age: "",
+            professionalSkills:"",
+            education: "",
+            hasCertificate: "",
+            isDisability: "",
+            sourceOfData: "",
+            note: "",
+          },
+
+          // 添加名单表单——下拉框选项
+          options: [{
+            value: '本科',
+            label: '本科'
+          },
+          {
+            value: '专科',
+            label: '专科'
+          }, {
+            value: '高中',
+            label: '高中'
+          }, {
+            value: '研究生',
+            label: '研究生'
+          }, {
+            value: '博士',
+            label: '博士'
+          }, {
+            value: '初中',
+            label: '初中'
+          },
+          {
+            value: '小学',
+            label: '小学'
+          },
+          {
+            value: '其它',
+            label: '其它'
+          }
+          ],
+
+          // 表格
+          DATA: {
+            page: 1,
+            name: "",
+            idNumber: "",
+            gender: "",/*多条件查询——性别单选框的默认选项*/
+            hasCertificate: "", /*多条件查询——是否为有证书单选框的默认选项*/
+            isDisability: "",/*多条件查询——是否为残疾人单选框的默认选项*/
+            phoneNumber: "",
+            professionalSkills: "",
+            sourceOfData: "",
+            education: ""
+          },
+          DATA2: {
+            page: 1,
+            name: "",
+            idNumber: "",
+            gender: "",/*多条件查询——性别单选框的默认选项*/
+            hasCertificate: "", /*多条件查询——是否为有证书单选框的默认选项*/
+            isDisability: "",/*多条件查询——是否为残疾人单选框的默认选项*/
+            phoneNumber: "",
+            professionalSkills: "",
+            sourceOfData: "",
+            education: ""
+          },
+          currentPage: 1,
+          pagesize: 10,
+          total: '',
+          currentPage2: 1,
+          pagesize2: 10,
+          total2: 10,
+          tableData: [
+            // { id: '1', name: '张三三三', gender: '女', age: '12', cardNumber: '50011119980711111X', phoneNumber: '13678410204', education: "大专", skill: "精通ppt,execl等Microsoft软件,前端知识，后端知识", area: "渝中区人民路232号" }
+          ],
+          tableData2: [
+            // { name: '张三三三', gender: '女', age: '12', cardNumber: '50011119980711111X', phoneNumber: '13678410204', education: "大专", skill: "精通ppt,execl等Microsoft软件,前端知识，后端知识", area: "渝中区人民路232号" }
+          ],
+        }
+      },
+      created() {
+        // this.getPhoneHistory()
+        this.getTableData(this.DATA)
+        this.getTotal(this.DATA)
+        this.getTableData2(this.DATA2)
+        this.getTotal2(this.DATA2)
+        this.getthroughRecord()
+        this.getTransaction() //获取事务
+        
+        // this.checkLocalstorage()
+
+      },
+      
+      methods: {
+        getTableDataURL(URL, options) {        //根据URL和参数对象生成附加参数的URL
+          URL += "?";
+          for (let [key, value] of Object.entries(options)) {
+            if (value !== "") URL += "" + key + "=" + value + "&";
+          }
+          return URL.slice(0, URL.length - 1);
+        },
+        getCountURL(URL, options) {
+          URL += "?";                //根据URL和参数对象生成附加参数不带page的URL
+          for (let [key, value] of Object.entries(options)) {
+            if (value !== "" && key !== 'page') URL += "" + key + "=" + value + "&";
+          }
+          return URL.slice(0, URL.length - 1);
+        },
+        initForm(obj) {
+          for (let key in obj) {    //对象键值全部变为空
+            obj[key] = "";
+          }
+        },
+        searchData() {            //表一所有搜索框
+          this.DATA.page = 1
+          this.getTableData(this.DATA)
+          this.getTotal(this.DATA)
+        },
+        searchData2() {         //表二所有搜索框
+          this.DATA2.page = 1
+          this.getTableData2(this.DATA2)
+          this.getTotal2(this.DATA2)
+        },
+        handleCurrentChange(size) {       //改变表一page
+          // this.currentPage = currentPage;
+
+          this.DATA.page = size;
+
+          this.getTableData(this.DATA);
+        },
+        handleCurrentChange2(size) {      //改变表二page
+
+          // this.currentPage = currentPage;
+          this.DATA2.page = size;
+          this.getTableData2(this.DATA2);
+        },
+        changeTable1() {       
+          this.getTotal(this.DATA).then(()=>{           //改变表一任何一个单选框
+            this.getTableData(this.DATA)
+          }).catch(err => {
+            this.$message.error(err);
+          })                                            
+        },
+        changeTable2() {                              //改变表二任何一个单选框
+          this.getTotal2(this.DATA2).then(() => {
+            this.getTableData2(this.DATA2)
+          }).catch(err => {
+            this.$message.error(err);
+          })
+        },
+        getTableData(options) {   //获取表一数据
+
+          this.loading = true;
+          let URL = "http://lcj525.vipgz4.idcfengye.com/callAllList"
+          URL = this.getTableDataURL(URL, options);
+          return new Promise(resolve => {
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+
+                this.tableData = this.filterData(json);
+
+                resolve();
+                setTimeout(() => {
+                  this.loading = false;
+                }, 500);
+              });
+          });
+        },
+        getTableData2(options) { //获取表二数据
+          this.loading2 = true;
+          let URL = "http://lcj525.vipgz4.idcfengye.com/callAllList"
+          URL = this.getTableDataURL(URL, options);
+          return new Promise(resolve => {
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+                this.tableData2 = this.filterData(json);
+                resolve();
+                setTimeout(() => {
+                  this.loading2 = false;
+                }, 500);
+              });
+          });
+        },
+        getTotal(options) {
+          console.log("1")
+          return new Promise(resolve => {
+            let URL = "http://lcj525.vipgz4.idcfengye.com/callAllListCount"           //获取表一所有数据总数
+            URL = this.getCountURL(URL, options);
+            console.log(URL)
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+                
+
+                this.total1 = json.count;
+
+                resolve();
+              });
+          });
+        },
+        getTotal2(options) {
+          let URL = "http://lcj525.vipgz4.idcfengye.com/callAllListCount"     //获取表二所有数据总数
+          URL = this.getCountURL(URL, options);
+          return new Promise(resolve => {
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+                this.total2 = json.count;
+                resolve();
+              });
+          });
+        },
+        getPhoneHistory() {
+          let URL = "http://127.0.0.1:8080/throughRecord"     //获取电话记录
+          URL = this.getCountURL(URL, options);
+          return new Promise(resolve => {
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+                this.total2 = json.throughTo;
+                this.total2 = json.noThroughTo;
+                resolve();
+              });
+          });
+        },
+
+        filterData(tableData) {
+          return tableData.map(item => {
+            item.isWechatAdded === 1 ? item.isWechatAdded = '是' : item.isWechatAdded = '否'
+            item.hasCertificate === 1 ? item.hasCertificate = '是' : item.hasCertificate = '否'
+            item.isDisability === 1 ? item.isDisability = '是' : item.isDisability = '否'
+            return item;
+          })
+        },
+
+
+        getTransaction() {
+          let URL = "http://lcj525.vipgz4.idcfengye.com/getTransaction"  //获取事务
+
+          return new Promise(resolve => {
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+                this.affair_table = json
+                for (var i = 0;i<this.affair_table.length;i++){
+                  if(this.affair_table[i].time>new Date().getTime()){
+                    this.affair_table.splice(i,1)
+                  }
+                }
+                console.log(this.affair_table)
+                resolve()
+              })
+
+          })
+        },
+
+        addTransaction() {
+          let URL = "http://lcj525.vipgz4.idcfengye.com/addTransaction" //新增事务
+          // this.newaffair_form = {
+          //   content:this.affair_form.content,
+          //   time:this.affair_form.time1+""+this.affair_form.time2
+          // }
+          let _this = this
+          console.log(_this.affair_form)
+          _this.affair_form = {
+            time: this.affair_form.time1 + " " + this.affair_form.time2,
+            content: this.affair_form.content
+          }
+          var opt = {
+            method: "POST",
+            body: JSON.stringify(_this.affair_form),
+            headers: {
+              "content-type": 'application/json'
+            }
+          }
+          return new Promise(resolve => {
+            fetch(URL, opt)
+              .then(res => res.json())
+              .then(json => {
+                // this.affair_table.push({
+                //   date:this.affair_form.date + " " + this.affair_form.date2,
+                //   content:this.affair_form.textarea,
+                // })
+
+                this.getTransaction()     //重新刷新一次，请求获取事务名单
+
+                this.dialogFormVisible1 = false
+                resolve()
+              })
+
+          })
+        },
+        deleteTransaction(rowId) {           //完成、删除事务
+          let URL = `http://lcj525.vipgz4.idcfengye.com/deleteTransaction?id=${rowId}`
+          return new Promise(resolve => {
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+                this.getTransaction()
+                resolve()
+              })
+          })
+
+        },
+
+        addPhone() {
+          let URL = "http://lcj525.vipgz4.idcfengye.com/addPhone"   ///*提交   添加电话名单弹窗表单*/
+          let _this = this
+          if(_this.add_form.gender == 0){_this.add_form.gender = '男'}
+          else if(_this.add_form.gender ==1){_this.add_form.gender = '女'}
+          var phoneForm = {
+            method: "post",
+            body: JSON.stringify(_this.add_form),
+            headers: {
+              "content-type": 'application/json'
+            }
+          }
+          return new Promise(resolve => {
+            fetch(URL, phoneForm)
+              .then(res => res.json())
+              .then(json => {
+                this.getTableData(this.DATA)
+                this.getTotal(this.DATA)
+                this.dialogFormVisible2 = false
+                console.log("ok")
+              })
+          })
+
+        },
+        updatePhone(updateInfo) {
+          console.log(updateInfo)
+          this.dialogFormVisible3 = true
+          this.update_form = Object.assign({}, updateInfo)
+          console.log(this.update_form)
+          
+          this.update_form.cild = this.update_form.customerId
+          this.update_form.pclId = this.update_form.phoneCallListId
+          delete this.update_form.customerId
+          delete this.update_form.phoneCallListId
+          delete this.update_form.employeeId
+          this.update_form.isWechatAdded === '是' ? this.update_form.isWechatAdded = 1 : this.update_form.isWechatAdded = 0
+          // this.update_form.gender === '女' ? this.update_form.gender = 1 : this.update_form.gender = 0
+          this.update_form.hasCertificate === '无' ? this.update_form.hasCertificate = 0 : this.update_form.hasCertificate = 1
+          this.update_form.isDisability === '否' ? this.update_form.isDisability = 0 : this.update_form.isDisability = 1
+        },
+
+        update() {
+          //编辑 重新提交表单
+          let URL = "http://lcj525.vipgz4.idcfengye.com/updatePhone"
+          let _this = this
+
+          
+          var opt = {
+            method: "POST",
+            body: JSON.stringify(_this.update_form),
+            headers: {
+              "content-type": 'application/json'
+            }
+          }
+          return new Promise(resolve => {
+            fetch(URL, opt)
+              .then(res => res.json())
+              .then(json => {
+                this.getTableData(this.DATA)
+                this.getTotal(this.DATA)
+                this.dialogFormVisible3 = false
+                resolve();
+              });
+          })
+        },
+
+        through(currentRow) {           //通过
+
+          this.$prompt('面试时间', {
+            confirmButtonText: '通过',
+            cancelButtonText: '取消',
+            inputPattern: /^((([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))0229))-([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/,
+            inputErrorMessage:'面试时间格式不正确,例如：2020-08-02-21:00',
+
+          }).then(({ value }) => {
+            let URL = 'http://lcj525.vipgz4.idcfengye.com/signUp'
+            this.throughForm = {
+              phoneCallListId: currentRow.phoneCallListId,
+              customerId: currentRow.customerId,
+              employeeId: currentRow.employeeId,
+              interviewTime: value
+            }
+            var opt = {
+              method: "POST",
+              body: JSON.stringify(this.throughForm),
+              headers: {
+                "content-type": 'application/json'
+              }
+
+            }
+            return new Promise(resolve => {
+              fetch(URL, opt)
+                .then(res => res.json())
+                .then(json => {
+                  this.$message({
+                    type: 'success',
+                    message: currentRow.name + '的面试时间是: ' + value,
+
+                  });
+                  resolve();
+                });
+            })
+
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '取消输入'
+            });
+          });
+
+        },
+        
+        
+        callPhone(row) {
+          let username = localStorage.getItem('username') //你的用户名
+          let password = decodeURIComponent(window.atob(localStorage.getItem("password"))) //你的密码  默认密码都为12341234
+          let val = '{ "messageType": "clientLoginIn", "data": { "username": "' + username + '", "password": "' + password + '", "forceLogin": 1 } }'
+          ws.send(val);
+          
+          ws.onmessage = (evt)=> {
+            
+            console.log("Received Message: " + evt.data);
+            let json = JSON.parse(evt.data)
+            
+            let URL = 'https://yunzhitel-recorder.oss-cn-shenzhen.aliyuncs.com/'
+            
+            if (json.messageType === 'phoneCallLog') {
+              alert('录音地址为:' + URL + json.data.filepath)
+            }
+            if (json.messageType === 'phoneCall'){
+              
+              
+              if(json.errcode == 34){ alert("请先登录手机app") }
+              
+            }
+            if (json.messageType === 'clientLoginIn') {
+              if(json.errcode == -1){
+                alert("登录信息有误,或未登录")
+                this.callDialog = true
+              }
+              else{
+              let number = '1008611'
+              let callName = row.name
+              console.log(number)
+              let val = '{"messageType":"phoneCall","data":{"phone":"' + number + '","name": "'+callName+'"}}'
+              ws.send(val)
+
+              }
+              
+              // let number = row.phoneNumber        //你要打的电话 
+            }
+            if (json.messageType === 'phoneCallLog'){
+              if(json.data.status == 1){json.data.status = '接通'}
+              else if(json.data.status == 2){ json.data.status = '外拨失败'}
+              else if(json.data.status == 3){ josn.data.status = '对方未接'}
+              else if(json.data.status == 4){ json.data.status = '号码错误'}
+              else if(json.data.status == 5){ json.data.status = '拒接'}
+              else if(json.data.status == 6){ json.data.status = '通话中'}
+              let phoneCallLog = {
+                'status' : json.data.status,
+                'createtime' : json.data.createtime,
+                'duration' : json.data.duration,
+                'ringduration' :json.data.ringduration,
+                'filepath' : json.data.filepath,
+                'customerId' : row.customerId,
+                'phoneCallListId' : row.phoneCallListId,
+                'employeeId' : row.employeeId,
+              }
+              console.log(phoneCallLog)
+              let opt ={
+                method:'post',
+                body:JSON.stringify(phoneCallLog),
+                headers: {
+                "content-type": 'application/json'
+            }
+                
+              }
+              let URL = 'http://lcj525.vipgz4.idcfengye.com/addPhoneRecord'
+              fetch(URL,opt)
+              .then(res=>res.json())
+              .then(json=>{
+
+              })
+             
+
+
+            }
+          }
+        },
+
+        callLogin(){
+          localStorage.setItem('username','yt20081571at')
+          localStorage.setItem('password',window.btoa(window.encodeURIComponent('12341234')))
+          localStorage.setItem('oldtime',new Date().getTime())
+          this.callDialog = false
+        },
+
+        checkLocalstorage(){
+          let delayTime = 60*60*1000
+          let storage = window.localStorage
+          let oldtime = storage.getItem('oldtime')
+          
+          
+          // console.log(new Date().getTime())
+          let time = new Date().getTime() - oldtime
+          // console.log(time)
+          if(time > delayTime){
+            storage.clear()
+          }
+          else{
+            
+          }
+        },
+          getthroughRecord(){
+            let URL = 'http://lcj525.vipgz4.idcfengye.com/throughRecord'
+            fetch(URL)
+            .then(res=>res.json())
+            .then(json=>{
+              this.phone.total = json.throughAll
+              this.phone.throughTo = json.throughTo
+              this.phone.noThroughTo = json.throughAll-json.throughTo
+            })
+          },
+          takeOutAll(){
+            let URL = 'http://lcj525.vipgz4.idcfengye.com/takeOutAll'
+            fetch(URL)
+            .then(res=>res.json())
+            .then(json=>{
+              this.getTableData(this.DATA)
+              this.getTotal(this.DATA)
+              this.getTableData2(this.DATA2)
+              this.getTotal2(this.DATA2)
+            })
+          },
+          takeOut(){
+            let URL = 'http://lcj525.vipgz4.idcfengye.com/takeOut'
+            fetch(URL)
+            .then(res=>res.json())
+            .then(json=>{
+              this.getTableData(this.DATA)
+              this.getTotal(this.DATA)
+              this.getTableData2(this.DATA2)
+              this.getTotal2(this.DATA2)
+            })
+
+          },
+
+          backData(phoneCallListId){
+            let URL = `http://lcj525.vipgz4.idcfengye.com/backData?id=${phoneCallListId}`
+            fetch(URL)
+            .then(res=>res.json())
+            .then(json=>{
+              this.getTableData(this.DATA.page=5)
+              this.getTotal(this.DATA)
+              this.getTableData2(this.DATA2)
+              this.getTotal2(this.DATA2)
+            })
+ 
+          },
+
+        
+
+
+        /*打开新增事务弹窗时清除上一次输入的内容*/
+        openAddForm() {
+          this.add_form = {
+            name: "",
+            idNumber: "",
+            phoneNumber: "",
+            address: "",
+            
+            gender: "",
+            age: "",
+            professionalSkills:"",
+            education: "",
+            hasCertificate: "",
+            isDisability: "",
+            sourceOfData: "",
+            note: "",
+          }
+        },
+
+        /*打开新增事务弹窗时清除上一次输入的内容*/
+        openDialog() {
+          this.affair_form.content = '',
+            this.affair_form.time = '',
+            // this.affair_form.date2 = ','
+            this.dialogFormVisible1 = true
+
+
+        },
+        /*重置弹窗内容*/
+        resetForm(formName) {
+          this.affair_form = {
+            content: '',
+            time: '',
+            // date2: '',
+          },
+            this.$refs[formName].resetFields();
+
+        },
+        
+        
+        /*提交添加名单弹窗表单*/
+        addForm_submit() {
+          console.log(this.add_form)
+          this.dialogFormVisible2 = false
+        },
+
+        // 事务内容删除、完成
+        delte_affair_table(rowId) {
+
+          // this.$delete(this.affair_table,rowId)
+
+
+
+        },
+
+      },
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8" />
+
+<link rel="stylesheet" href="/admin/css/style.css" />
+<link rel="stylesheet" href="/admin/css/other.css" />
+<!-- <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" /> -->
+<link rel="stylesheet" href="/admin/css/index.css">
+<script type="text/javascript" src="/admin/js/vue.js"></script>
+<script src="/admin/js/element.js"></script>
+<title>业务员——报名名单</title>
+<style>
+  .el-card {
+    height: 100px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  }
+
+  .el-dialog {
+    width: 500px;
+  }
+
+  .el-form-item label:after {
+    content: "";
+    display: inline-block;
+    width: 100%;
+  }
+
+  .el-form-item__label {
+    text-align: justify;
+    height: 50px;
+  }
+
+  .el-form-item.is-required .el-form-item__label:before {
+    content: none !important;
+  }
+
+  .el-form-item {
+    width: 75%;
+  }
+
+
+
+  /* .el-tooltip__popper,
+  .el-tooltip__popper.is-dark {
+    background: #f5f5f5 !important;
+    color: #303133 !important;
+  } */
+</style>
+<body>
+  <header class="header">
+    <div class="container flex">
+      <div class="left">
+        <img class="logo" src="/admin/images/2.jpg" />
+      </div>
+      <div class="right flex">
+        <p class="font">用户1</p>
+        <p class="font exit">退出</p>
+      </div>
+    </div>
+  </header>
+  <div class="body flex">
+    <div class="slider">
+      <div class="slider-body">
+        <ul>
+          <li class="ul-item active">
+            <a class="slider-link " href="/Salesman/index.html">电话名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link active" href="/Salesman/apply.html">报名名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link" href="/Salesman/interview.html">面试名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link" href="/Salesman/wait_hire.html">待入职名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link" href="/Salesman/hire.html">入职名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link" href="/Salesman/other.html">结算名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link" href="/Salesman/phoneRecords.html">电话记录</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="main">
+      <!-- 主体  -->
+      <div id="app">
+        <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-bottom:2rem;margin-top: 2rem;">
+          <div class="mobileSize">
+            <el-input placeholder="请输入姓名" v-model="DATA.name" @keyup.enter.native="searchData">
+            </el-input>
+          </div>
+          <div class="mobileSize">
+            <el-input placeholder="输入身份证号" v-model="DATA.cardNumber" @keyup.enter.native="searchData">
+            </el-input>
+          </div>
+          <div class="mobileSize">
+            <el-input placeholder="请输入电话号码" v-model="DATA.phoneNumber" @keyup.enter.native="searchData">
+            </el-input>
+          </div>
+        </div>
+        <!-- 表格 -->
+        <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
+          <el-table-column fixed prop="name" align="center"  label="姓名">
+          </el-table-column>
+          <el-table-column prop="idNumber" align="center"  label="身份证号" width="180">
+          </el-table-column>
+          <el-table-column prop="gender" align="center"  center label="性别">
+          </el-table-column>
+          <el-table-column prop="age" align="center"  label="年龄">
+          </el-table-column>
+          <el-table-column prop="phoneNumber" align="center"  label="电话号码" width="120">
+          </el-table-column>
+          <el-table-column prop="education" align="center"  label="学历">
+          </el-table-column>
+          <el-table-column prop="address" align="center" label="区域" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="professionalSkills" align="center" label="专业技能" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="hasCertificate" align="center" label="证书">
+          </el-table-column>
+          <el-table-column prop="isDisability" align="center" label="残疾人">
+          </el-table-column>
+          <el-table-column prop="recommendEnterprise" align="center" label="推荐企业" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="recommendJob" align="center" label="推荐岗位" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="signUpTime" align="center" label="报名时间" width="100">
+          </el-table-column>
+          <el-table-column prop="interviewTime" align="center" label="面试时间" width="150">
+          </el-table-column>
+          <el-table-column prop="note" align="center" label="备注" :show-overflow-tooltip="true" >
+          </el-table-column>
+          <el-table-column label="操作" fixed="right" align="center" width="125">
+            <template slot-scope="scope">
+              <el-button size="small" type="primary" @click="updatePhone(scope.row)">
+                编辑
+              </el-button>    
+            </template>
+          </el-table-column>
+        </el-table>
+        <div class="footer" style="width: 100%;margin-top:1rem;">
+          <template>
+            <el-pagination :current-page="currentPage" :page-size="pagesize" :page-sizes="10" :total="total"
+              @current-change="handleCurrentChange" background layout="total,prev, pager, next, jumper">
+            </el-pagination>
+          </template>
+        </div>
+
+        <!-- 编辑表单 -->
+        <el-dialog title="编辑表单" :visible.sync="editDialog">
+          <el-form :model="update_form" ref="update_form" style="margin-left: 80px;" class="demo-ruleForm">
+            <el-form-item label="姓名" :label-width="formLabelWidth">
+              <el-input v-model="update_form.name" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="性别" :label-width="formLabelWidth">
+              <el-radio-group v-model="update_form.gender">
+                <el-radio :label="0">男</el-radio>
+                <el-radio :label="1">女</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="身份证" :label-width="formLabelWidth">
+              <el-input v-model="update_form.idNumber" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="年龄" :label-width="formLabelWidth">
+              <el-input v-model="update_form.age" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="电话" :label-width="formLabelWidth">
+              <el-input v-model="update_form.phoneNumber" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="学历" :label-width="formLabelWidth">
+              <el-select v-model="update_form.education" placeholder="请选择">
+                <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="区域" :label-width="formLabelWidth">
+              <el-input v-model="update_form.address" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+
+
+            <el-form-item label="专业技能" :label-width="formLabelWidth">
+              <el-input v-model="update_form.professionalSkills" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="证书" :label-width="formLabelWidth">
+              <el-radio-group v-model="update_form.hasCertificate">
+                <el-radio :label="0">是</el-radio>
+                <el-radio :label="1">否</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="残疾人" :label-width="formLabelWidth">
+              <el-radio-group v-model="update_form.isDisability">
+                <el-radio :label="0">是</el-radio>
+                <el-radio :label="1">否</el-radio>
+
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="推荐企业" :label-width="formLabelWidth">
+              <el-input v-model="update_form.recommendEnterprise" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="推荐岗位" :label-width="formLabelWidth">
+              <el-input v-model="update_form.recommendJob" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="面试时间" :label-width="formLabelWidth">
+              <el-input v-model="update_form.signUpTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+        
+          </el-form>
+          <div slot="footer" class="dialog-footer" style="text-align: center;">
+            <el-button @click="dialogFormVisible3 = false">取 消</el-button>
+            <el-button type="primary" @click="update">提交</el-button>
+          </div>
+        </el-dialog>
+
+      </div>
+    </div>
+  </div>
+  <script>
+    new Vue({
+      el: '#app',
+      data: function () {
+        return {
+          loading: false,
+          editDialog:false,
+          formLabelWidth:'70px',
+          //编辑表单
+          update_form: {
+            signUpInfoId:"",
+            name: "",
+            cardNumber: "",
+            phoneNumber: "",
+            address: "",
+            professionalSkills: "",
+            gender: "",
+            age: "",
+            education: "",
+            recommendEnterprise:"",
+            recommendJob:"",
+            signUpTime:"",
+            interviewTime:"",
+            hasCertificate: "",
+            isDisability: "",
+          },
+          options: [{
+            value: '本科',
+            label: '本科'
+          },
+          {
+            value: '专科',
+            label: '专科'
+          }, {
+            value: '高中',
+            label: '高中'
+          }, {
+            value: '研究生',
+            label: '研究生'
+          }, {
+            value: '博士',
+            label: '博士'
+          }, {
+            value: '初中',
+            label: '初中'
+          },
+          {
+            value: '小学',
+            label: '小学'
+          },
+          {
+            value: '其它',
+            label: '其它'
+          }
+          ],
+
+          DATA: {
+            page: 1,
+            // pagesize: 10,
+            name: '',
+            cardNumber: "",
+            phoneNumber: ""
+          },
+          currentPage: 1,
+          pagesize: 10,
+          total: "",
+          tableData: [
+            // { name: '张三', gender: '女', age: '12', cardNumber: '500227199801233288x', phoneNumber: '15736063175', education: "大专" }
+          ]
+        }
+      },
+      created() {
+        this.getTableData(this.DATA)
+        this.getTotal(this.DATA)
+      },
+      methods: {
+        getTableDataURL(URL, options) {        //根据URL和参数对象生成附加参数的URL
+          URL += "?";
+          for (let [key, value] of Object.entries(options)) {
+            if (value !== "") URL += "" + key + "=" + value + "&";
+          }
+          return URL.slice(0, URL.length - 1);
+        },
+        getCountURL(URL, options) {
+          URL += "?";                //根据URL和参数对象生成附加参数不带page的URL
+          for (let [key, value] of Object.entries(options)) {
+            if (value !== "" && key !== 'page') URL += "" + key + "=" + value + "&";
+          }
+          return URL.slice(0, URL.length - 1);
+        },
+        // getURL(URL, options) {
+        //   URL += "?";
+        //   for (let [key, value] of Object.entries(options)) {
+        //     if (value !== "") URL += "" + key + "=" + value + "&";
+        //   }
+        //   return URL.slice(0, URL.length - 1);
+        // },
+        initForm(obj) {
+          for (let key in obj) {
+            obj[key] = "";
+          }
+        },
+        searchData() {            //表一所有搜索框
+          this.DATA.page = 1
+          this.getTableData(this.DATA);
+          this.getTotal(this.DATA)
+        },
+        handleCurrentChange(size) {
+          this.currentPage = currentPage;
+          this.DATA.page = currentPage;
+          this.getTableData(this.DATA);
+        },
+        changeTable1() {                //改变表一任何一个单选框
+          this.getTotal(this.DATA).then(() => {
+            this.getTableData(this.DATA)
+          }).catch(err => {
+            this.$message.error(err);
+          })
+        },
+
+        getTableData(options) {
+          let URL = "http://lcj525.vipgz4.idcfengye.com/signUpList"
+          // this.loading = true;
+          URL = this.getTableDataURL(URL, options);
+          return new Promise(resolve => {
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+                
+
+                this.tableData = this.filterData(json);
+
+                resolve();
+                setTimeout(() => {
+                  this.loading = false;
+                }, 500);
+              });
+          });
+        },
+        getTotal(options) {
+          return new Promise(resolve => {
+            let URL = "http://lcj525.vipgz4.idcfengye.com/signUpListCount"           //获取表一所有数据总数
+            URL = this.getCountURL(URL, options);
+            console.log(URL)
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+                console.log(json)
+                this.total = json.count;
+                
+                resolve();
+              });
+          });
+        },
+
+        filterData(tableData) {
+          return tableData.map(item => {
+            // item.isWechatAdded === 1 ? item.isWechatAdded = '是' : item.isWechatAdded = '否'
+            item.gender === 1 ? item.gender = '男':item.gender = '女'
+            item.hasCertificate === 1 ? item.hasCertificate = '是' : item.hasCertificate = '否'
+            item.isDisability === 1 ? item.isDisability = '是' : item.isDisability = '否'
+            return item;
+          })
+        },
+
+
+
+        updatePhone(updateInfo) {
+          // console.log(updateInfo)
+          this.editDialog = true
+          this.update_form = Object.assign({}, updateInfo)
+          this.update_form.signUpInfoId = this.update_form.id
+          console.log(this.update_form)
+          this.update_form.gender === '女' ? this.update_form.gender = 1 : this.update_form.gender = 0
+          this.update_form.hasCertificate === '无' ? this.update_form.hasCertificate = 0 : this.update_form.hasCertificate = 1
+          this.update_form.isDisability === '否' ? this.update_form.isDisability = 0 : this.update_form.isDisability = 1
+        },
+
+        update() {
+          //编辑 重新提交表单
+          let URL = "http://lcj525.vipgz4.idcfengye.com/updateSignUp"
+          let _this = this
+          _this.update_form.gender == 0 ? _this.update_form.gender = '男' : _this.update_form.gender = '女'
+          var opt = {
+            method: "POST",
+            body: JSON.stringify(_this.update_form),
+            headers: {
+              "content-type": 'application/json'
+            }
+          }
+          return new Promise(resolve => {
+            fetch(URL, opt)
+              .then(res => res.json())
+              .then(json => {
+                this.getTableData(this.DATA)
+                // this.getTotal(this.DATA)
+                this.editDialog = false
+                resolve();
+              });
+          })
+        },
+      },
+    });
+  </script>
+</body>
+
+</html>
