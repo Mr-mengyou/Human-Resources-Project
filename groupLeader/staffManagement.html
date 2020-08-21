@@ -46,6 +46,7 @@
     color: #303133 !important;
   } */
 </style>
+
 <body>
   <header class="header">
     <div class="container flex">
@@ -62,26 +63,15 @@
     <div class="slider">
       <div class="slider-body">
         <ul>
-          <!-- <li class="ul-item active">
-            <a class="slider-link " href="/Salesman/index.html">电话名单</a>
+          
+          <li class="ul-item">
+            <a class="slider-link" href="/groupLeader/staffManagement.html">员工管理</a>
           </li>
           <li class="ul-item">
-            <a class="slider-link " href="/Salesman/apply.html">报名名单</a>
+            <a class="slider-link" href="/groupLeader/staffRecord.html">档案管理</a>
           </li>
           <li class="ul-item">
-            <a class="slider-link" href="/Salesman/interview.html">面试名单</a>
-          </li>
-          <li class="ul-item">
-            <a class="slider-link " href="/Salesman/wait_hire.html">待入职名单</a>
-          </li>
-          <li class="ul-item">
-            <a class="slider-link" href="/Salesman/hire.html">入职名单</a>
-          </li>
-          <li class="ul-item">
-            <a class="slider-link" href="/Salesman/other.html">结算名单</a>
-          </li> -->
-          <li class="ul-item">
-            <a class="slider-link active" href="/Salesman/staffManagement.html">员工管理</a>
+            <a class="slider-link active" href="/groupLeader/leaveManagement.html">离职管理</a>
           </li>
         </ul>
       </div>
@@ -93,7 +83,7 @@
           <div class="mobileSize">
             <el-input placeholder="请输入姓名" v-model="DATA.employeeName" @keyup.enter.native="searchData">
             </el-input>
-          </div>    
+          </div>
           <div class="mobileSize">
             <el-input placeholder="请输入部门名" v-model="DATA.deptName" @keyup.enter.native="searchData">
             </el-input>
@@ -102,34 +92,41 @@
             <el-button type="primary" @click="addemployee">添加名单</el-button>
           </div>
         </div>
-        
-        
+
+
         <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
-          <el-table-column prop="idWork" align="center"  label="工号">
+          <el-table-column prop="idWork" align="center" label="工号">
           </el-table-column>
-          <el-table-column prop="employeeName" align="center" label="员工姓名" width="80">
-        </el-table-column>
-        <el-table-column prop="gender" align="center" label="性别" width="40">
-        </el-table-column>
-          <el-table-column prop="idNumber" align="center"  label="身份证号" width="180">
+          <el-table-column prop="employeeName" align="center" label="员工姓名" width="60">
           </el-table-column>
-          <el-table-column prop="phoneNumber" align="center"  label="电话号码">
+          <el-table-column prop="gender" align="center" label="性别" width="40">
           </el-table-column>
-          
+          <el-table-column prop="idNumber" align="center" label="身份证号" width="180">
+          </el-table-column>
+          <el-table-column prop="phoneNumber" align="center" label="电话号码">
+          </el-table-column>
+
           <el-table-column prop="position" align="center" label="岗位">
-          </el-table-column>       
+          </el-table-column>
           <el-table-column prop="inductionTime" align="center" label="入职时间">
           </el-table-column>
           <el-table-column prop="deptName" align="center" label="部门名">
           </el-table-column>
-          <el-table-column prop="password" align="center" label="登录密码" >
+          <el-table-column prop="password" align="center" label="登录密码">
           </el-table-column>
-          <el-table-column label="操作" fixed="right" align="center" width="120">
+          <el-table-column label="操作" fixed="right" align="center" width="220">
             <template slot-scope="scope">
               <el-button size="small" type="primary" @click="updataemployee(scope.row)">
                 编辑
               </el-button>
-              
+              <el-button size="small" type="warning" @click="record(scope.row)">
+                档案
+              </el-button>
+              <el-button size="small" type="danger" @click="departure(scope.row)">
+                离职
+              </el-button>
+
+
             </template>
           </el-table-column>
         </el-table>
@@ -142,78 +139,163 @@
         </div>
 
         <el-dialog title="编辑员工信息" :visible.sync="updateDialog">
-            <el-form :model="update_form" ref="update_form" style="margin-left: 80px;" class="demo-ruleForm">
-              <el-form-item label="员工姓名" :label-width="formLabelWidth">
-                <el-input v-model="update_form.employeeName" autocomplete="off" size="small"></el-input>
-              </el-form-item>
-              <el-form-item label="性别" :label-width="formLabelWidth">
-                <el-radio-group v-model="update_form.gender">
-                  <el-radio :label="0">男</el-radio>
-                  <el-radio :label="1">女</el-radio>
-                </el-radio-group>
-              </el-form-item>
-              <el-form-item label="身份证" :label-width="formLabelWidth">
-                <el-input v-model="update_form.idNumber" autocomplete="off" size="small"></el-input>
-              </el-form-item>
-              <el-form-item label="电话" :label-width="formLabelWidth">
-                <el-input v-model="update_form.phoneNumber" autocomplete="off" size="small"></el-input>
-              </el-form-item>
-              <el-form-item label="部门名" :label-width="formLabelWidth">
-                <el-input v-model="update_form.deptName" autocomplete="off" size="small"></el-input>
-              </el-form-item>
-              <el-form-item label="岗位" :label-width="formLabelWidth">
-                <el-input v-model="update_form.position" autocomplete="off" size="small"></el-input>
-              </el-form-item>
-              <el-form-item label="入职时间" :label-width="formLabelWidth">
-                <el-input v-model="update_form.inductionTime" autocomplete="off" size="small"></el-input>
-              </el-form-item>
-              <el-form-item label="登录密码" :label-width="formLabelWidth">
-                <el-input v-model="update_form.password" autocomplete="off" size="small"></el-input>
-              </el-form-item>
-            </el-form>
-            <div slot="footer" class="dialog-footer" style="text-align: center;">
-              <el-button @click="updateDialog = false">取 消</el-button>
-              <el-button type="primary" @click="update">编辑</el-button>
-            </div>
-          </el-dialog>
+          <el-form :model="update_form" ref="update_form" style="margin-left: 80px;" class="demo-ruleForm">
+            <el-form-item label="员工姓名" :label-width="formLabelWidth">
+              <el-input v-model="update_form.employeeName" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="性别" :label-width="formLabelWidth">
+              <el-radio-group v-model="update_form.gender">
+                <el-radio :label="0">男</el-radio>
+                <el-radio :label="1">女</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="身份证" :label-width="formLabelWidth">
+              <el-input v-model="update_form.idNumber" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="电话" :label-width="formLabelWidth">
+              <el-input v-model="update_form.phoneNumber" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="部门名" :label-width="formLabelWidth">
+              <el-input v-model="update_form.deptName" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="岗位" :label-width="formLabelWidth">
+              <el-input v-model="update_form.position" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="入职时间" :label-width="formLabelWidth">
+              <el-input v-model="update_form.inductionTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="登录密码" :label-width="formLabelWidth">
+              <el-input v-model="update_form.password" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer" style="text-align: center;">
+            <el-button @click="updateDialog = false">取 消</el-button>
+            <el-button type="primary" @click="update">编辑</el-button>
+          </div>
+        </el-dialog>
 
 
-          <el-dialog title="添加员工信息" :visible.sync="addDialog">
-            <el-form :model="addForm" ref="addForm" style="margin-left: 80px;" class="demo-ruleForm">
-              <el-form-item label="员工姓名" :label-width="formLabelWidth">
-                <el-input v-model="addForm.employeeName" autocomplete="off" size="small"></el-input>
-              </el-form-item>
-              <el-form-item label="性别" :label-width="formLabelWidth">
-                <el-radio-group v-model="addForm.gender">
-                  <el-radio :label="0">男</el-radio>
-                  <el-radio :label="1">女</el-radio>
-                </el-radio-group>
-              </el-form-item>
-              <el-form-item label="身份证" :label-width="formLabelWidth">
-                <el-input v-model="addForm.idNumber" autocomplete="off" size="small"></el-input>
-              </el-form-item>
-              <el-form-item label="电话" :label-width="formLabelWidth">
-                <el-input v-model="addForm.phoneNumber" autocomplete="off" size="small"></el-input>
-              </el-form-item>
-              <el-form-item label="部门名" :label-width="formLabelWidth">
-                <el-input v-model="addForm.deptName" autocomplete="off" size="small"></el-input>
-              </el-form-item>
-              <el-form-item label="岗位" :label-width="formLabelWidth">
-                <el-input v-model="addForm.position" autocomplete="off" size="small"></el-input>
-              </el-form-item>
-              <el-form-item label="入职时间" :label-width="formLabelWidth">
-                <el-input v-model="addForm.inductionTime" autocomplete="off" size="small"></el-input>
-              </el-form-item>
-              <el-form-item label="登录密码" :label-width="formLabelWidth">
-                <el-input v-model="addForm.password" autocomplete="off" size="small"></el-input>
-              </el-form-item>
-            </el-form>
-            <div slot="footer" class="dialog-footer" style="text-align: center;">
-              <el-button @click="addDialog = false">取 消</el-button>
-              <el-button type="primary" @click="add">添加</el-button>
-            </div>
-          </el-dialog>
-               
+        <el-dialog title="添加员工信息" :visible.sync="addDialog">
+          <el-form :model="addForm" ref="addForm" style="margin-left: 80px;" class="demo-ruleForm">
+            <el-form-item label="员工姓名" :label-width="formLabelWidth">
+              <el-input v-model="addForm.employeeName" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="性别" :label-width="formLabelWidth">
+              <el-radio-group v-model="addForm.gender">
+                <el-radio :label="0">男</el-radio>
+                <el-radio :label="1">女</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="身份证" :label-width="formLabelWidth">
+              <el-input v-model="addForm.idNumber" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="电话" :label-width="formLabelWidth">
+              <el-input v-model="addForm.phoneNumber" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="部门名" :label-width="formLabelWidth">
+              <el-input v-model="addForm.deptName" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="岗位" :label-width="formLabelWidth">
+              <el-input v-model="addForm.position" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="入职时间" :label-width="formLabelWidth">
+              <el-input v-model="addForm.inductionTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="登录密码" :label-width="formLabelWidth">
+              <el-input v-model="addForm.password" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer" style="text-align: center;">
+            <el-button @click="addDialog = false">取 消</el-button>
+            <el-button type="primary" @click="add">添加</el-button>
+          </div>
+        </el-dialog>
+
+        <el-dialog title="离职原因" :visible.sync="departureDialog">
+          <el-form :model="departureForm" ref="departureForm" style="margin-left: 80px;" class="demo-ruleForm">
+            <el-form-item label="离职原因" :label-width="formLabelWidth">
+              <el-input v-model="departureForm.leavingReason" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="离职交接" :label-width="formLabelWidth">
+              <el-input v-model="departureForm.tool" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="交接确认" :label-width="formLabelWidth">
+              <el-radio-group v-model="departureForm.confirm">
+                <el-radio :label="0">正常</el-radio>
+                <el-radio :label="1">异常</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="交接人" :label-width="formLabelWidth">
+              <el-input v-model="departureForm.handover" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="备注" :label-width="formLabelWidth">
+              <el-input v-model="departureForm.note" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            
+          </el-form>
+          <div slot="footer" class="dialog-footer" style="text-align: center;">
+            <el-button @click="departureDialog = false">取 消</el-button>
+            <el-button type="primary" @click="submitDeparture">确认</el-button>
+          </div>
+        </el-dialog>
+
+
+        <el-dialog title="添加档案" :visible.sync="recordDialog">
+          <el-form :model="recordForm" ref="departureForm" style="margin-left: 80px;" class="demo-ruleForm">
+            <el-form-item label="生日类别" :label-width="formLabelWidth">
+              <el-radio-group v-model="departureForm.category">
+                <el-radio :label="0">农历</el-radio>
+                <el-radio :label="1">新历</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="生日" :label-width="formLabelWidth">
+              <el-input v-model="recordForm.birthday" autocomplete="off" size="small"></el-input>
+            </el-form-item> 
+            
+            <el-form-item label="学历" :label-width="formLabelWidth">
+              <el-input v-model="recordForm.education" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="家庭住址" :label-width="formLabelWidth">
+              <el-input v-model="recordForm.address" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="现住址" :label-width="formLabelWidth">
+              <el-input v-model="recordForm.addressNow" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="家庭住址" :label-width="formLabelWidth">
+              <el-input v-model="recordForm.address" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="紧急联系人" :label-width="formLabelWidth">
+              <el-input v-model="recordForm.emergencyContact" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="联系人关系" :label-width="formLabelWidth">
+              <el-input v-model="recordForm.relation" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="紧急联系电话" :label-width="formLabelWidth">
+              <el-input v-model="recordForm.emergencyContactPhone" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="合同到期时间" :label-width="formLabelWidth">
+              <el-input v-model="recordForm.dueToTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="离职时间" :label-width="formLabelWidth">
+              <el-input v-model="recordForm.departureTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="参保时间" :label-width="formLabelWidth">
+              <el-input v-model="recordForm.ginsengTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="停保时间" :label-width="formLabelWidth">
+              <el-input v-model="recordForm.stopTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="备注" :label-width="formLabelWidth">
+              <el-input v-model="recordForm.note" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            
+          </el-form>
+          <div slot="footer" class="dialog-footer" style="text-align: center;">
+            <el-button @click="recordDialog = false">取 消</el-button>
+            <el-button type="primary" @click="submitRecord">确认</el-button>
+          </div>
+        </el-dialog>
+
       </div>
     </div>
   </div>
@@ -222,26 +304,32 @@
       el: '#app',
       data: function () {
         return {
-          loading: false,
-          updateDialog:false,
-          addDialog:false,
-          formLabelWidth:'100px',
-          update_form:"",
-          addForm:{},
           
+          loading: false,
+          updateDialog: false,
+          recordDialog:false,
+          addDialog: false,
+          departureDialog:false,
+          formLabelWidth: '100px',
+          update_form: "",
+          addForm: {},
+          departureForm:{},
+          recordForm:{},
+          
+
           DATA: {
             page: 1,
             pagesize: 10,
-            
-            employeeName:'',
+
+            employeeName: '',
             deptName: "",
-            
+
           },
           currentPage: 1,
           pagesize: 10,
           total: "",
           tableData: [
-            { employeeName: '张三', gender: '男', idNumber: '500227199801233288x', phoneNumber: '15736063175', idWork: "2017441552",deptName:"销售部",position:"数据专员",password:"12121",inductionTime:"2020-12-12"}
+            { employeeName: '张三', gender: '男', idNumber: '500227199801233288x', phoneNumber: '15736063175', idWork: "2017441552", deptName: "销售部", position: "数据专员", password: "12121", inductionTime: "2020-12-12" }
           ]
         }
       },
@@ -297,7 +385,7 @@
               .then(res => res.json())
               .then(json => {
                 this.tableData = json;
-                
+
                 resolve();
                 setTimeout(() => {
                   this.loading = false;
@@ -315,72 +403,87 @@
               .then(json => {
                 console.log(json)
                 this.total = json.count;
-                
+
                 resolve();
               });
           });
         },
-        updataemployee(rowList){
-            this.updateDialog = true
-            this.update_form = Object.assign({},rowList)
-            console.log(this.update_form)
-            this.update_form.gender == '男' ? this.update_form.gender = 0:this.update_form.gender = 1
+        updataemployee(rowList) {
+          this.updateDialog = true
+          this.update_form = Object.assign({}, rowList)
+          console.log(this.update_form)
+          this.update_form.gender == '男' ? this.update_form.gender = 0 : this.update_form.gender = 1
         },
-        update(){
-            let URL = "http://lcj525.vipgz4.idcfengye.com/updataemployee" 
-            this.update_form.gender == 1 ? this.update_form.gender = '男':this.update_form.gender = '女'
-            console.log(this.update_form)
-            let opt = {
-                method : 'post',
-                body : JSON.stringify(this.update_form),
-                headers: {
-                "content-type": 'application/json'
+        update() {
+          let URL = "http://lcj525.vipgz4.idcfengye.com/updataemployee"
+          this.update_form.gender == 1 ? this.update_form.gender = '男' : this.update_form.gender = '女'
+          console.log(this.update_form)
+          let opt = {
+            method: 'post',
+            body: JSON.stringify(this.update_form),
+            headers: {
+              "content-type": 'application/json'
             },
-            }
-            fetch(URL,opt)
-            .then(res=>res.json())
-            .then(json=>{
-                this.$message({
+          }
+          fetch(URL, opt)
+            .then(res => res.json())
+            .then(json => {
+              this.$message({
                 type: 'info',
                 message: '修改成功'
-            })
-            this.updateDialog = false
+              })
+              this.updateDialog = false
             })
 
         },
-        addemployee(){
-            this.addDialog = true
-            this.addForm = {}
-            
+        addemployee() {
+          this.addDialog = true
+          this.addForm = {}
+
         },
-        add(){
-            this.addForm.gender == 0 ? this.addForm.gender = '男': this.addForm.gender = '女'
-            console.log(this.addForm)
-            let URL = 'http://lcj525.vipgz4.idcfengye.com/updataemployee'
-            let opt = {
-                method : 'post',
-                body : JSON.stringify(this.addForm),
-                headers: {
-                "content-type": 'application/json'
+        add() {
+          this.addForm.gender == 0 ? this.addForm.gender = '男' : this.addForm.gender = '女'
+          console.log(this.addForm)
+          let URL = 'http://lcj525.vipgz4.idcfengye.com/updataemployee'
+          let opt = {
+            method: 'post',
+            body: JSON.stringify(this.addForm),
+            headers: {
+              "content-type": 'application/json'
             },
-            }
-            fetch(URL,opt)
-            .then(res=>res.json())
-            .then(json=>{
-                this.$message({
+          }
+          fetch(URL, opt)
+            .then(res => res.json())
+            .then(json => {
+              this.$message({
                 type: 'info',
                 message: '添加成功'
-            })
+              })
             })
 
         },
+        departure(currentRow) {           //离职
+        this.departureDialog = true
 
-        
-        
+         
+
+        },
+        submitDeparture(){},        
+
+        record() { 
+          this.recordDialog = true
+        },
+
+        submitRecord(){},
 
 
 
-        
+
+
+
+
+
+
       },
     });
   </script>

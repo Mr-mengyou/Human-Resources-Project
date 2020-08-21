@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8" />
+
+<link rel="stylesheet" href="/admin/css/style.css" />
+<link rel="stylesheet" href="/admin/css/other.css" />
+<!-- <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" /> -->
+<link rel="stylesheet" href="/admin/css/index.css">
+<script type="text/javascript" src="/admin/js/vue.js"></script>
+<script src="/admin/js/element.js"></script>
+<title>组长——电话记录</title>
+<style>
+  .el-card {
+    height: 100px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  }
+
+  .el-dialog {
+    width: 500px;
+  }
+
+  .el-form-item label:after {
+    content: "";
+    display: inline-block;
+    width: 100%;
+  }
+
+  .el-form-item__label {
+    text-align: justify;
+    height: 50px;
+  }
+
+  .el-form-item.is-required .el-form-item__label:before {
+    content: none !important;
+  }
+
+  .el-form-item {
+    width: 75%;
+  }
+  .c {
+    background-color: red;
+  }
+
+
+
+  /* .el-tooltip__popper,
+  .el-tooltip__popper.is-dark {
+    background: #f5f5f5 !important;
+    color: #303133 !important;
+  } */
+</style>
+<body>
+  <header class="header">
+    <div class="container flex">
+      <div class="left">
+        <img class="logo" src="/admin/images/2.jpg" />
+      </div>
+      <div class="right flex">
+        <p class="font">用户1</p>
+        <p class="font exit">退出</p>
+      </div>
+    </div>
+  </header>
+  <div class="body flex">
+    <div class="slider">
+      <div class="slider-body">
+        <ul>
+          
+            <li class="ul-item">
+              <a class="slider-link" href="/groupLeader/staffManagement.html">员工管理</a>
+            </li>
+            <li class="ul-item">
+              <a class="slider-link active" href="/groupLeader/staffRecord.html">档案管理</a>
+            </li>
+            <li class="ul-item">
+              <a class="slider-link " href="/groupLeader/leaveManagement.html">离职管理</a>
+            </li>
+        </ul>
+      </div>
+    </div>
+    <div class="main">
+      <!-- 主体  -->
+      <div id="app">
+        <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-bottom:2rem;margin-top: 2rem;">
+          <div class="mobileSize">
+            <el-input placeholder="请输入姓名" v-model="DATA.name" @keyup.enter.native="searchData">
+            </el-input>
+          </div>
+          <div class="mobileSize">
+            <el-input placeholder="输入工号" v-model="DATA.idWork" @keyup.enter.native="searchData">
+            </el-input>
+          </div>
+          
+        </div>
+        <el-table :data="tableData" style="width: 100%" v-loading="loading" border :cell-style="cellStyle">
+          <el-table-column prop="idWork" align="center" label="工号" width="100">
+          </el-table-column>
+          <el-table-column prop="employeeName" align="center" label="员工姓名" width="60">
+          </el-table-column>
+          <el-table-column prop="gender" align="center" label="性别" width="40">
+          </el-table-column>
+          <el-table-column prop="idNumber" align="center" label="身份证号" width="180">
+          </el-table-column>
+          <el-table-column prop="phoneNumber" align="center" label="电话号码">
+          </el-table-column>
+          <el-table-column prop="position" align="center" label="岗位">
+          </el-table-column>
+          <el-table-column prop="inductionTime" align="center" label="入职时间">
+          </el-table-column>
+          <el-table-column prop="dueToTime" align="center"  label="合同到期时间">
+          </el-table-column>
+          <el-table-column prop="deptName" align="center" label="部门名">
+          </el-table-column>
+          <el-table-column label="操作" fixed="right" align="center" width="100">
+            <template slot-scope="scope">
+              <el-button size="small" type="primary" @click="detail(scope.row)">
+                详情
+              </el-button>
+            </template>
+          </el-table-column>
+
+          
+        </el-table>
+        <div class="footer" style="width: 100%;margin-top:1rem;">
+          <template>
+            <el-pagination :current-page="currentPage" :page-size="pagesize" :page-sizes="10" :total="total"
+              @current-change="handleCurrentChange" background layout="total,prev, pager, next, jumper">
+            </el-pagination>
+          </template>
+        </div>
+
+        <el-dialog title="详情档案" :visible.sync="detailDialog">
+          <el-form :model="detailForm" ref="detailForm" style="margin-left: 80px;" class="demo-ruleForm">
+            <el-form-item label="工号" :label-width="formLabelWidth">
+              <el-input v-model="detailForm.idWork" autocomplete="off" size="small" :disabled="true"></el-input>
+            </el-form-item> 
+            <el-form-item label="员工姓名" :label-width="formLabelWidth">
+              <el-input v-model="detailForm.employeeName" autocomplete="off" size="small" :disabled="true"></el-input>
+            </el-form-item> 
+            <el-form-item label="性别" :label-width="formLabelWidth">
+              <el-radio-group v-model="detailForm.gender" :disabled="true">
+                <el-radio :label="0">男</el-radio>
+                <el-radio :label="1">女</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="身份证号" :label-width="formLabelWidth">
+              <el-input v-model="detailForm.idNumber" autocomplete="off" size="small" :disabled="true"></el-input>
+            </el-form-item> 
+            <el-form-item label="电话号码" :label-width="formLabelWidth">
+              <el-input v-model="detailForm.phoneNumber" autocomplete="off" size="small" :disabled="true"></el-input>
+            </el-form-item> 
+            <el-form-item label="岗位" :label-width="formLabelWidth">
+              <el-input v-model="detailForm.position" autocomplete="off" size="small" :disabled="true"></el-input>
+            </el-form-item> 
+            <el-form-item label="入职时间" :label-width="formLabelWidth">
+              <el-input v-model="detailForm.inductionTime" autocomplete="off" size="small" :disabled="true"></el-input>
+            </el-form-item> 
+            <el-form-item label="部门名" :label-width="formLabelWidth" :disabled="true">
+              <el-input v-model="detailForm.deptName" autocomplete="off" size="small"></el-input>
+            </el-form-item> 
+
+            <el-form-item label="生日类别" :label-width="formLabelWidth">
+              <el-radio-group v-model="detailForm.category">
+                <el-radio :label="0">农历</el-radio>
+                <el-radio :label="1">新历</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="生日" :label-width="formLabelWidth">
+              <el-input v-model="detailForm.birthday" autocomplete="off" size="small"></el-input>
+            </el-form-item> 
+            
+            <el-form-item label="学历" :label-width="formLabelWidth">
+              <el-input v-model="detailForm.education" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="家庭住址" :label-width="formLabelWidth">
+              <el-input v-model="detailForm.address" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="现住址" :label-width="formLabelWidth">
+              <el-input v-model="detailForm.addressNow" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="家庭住址" :label-width="formLabelWidth">
+              <el-input v-model="detailForm.address" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="紧急联系人" :label-width="formLabelWidth">
+              <el-input v-model="detailForm.emergencyContact" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="联系人关系" :label-width="formLabelWidth">
+              <el-input v-model="detailForm.relation" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="紧急联系电话" :label-width="formLabelWidth">
+              <el-input v-model="detailForm.emergencyContactPhone" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="合同到期时间" :label-width="formLabelWidth">
+              <el-input v-model="detailForm.dueToTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="离职时间" :label-width="formLabelWidth">
+              <el-input v-model="detailForm.departureTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="参保时间" :label-width="formLabelWidth">
+              <el-input v-model="detailForm.ginsengTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="停保时间" :label-width="formLabelWidth">
+              <el-input v-model="detailForm.stopTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="备注" :label-width="formLabelWidth">
+              <el-input v-model="detailForm.note" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            
+          </el-form>
+          <div slot="footer" class="dialog-footer" style="text-align: center;">
+            <el-button @click="detailDialog = false">取 消</el-button>
+            <el-button type="primary" @click="edit">确认修改</el-button>
+          </div>
+        </el-dialog>
+
+
+           
+       
+      </div>
+    </div>
+  </div>
+  <script>
+    new Vue({
+      el: '#app',
+      data: function () {
+        return {
+          loading: false,
+          detailDialog:false,
+          formLabelWidth:'100px',
+          detailForm : {},
+          selected:true,
+          
+          
+          DATA: {
+            page: 1,
+            pagesize: 10,
+            name: '',
+            employeeName:'',
+            idNumber: "",
+            phoneNumber: ""
+          },
+          currentPage: 1,
+          pagesize: 10,
+          total: "",
+          tableData: [
+            { employeeName: '张三', gender: '女', idWork: '12', idNumber: '500227199801233288x', phoneNumber: '15736063175',position:"数据专员",deptName:"销售部",inductionTime:"2020-12-12",dueToTime:"5"}
+          ]
+        }
+      },
+      
+      created() {
+        this.getTableData(this.DATA)
+        this.getTotal(this.DATA)
+        
+      },
+      methods: {
+        getTableDataURL(URL, options) {        //根据URL和参数对象生成附加参数的URL
+          URL += "?";
+          for (let [key, value] of Object.entries(options)) {
+            if (value !== "") URL += "" + key + "=" + value + "&";
+          }
+          return URL.slice(0, URL.length - 1);
+        },
+        getCountURL(URL, options) {
+          URL += "?";                //根据URL和参数对象生成附加参数不带page的URL
+          for (let [key, value] of Object.entries(options)) {
+            if (value !== "" && key !== 'page') URL += "" + key + "=" + value + "&";
+          }
+          return URL.slice(0, URL.length - 1);
+        },
+        initForm(obj) {
+          for (let key in obj) {
+            obj[key] = "";
+          }
+        },
+        searchData() {
+          this.DATA.page = 1
+          this.getTableData(this.DATA);
+          this.getTotal(this.DATA)
+        },
+        handleCurrentChange(size) {
+          this.currentPage = currentPage;
+          this.DATA.page = currentPage;
+          this.getTableData(this.DATA);
+        },
+
+        changeTable1() {                //改变表一任何一个单选框
+          this.getTotal(this.DATA).then(() => {
+            this.getTableData(this.DATA)
+          }).catch(err => {
+            this.$message.error(err);
+          })
+        },
+
+        getTableData(options) {
+          let URL = "http://lcj525.vipgz4.idcfengye.com/getPhoneRecordDept"
+          // this.loading = true;
+          URL = this.getTableDataURL(URL, options);
+          return new Promise(resolve => {
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+                this.tableData = this.filterData(json);
+                
+                resolve();
+                setTimeout(() => {
+                  this.loading = false;
+                }, 500);
+              });
+          });
+        },
+        getTotal(options) {
+          return new Promise(resolve => {
+            let URL = "http://lcj525.vipgz4.idcfengye.com/getPhoneRecordDeptCount"           //获取表一所有数据总数
+            URL = this.getCountURL(URL, options);
+            console.log(URL)
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+                console.log(json)
+                this.total = json.count;
+                
+                resolve();
+              });
+          });
+        },
+
+        filterData(tableData) {
+          return tableData.map(item => {
+            // item.isWechatAdded === 1 ? item.isWechatAdded = '是' : item.isWechatAdded = '否'
+            item.status === 1 ? item.gender = '是':item.gender = '否'
+            item.filepath = 'https://yunzhitel-recorder.oss-cn-shenzhen.aliyuncs.com/'+item.filepath
+            return item;
+          })
+        },
+        detail(currentRow){
+          this.detailDialog = true
+          this.detailForm = Object.assign({},currentRow)
+          this.detailForm.gender == '男' ? this.detailForm.gender = 0 : this.detailForm.gender = 1
+          
+          console.log(currentRow)
+
+        },
+        edit(){},
+        cellStyle ({ row, column, rowIndex, columnIndex }) {
+          let dueToTime = row.dueToTime
+          if(dueToTime>1){
+            return 'color: red'
+
+          }
+
+        },
+        
+
+
+
+        
+      },
+    });
+  </script>
+</body>
+
+</html>
