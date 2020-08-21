@@ -65,17 +65,19 @@
     <div class="slider">
       <div class="slider-body">
         <ul>
-          
-            <li class="ul-item">
-              <a class="slider-link" href="/groupLeader/staffManagement.html">员工管理</a>
-            </li>
-            <li class="ul-item">
-              <a class="slider-link active" href="/groupLeader/staffRecord.html">档案管理</a>
-            </li>
-            <li class="ul-item">
-              <a class="slider-link " href="/groupLeader/leaveManagement.html">离职管理</a>
-            </li>
-        </ul>
+          <li class="ul-item">
+              <a class="slider-link active" href="/groupLeader/directorPhone.html">通话记录</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link " href="/groupLeader/staffManagement.html">员工管理</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link" href="/groupLeader/staffRecord.html">档案管理</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link " href="/groupLeader/leaveManagement.html">离职管理</a>
+          </li>
+      </ul>
       </div>
     </div>
     <div class="main">
@@ -120,6 +122,71 @@
           </el-table-column>
 
           
+        </el-table>
+        <div class="footer" style="width: 100%;margin-top:1rem;">
+          <template>
+            <el-pagination :current-page="currentPage" :page-size="pagesize" :page-sizes="10" :total="total"
+              @current-change="handleCurrentChange" background layout="total,prev, pager, next, jumper">
+            </el-pagination>
+          </template>
+        </div>
+
+        <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-bottom:2rem;margin-top: 2rem;">
+          <div class="mobileSize">
+            <el-input placeholder="请输入姓名" v-model="DATA2.name" @keyup.enter.native="searchData">
+            </el-input>
+          </div>  
+          <div class="mobileSize">
+            <el-input placeholder="请输入身份证号" v-model="DATA2.idNumber" @keyup.enter.native="searchData">
+            </el-input>
+          </div>
+          <div class="mobileSize">
+            <el-input placeholder="请输入电话号码" v-model="DATA2.phoneNumber" @keyup.enter.native="searchData">
+            </el-input>
+          </div>
+          
+        </div>
+        <el-table :data="tableData2" style="width: 100%" v-loading="loading" border >
+        
+          <el-table-column prop="name" align="center" label="姓名" width="60">
+          </el-table-column>
+          <el-table-column prop="gender" align="center" label="性别" width="40">
+          </el-table-column>
+          <el-table-column prop="idNumber" align="center" label="身份证号" width="180">
+          </el-table-column>
+          <el-table-column prop="age" align="center" label="年龄" width="180">
+          </el-table-column>
+          <el-table-column prop="phoneNumber" align="center" label="电话号码">
+          </el-table-column>
+          <el-table-column prop="education" align="center" label="学历">
+          </el-table-column>
+          <el-table-column prop="address" align="center" label="地址(区域)">
+          </el-table-column>
+          <el-table-column prop="professionalSkills" align="center"  label="专业技能">
+          </el-table-column>
+          <el-table-column prop="hasCertificate" align="center" label="是否有技能证书">
+          </el-table-column>
+          <el-table-column prop="isDisability" align="center" label="是否残疾">
+          </el-table-column>
+          <el-table-column prop="sourceOfData" align="center" label="数据来源">
+          </el-table-column>
+          <el-table-column prop="note" align="center" label="备注">
+          </el-table-column>
+          <el-table-column prop="addedTime" align="center" label="插入时间">
+          </el-table-column>
+          <el-table-column label="操作" fixed="right" align="center" width="220">
+            <template slot-scope="scope">
+              <el-button size="small" type="primary" @click="editSF(scope.row)">
+                编辑
+              </el-button>
+              <el-button size="small" type="warning" @click="allot(scope.row)">
+                分配
+              </el-button>
+              <el-button size="small" type="danger" @click="delete(scope.row)">
+                删除
+              </el-button>
+            </template>
+          </el-table-column>   
         </el-table>
         <div class="footer" style="width: 100%;margin-top:1rem;">
           <template>
@@ -209,13 +276,79 @@
           </el-form>
           <div slot="footer" class="dialog-footer" style="text-align: center;">
             <el-button @click="detailDialog = false">取 消</el-button>
+            <el-button type="primary" @click="editDetail">确认修改</el-button>
+          </div>
+        </el-dialog>
+
+
+        <el-dialog title="编辑" :visible.sync="editDialog">
+          <el-form :model="editSForm" ref="editSForm" style="margin-left: 80px;" class="demo-ruleForm">
+            <el-form-item label="姓名" :label-width="formLabelWidth">
+              <el-input v-model="editSForm.name" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="性别" :label-width="formLabelWidth">
+              <el-radio-group v-model="editSForm.gender">
+                <el-radio :label="0">男</el-radio>
+                <el-radio :label="1">女</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="身份证" :label-width="formLabelWidth">
+              <el-input v-model="editSForm.idNumber" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="年龄" :label-width="formLabelWidth">
+              <el-input v-model="editSForm.age" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="电话" :label-width="formLabelWidth">
+              <el-input v-model="editSForm.phoneNumber" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="学历" :label-width="formLabelWidth">
+              <el-select v-model="editSForm.education" placeholder="请选择">
+                <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="区域" :label-width="formLabelWidth">
+              <el-input v-model="editSForm.address" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="专业技能" :label-width="formLabelWidth">
+              <el-input v-model="editSForm.professionalSkills" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="证书" :label-width="formLabelWidth">
+              <el-radio-group v-model="editSForm.hasCertificate">
+                <el-radio :label="0">是</el-radio>
+                <el-radio :label="1">否</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="残疾人" :label-width="formLabelWidth">
+              <el-radio-group v-model="editSForm.isDisability">
+                <el-radio :label="0">是</el-radio>
+                <el-radio :label="1">否</el-radio>
+
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="数据来源" :label-width="formLabelWidth">
+              <el-select v-model="editSForm.sourceOfData" placeholder="请选择">
+                <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+
+            <el-form-item label="备注" :label-width="formLabelWidth">
+              <el-input v-model="editSForm.note" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+
+            <el-form-item label="插入时间" :label-width="formLabelWidth">
+              <el-input v-model="editSForm.addedTime" autocomplete="off" size="small" :disabled="true"></el-input>
+            </el-form-item>
+
+          </el-form>
+          <div slot="footer" class="dialog-footer" style="text-align: center;">
+            <el-button @click="editDialog = false">取 消</el-button>
             <el-button type="primary" @click="edit">确认修改</el-button>
           </div>
         </el-dialog>
 
 
-           
-       
       </div>
     </div>
   </div>
@@ -226,24 +359,66 @@
         return {
           loading: false,
           detailDialog:false,
+          editDialog:false,
           formLabelWidth:'100px',
           detailForm : {},
+          allotForm:{},
+          
+          editSForm :{},
           selected:true,
+
+          options: [{
+            value: '本科',
+            label: '本科'
+          },
+          {
+            value: '专科',
+            label: '专科'
+          }, {
+            value: '高中',
+            label: '高中'
+          }, {
+            value: '研究生',
+            label: '研究生'
+          }, {
+            value: '博士',
+            label: '博士'
+          }, {
+            value: '初中',
+            label: '初中'
+          },
+          {
+            value: '小学',
+            label: '小学'
+          },
+          {
+            value: '其它',
+            label: '其它'
+          }
+          ],
           
           
           DATA: {
             page: 1,
-            pagesize: 10,
+            // pagesize: 10,
             name: '',
-            employeeName:'',
-            idNumber: "",
-            phoneNumber: ""
+            idWork:'',
+          },
+          DATA2: {
+            page: 1,
+            // pagesize: 10,
+            name: '',
+            idNumber:'',
+            phoneNumber:'',
           },
           currentPage: 1,
           pagesize: 10,
           total: "",
           tableData: [
             { employeeName: '张三', gender: '女', idWork: '12', idNumber: '500227199801233288x', phoneNumber: '15736063175',position:"数据专员",deptName:"销售部",inductionTime:"2020-12-12",dueToTime:"5"}
+          ],
+          tableData2:[
+            { name:"李四",gender:'男',idNumber:"500227199801233288x",phoneNumber: '15736063175',}
           ]
         }
       },
@@ -341,7 +516,7 @@
           console.log(currentRow)
 
         },
-        edit(){},
+        editDetail(){},  //编辑第一个表单
         cellStyle ({ row, column, rowIndex, columnIndex }) {
           let dueToTime = row.dueToTime
           if(dueToTime>1){
@@ -350,6 +525,69 @@
           }
 
         },
+        editSF(currentRow){
+          this.editDialog = true
+          this.editSForm = Object.assign({},currentRow)
+          this.editSForm.gender == '男' ? this.editSForm.gender = 0 : this.editSForm.gender =1
+         
+        },
+        edit(){},  //编辑第二个表单
+        allot(currentRow){
+          this.$prompt('分配', {
+            confirmButtonText: '确定分配',
+            cancelButtonText: '取消分配',
+            
+
+          }).then(({ value }) => {
+            let URL = 'http://lcj525.vipgz4.idcfengye.com/signUp'
+            this.allotForm={
+              id:currentRow.id,
+              name : value
+
+            }
+            var opt = {
+              method: "POST",
+              body: JSON.stringify(this.allotForm),
+              headers: {
+                "content-type": 'application/json'
+              }
+
+            }
+            return new Promise(resolve => {
+              fetch(URL, opt)
+                .then(res => res.json())
+                .then(json => {
+                  this.$message({
+                    type: 'success',
+                    message: '您已经将这条数据成功分配给 '+ value,
+
+                  });
+                  resolve();
+                })
+                .catch(error=>{
+                  this.$message({
+                    type: 'success',
+                    message: '分配失败',
+
+                  });
+                  
+                })
+               
+            })
+
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '取消输入'
+            });
+          });
+
+        },
+        
+        delete(currentRow){},
+
+        
+
         
 
 

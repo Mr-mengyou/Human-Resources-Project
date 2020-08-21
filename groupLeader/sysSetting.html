@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8" />
+
+<link rel="stylesheet" href="/admin/css/style.css" />
+<link rel="stylesheet" href="/admin/css/other.css" />
+<!-- <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" /> -->
+<link rel="stylesheet" href="/admin/css/index.css">
+<script type="text/javascript" src="/admin/js/vue.js"></script>
+<script src="/admin/js/element.js"></script>
+<title>系统设置</title>
+<style>
+  .el-card {
+    height: 100px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  }
+
+  .el-dialog {
+    width: 500px;
+  }
+
+  .el-form-item label:after {
+    content: "";
+    display: inline-block;
+    width: 100%;
+  }
+
+  .el-form-item__label {
+    text-align: justify;
+    height: 50px;
+  }
+
+  .el-form-item.is-required .el-form-item__label:before {
+    content: none !important;
+  }
+
+  .el-form-item {
+    width: 75%;
+  }
+
+
+
+  /* .el-tooltip__popper,
+  .el-tooltip__popper.is-dark {
+    background: #f5f5f5 !important;
+    color: #303133 !important;
+  } */
+</style>
+<body>
+  <header class="header">
+    <div class="container flex">
+      <div class="left">
+        <img class="logo" src="/admin/images/2.jpg" />
+      </div>
+      <div class="right flex">
+        <p class="font">用户1</p>
+        <p class="font exit">退出</p>
+      </div>
+    </div>
+  </header>
+  <div class="body flex">
+    <div class="slider">
+      <div class="slider-body">
+        <ul>
+          <!-- <li class="ul-item active">
+            <a class="slider-link " href="/Salesman/index.html">电话名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link " href="/Salesman/apply.html">报名名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link" href="/Salesman/interview.html">面试名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link " href="/Salesman/wait_hire.html">待入职名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link" href="/Salesman/hire.html">入职名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link" href="/Salesman/other.html">结算名单</a>
+          </li> -->
+          <li class="ul-item">
+            <a class="slider-link active" href="/Salesman/phoneRecords.html">电话记录</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="main">
+      <!-- 主体  -->
+      <div id="app">
+        
+        <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
+         
+          <el-table-column prop="item" align="center" label="系统需要设置的项">
+          </el-table-column>
+          <el-table-column prop="value" align="center" label="项的值" >
+          </el-table-column>
+          <el-table-column label="操作" fixed="right" align="center" width="220">
+            <template slot-scope="scope">
+              <el-button size="small" type="primary" @click="edit(scope.row)">
+                编辑
+              </el-button>
+            </template>
+          </el-table-column>
+          
+          
+        </el-table>
+        <div class="footer" style="width: 100%;margin-top:1rem;">
+          <template>
+            <el-pagination :current-page="currentPage" :page-size="pagesize" :page-sizes="10" :total="total"
+              @current-change="handleCurrentChange" background layout="total,prev, pager, next, jumper">
+            </el-pagination>
+          </template>
+        </div>
+           
+       
+      </div>
+    </div>
+  </div>
+  <script>
+    new Vue({
+      el: '#app',
+      data: function () {
+        return {
+          loading: false,
+          editDialog:false,
+          formLabelWidth:'100px',
+          
+          
+          
+          currentPage: 1,
+          pagesize: 10,
+          total: "",
+          tableData: [
+            // { name: '张三', gender: '女', age: '12', cardNumber: '500227199801233288x', phoneNumber: '15736063175', education: "大专" }
+          ]
+        }
+      },
+      created() {
+        this.getTableData(this.DATA)
+        this.getTotal(this.DATA)
+      },
+      methods: {
+        getTableDataURL(URL, options) {        //根据URL和参数对象生成附加参数的URL
+          URL += "?";
+          for (let [key, value] of Object.entries(options)) {
+            if (value !== "") URL += "" + key + "=" + value + "&";
+          }
+          return URL.slice(0, URL.length - 1);
+        },
+        getCountURL(URL, options) {
+          URL += "?";                //根据URL和参数对象生成附加参数不带page的URL
+          for (let [key, value] of Object.entries(options)) {
+            if (value !== "" && key !== 'page') URL += "" + key + "=" + value + "&";
+          }
+          return URL.slice(0, URL.length - 1);
+        },
+        initForm(obj) {
+          for (let key in obj) {
+            obj[key] = "";
+          }
+        },
+        // searchData() {
+        //   this.DATA.page = 1
+        //   this.getTableData(this.DATA);
+        //   this.getTotal(this.DATA)
+        // },
+        handleCurrentChange(size) {
+          this.currentPage = currentPage;
+          this.DATA.page = currentPage;
+          this.getTableData(this.DATA);
+        },
+
+        // changeTable1() {                //改变表一任何一个单选框
+        //   this.getTotal(this.DATA).then(() => {
+        //     this.getTableData(this.DATA)
+        //   }).catch(err => {
+        //     this.$message.error(err);
+        //   })
+        // },
+
+        getTableData(options) {
+          let URL = "http://lcj525.vipgz4.idcfengye.com/getPhoneRecordDept"
+          // this.loading = true;
+          URL = this.getTableDataURL(URL, options);
+          return new Promise(resolve => {
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+                this.tableData = json;
+                
+                resolve();
+                setTimeout(() => {
+                  this.loading = false;
+                }, 500);
+              });
+          });
+        },
+        getTotal(options) {
+          return new Promise(resolve => {
+            let URL = "http://lcj525.vipgz4.idcfengye.com/getPhoneRecordDeptCount"           //获取表一所有数据总数
+            URL = this.getCountURL(URL, options);
+            console.log(URL)
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+                console.log(json)
+                this.total = json.count;
+                
+                resolve();
+              });
+          });
+        },
+
+        edit(currentRow){
+          this.$prompt('编辑时间', {
+            confirmButtonText: '确定编辑',
+            cancelButtonText: '取消编辑',
+            
+
+          }).then(({ value }) => {
+            let URL = 'http://lcj525.vipgz4.idcfengye.com/signUp'
+            this.allotForm={
+              id:currentRow.id,
+              name : value
+            }
+            var opt = {
+              method: "POST",
+              body: JSON.stringify(this.allotForm),
+              headers: {
+                "content-type": 'application/json'
+              }
+
+            }
+            return new Promise(resolve => {
+              fetch(URL, opt)
+                .then(res => res.json())
+                .then(json => {
+                  this.$message({
+                    type: 'success',
+                    message: '您已经成功修改为 '+ value,
+
+                  });
+                  resolve();
+                })
+                .catch(error=>{
+                  this.$message({
+                    type: 'success',
+                    message: '修改失败',
+
+                  });
+                  
+                })
+               
+            })
+
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '取消输入'
+            });
+          });
+        }
+
+        
+        
+
+
+
+        
+      },
+    });
+  </script>
+</body>
+
+</html>
