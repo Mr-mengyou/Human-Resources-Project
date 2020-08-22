@@ -81,7 +81,7 @@
             <a class="slider-link" href="/Salesman/other.html">结算名单</a>
           </li> -->
           <li class="ul-item">
-            <a class="slider-link active" href="/Salesman/phoneRecords.html">权限分配
+            <a class="slider-link active" href="/other/authorityManage.html">权限分配
             </a>
           </li>
         </ul>
@@ -126,6 +126,24 @@
               </el-pagination>
             </template>
           </div>
+
+
+          <el-dialog title="权限分配" :visible.sync="allotDialog">
+            <el-tree
+              :data="data"
+              show-checkbox
+              node-key="id"
+              ref="tree"
+              :props="defaultProps">
+            </el-tree>
+            
+          
+            
+            <div slot="footer" class="dialog-footer" style="text-align: center;">
+              <el-button @click="dialogFormVisible3 = false">取 消</el-button>
+              <el-button type="primary" @click="allot">确认分配</el-button>
+            </div>
+          </el-dialog>
        
       </div>
     </div>
@@ -136,8 +154,141 @@
       data: function () {
         return {
           loading: false,
-          editDialog:false,
+          allotDialog:false,
           formLabelWidth:'100px',
+          data: [{
+          id: 1,
+          label: '业务员',
+          children: [{
+            id: 10,
+            label: '电话名单',
+          },
+          {
+            id: 11,
+            label: '报名名单',
+          },{
+            id: 12,
+            label: '电话名单',
+          },{
+            id: 13,
+            label: '面试名单',
+          },{
+            id: 14,
+            label: '待入职名单',
+          },{
+            id: 15,
+            label: '入职名单',
+          },{
+            id: 16,
+            label: '结算名单',
+          }]
+        }, {
+          id: 2,
+          label: '组长',
+          children: [{
+            id: 20,
+            label: '报名名单'
+          }, {
+            id: 21,
+            label: '面试名单'
+          },
+          {
+            id: 22,
+            label: '待入职名单'
+          },{
+            id: 23,
+            label: '入职名单'
+          },]
+        }, {
+          id: 3,
+          label: '市场部',
+          children: [{
+            id: 30,
+            label: '面试名单'
+          }, {
+            id: 31,
+            label: '待入职名单'
+          }]
+        },
+        {
+          id: 4,
+          label: '文员',
+          children: [{
+            id: 40,
+            label: '员工管理'
+          }, {
+            id: 41,
+            label: '员工档案管理'
+          },{
+            id: 42,
+            label: '员工离职管理'
+          },{
+            id: 43,
+            label: '工伤管理'
+          },{
+            id: 44,
+            label: '账务管理'
+          },]
+        },
+        {
+          id: 5,
+          label: '数据专员',
+          children: [{
+            id: 50,
+            label: '报名管理'
+          }, {
+            id: 51,
+            label: '面试管理'
+          },{
+            id: 52,
+            label: '待入职管理'
+          },
+          {
+            id: 53,
+            label: '入职管理'
+          }]
+        },
+        {
+          id: 6,
+          label: '财务',
+          children: [{
+            id: 60,
+            label: '结算管理'
+          }]
+        },
+        {
+          id: 7,
+          label: '企业管理',
+          children: [{
+            id: 70,
+            label: '企业管理'
+          }, {
+            id: 71,
+            label: '企业报表'
+          }]
+        },
+        {
+          id: 8,
+          label: '其它',
+          children: [{
+            id: 80,
+            label: '公海管理'
+          }, {
+            id: 81,
+            label: '数据报表'
+          },{
+            id: 82,
+            label: '权限分配'
+          },{
+            id: 83,
+            label: '系统设置'
+          },]
+        }
+        ],
+          defaultProps: {
+          children: 'children',
+          label: 'label'
+          },
           
           
           DATA: {
@@ -207,7 +358,7 @@
             fetch(URL)
               .then(res => res.json())
               .then(json => {
-                this.tableData = this.filterData(json);
+                this.tableData = json;
                 
                 resolve();
                 setTimeout(() => {
@@ -232,14 +383,17 @@
           });
         },
 
-        filterData(tableData) {
-          return tableData.map(item => {
-            // item.isWechatAdded === 1 ? item.isWechatAdded = '是' : item.isWechatAdded = '否'
-            item.status === 1 ? item.gender = '是':item.gender = '否'
-            item.filepath = 'https://yunzhitel-recorder.oss-cn-shenzhen.aliyuncs.com/'+item.filepath
-            return item;
-          })
+        
+
+        permissAllot(){
+          this.allotDialog = true
+
+
         },
+        allot(){
+          console.log(this.$refs.tree.getHalfCheckedNodes())
+        },
+        
         
 
 

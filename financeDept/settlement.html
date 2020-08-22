@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8" />
+
+<link rel="stylesheet" href="/admin/css/style.css" />
+<link rel="stylesheet" href="/admin/css/other.css" />
+<!-- <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" /> -->
+<link rel="stylesheet" href="/admin/css/index.css">
+<script type="text/javascript" src="/admin/js/vue.js"></script>
+<script src="/admin/js/element.js"></script>
+<title>财务——结算名单</title>
+<style>
+  .el-card {
+    height: 100px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  }
+
+  .el-dialog {
+    width: 80%;
+    
+    
+  }
+
+  .el-form-item label:after {
+    content: "";
+    display: inline-block;
+    width: 100%;
+  }
+
+  .el-form-item__label {
+    text-align: justify;
+    height: 50px;
+  }
+
+  .el-form-item.is-required .el-form-item__label:before {
+    content: none !important;
+  }
+
+  .el-form-item {
+    width: 45%;
+    margin-left: 30px;
+  }
+
+
+
+  /* .el-tooltip__popper,
+  .el-tooltip__popper.is-dark {
+    background: #f5f5f5 !important;
+    color: #303133 !important;
+  } */
+</style>
+<body>
+  <header class="header">
+    <div class="container flex">
+      <div class="left">
+        <img class="logo" src="/admin/images/2.jpg" />
+      </div>
+      <div class="right flex">
+        <p class="font">用户1</p>
+        <p class="font exit">退出</p>
+      </div>
+    </div>
+  </header>
+  <div class="body flex">
+    <div class="slider">
+      <div class="slider-body">
+        <ul>
+          <li class="ul-item ">
+            <a class="slider-link active" href="/financeDept/settlement.html">结算名单</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="main">
+      <!-- 主体  -->
+      <div id="app">
+        <el-row>
+            <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+              <el-input placeholder="请输入姓名" v-model="DATA.name" @keyup.enter.native="searchData">
+            </el-col>
+            <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+              <el-input placeholder="输入身份证号" v-model="DATA.idNumber" @keyup.enter.native="searchData">
+            </el-col>
+            <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+              <el-input placeholder="请输入电话号码" v-model="DATA.phoneNumber" @keyup.enter.native="searchData">
+            </el-col>
+            <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+              <el-input placeholder="请输入结算状态" v-model="DATA.state" @keyup.enter.native="searchData">
+            </el-col>
+        </el-row>
+        <!-- 表格 -->
+        <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
+            <el-table-column fixed prop="name" align="center" center label="姓名" width="80">
+            </el-table-column>
+            <el-table-column prop="idNumber" align="center" label="身份证号" width="180">
+            </el-table-column>
+            <el-table-column prop="gender" align="center" label="性别" width="50">
+            </el-table-column>
+            <el-table-column prop="age" align="center" label="年龄" width="50">
+            </el-table-column>
+            <el-table-column prop="phoneNumber" align="center" label="电话号码" width="120">
+            </el-table-column>
+            <el-table-column prop="state" align="center" label="入职状态" >
+            </el-table-column>
+            <el-table-column prop="recommendEnterprise" align="center" label="推荐企业" :show-overflow-tooltip="true">
+            </el-table-column>
+            <el-table-column prop="recommendJob" align="center" label="推荐岗位" :show-overflow-tooltip="true">
+            </el-table-column>
+            <el-table-column prop="contractExpireTime" align="center" label="合同到期时间" width="120" :show-overflow-tooltip="true">
+            </el-table-column>
+            <el-table-column prop="emergencyContact" align="center" label="紧急联系人" width="100" :show-overflow-tooltip="true">
+            </el-table-column>
+            <el-table-column prop="emergencyContactPhone" align="center" label="紧急联系电话" width="120" :show-overflow-tooltip="true">
+            </el-table-column>
+            <el-table-column prop="insurance" align="center" label="保险类别" :show-overflow-tooltip="true">
+            </el-table-column>
+            <el-table-column prop="unit" align="center" label="参保单位" :show-overflow-tooltip="true">
+            </el-table-column>
+            <el-table-column label="操作" fixed="right" align="center" width="125">
+            <template slot-scope="scope">
+              <el-button size="small" type="primary" @click="updateList(scope.row)">
+                编辑
+              </el-button>    
+            </template>
+          </el-table-column>
+        </el-table>
+        <div class="footer" style="width: 100%;margin-top:1rem;">
+          <template>
+            <el-pagination :current-page="currentPage" :page-size="pagesize" :page-sizes="10" :total="total"
+              @current-change="handleCurrentChange" background layout="total,prev, pager, next, jumper">
+            </el-pagination>
+          </template>
+        </div>
+
+        <!-- 编辑表单 -->
+        <el-dialog title="编辑表单" :visible.sync="editDialog">
+            
+          <el-form :inline="true" :model="update_form" ref="update_form" style="margin-left: 100px;" class="demo-ruleForm">
+            
+            <el-form-item label="姓名" :label-width="formLabelWidth">
+              <el-input v-model="update_form.name" autocomplete="off" style="width: 100px;" size="small"></el-input>
+              <span style="font-size: 12px;color: red;">结算状态:{{ state }}</p></span>
+            </el-form-item>
+            <el-form-item label="满岗标准" :label-width="formLabelWidth">
+                <el-input v-model="update_form.standard" autocomplete="off" size="small"></el-input>
+              </el-form-item>
+            <el-form-item label="结算次数" :label-width="formLabelWidth">
+              <el-input v-model="update_form.settlementNumber" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="结算标准" :label-width="formLabelWidth">
+              <el-input v-model="update_form.settlementStandard" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="出勤时/天" :label-width="formLabelWidth">
+                <el-col :span =8>
+                    <el-input v-model="update_form.attendanceDays" style="width: 70px;" autocomplete="off" size="small"></el-input>
+                </el-col>
+                <el-col :span=6>-</el-col>
+                <el-col :span =8>
+                <el-input v-model="update_form.attendanceHours" style="width: 70px;" autocomplete="off" size="small"></el-input>
+                </el-col>
+            </el-form-item>
+            <el-form-item label="出勤单价" :label-width="formLabelWidth">
+                <el-input v-model="update_form.price" style="width: 65px;" autocomplete="off" size="small"></el-input>
+                <span style="font-size: 12px;color: red;">特殊说明:{{ mark }}</span>
+            </el-form-item>
+            <el-form-item label="结算所属周期" :label-width="formLabelWidth">
+                <el-input v-model="update_form.cycle"  autocomplete="off" size="small"></el-input>  
+            </el-form-item>
+            <el-form-item label="结算时间" :label-width="formLabelWidth">
+                <el-input v-model="update_form.settlementTime"  autocomplete="off" size="small"></el-input>  
+            </el-form-item>
+            <el-form-item label="凭证" :label-width="formLabelWidth">
+                <el-upload
+                    class="upload-demo"
+                    action="http://lcj525.vipgz4.idcfengye.com/updateSettlement"
+                    :before-remove="beforeRemove"
+                    multiple
+                    :limit="2"
+                    :file-list="fileList"
+                    list-type="picture">
+                    <el-button size="small" type="primary">点击上传</el-button>
+                    <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+                </el-upload> 
+            </el-form-item>
+          
+            
+            
+            <!-- <el-form-item label="出勤天数" :label-width="formLabelWidth">
+                <el-input v-model="update_form.attendanceDays" autocomplete="off" size="small"></el-input>
+            </el-form-item> -->
+            
+        
+          </el-form>
+          <div slot="footer" class="dialog-footer" style="text-align: center;">
+            <el-button @click="dialogFormVisible3 = false">取 消</el-button>
+            <el-button type="primary" @click="update">提交</el-button>
+          </div>
+        </el-dialog>
+
+      </div>
+    </div>
+  </div>
+  <script>
+    new Vue({
+      el: '#app',
+      data: function () {
+        return {
+          loading: false,
+          editDialog:false,
+          formLabelWidth:'120px',
+          //编辑表单
+          fileList: [],
+          mark:'因各种原因请假，则为200/天',
+          state:'已结算',
+          update_form:{},
+          
+          DATA: {
+            page: 1,
+            // pagesize: 10,
+            name: '',
+            cardNumber: "",
+            phoneNumber: ""
+          },
+          currentPage: 1,
+          pagesize: 10,
+          total: "",
+          tableData: [
+            { name: '张三', gender: '女', age: '12', cardNumber: '500227199801233288x', phoneNumber: '15736063175', education: "大专" }
+          ]
+        }
+      },
+      created() {
+        this.getTableData(this.DATA)
+        this.getTotal(this.DATA)
+      },
+      methods: {
+        getTableDataURL(URL, options) {        //根据URL和参数对象生成附加参数的URL
+          URL += "?";
+          for (let [key, value] of Object.entries(options)) {
+            if (value !== "") URL += "" + key + "=" + value + "&";
+          }
+          return URL.slice(0, URL.length - 1);
+        },
+        getCountURL(URL, options) {
+          URL += "?";                //根据URL和参数对象生成附加参数不带page的URL
+          for (let [key, value] of Object.entries(options)) {
+            if (value !== "" && key !== 'page') URL += "" + key + "=" + value + "&";
+          }
+          return URL.slice(0, URL.length - 1);
+        },
+        // getURL(URL, options) {
+        //   URL += "?";
+        //   for (let [key, value] of Object.entries(options)) {
+        //     if (value !== "") URL += "" + key + "=" + value + "&";
+        //   }
+        //   return URL.slice(0, URL.length - 1);
+        // },
+        initForm(obj) {
+          for (let key in obj) {
+            obj[key] = "";
+          }
+        },
+        searchData() {            //表一所有搜索框
+          this.DATA.page = 1
+          this.getTableData(this.DATA);
+          this.getTotal(this.DATA)
+        },
+        handleCurrentChange(size) {
+          this.currentPage = currentPage;
+          this.DATA.page = currentPage;
+          this.getTableData(this.DATA);
+        },
+        changeTable1() {                //改变表一任何一个单选框
+          this.getTotal(this.DATA).then(() => {
+            this.getTableData(this.DATA)
+          }).catch(err => {
+            this.$message.error(err);
+          })
+        },
+
+        getTableData(options) {
+          let URL = "http://lcj525.vipgz4.idcfengye.com/signUpList"
+          // this.loading = true;
+          URL = this.getTableDataURL(URL, options);
+          return new Promise(resolve => {
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+                
+
+                this.tableData = json;
+
+                resolve();
+                setTimeout(() => {
+                  this.loading = false;
+                }, 500);
+              });
+          });
+        },
+        getTotal(options) {
+          return new Promise(resolve => {
+            let URL = "http://lcj525.vipgz4.idcfengye.com/signUpListCount"           //获取表一所有数据总数
+            URL = this.getCountURL(URL, options);
+            console.log(URL)
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+                console.log(json)
+                this.total = json.count;
+                
+                resolve();
+              });
+          });
+        },
+
+   
+        updateList(currentRow) {
+          // console.log(updateInfo)
+          this.editDialog = true
+          
+          this.update_form = Object.assign({}, currentRow)
+          delete this.update_form.name,this.update_form.idNumber,this.update_form.gender,this.update_form.phoneNumber,this.update_form.recommendEnterprise,this.update_form.recommendJob,this.update_form.inductionTime,this.update_form.state,this.update_form.contractExpireTime,
+          this.update_form.emergencyContact,this.update_form.emergencyContactPhone,this.update_form.insurance,this.update_form.unit
+          this.mark = this.update_form.mark
+          this.state = this.update_form.state
+        },
+
+        update() {
+          //编辑 重新提交表单
+          let URL = "http://lcj525.vipgz4.idcfengye.com/updateSettlement"
+          
+          var opt = {
+            method: "POST",
+            body: JSON.stringify(this.update_form),
+            headers: {
+              "content-type": 'application/json'
+            }
+          }
+          return new Promise(resolve => {
+            fetch(URL, opt)
+              .then(res => res.json())
+              .then(json => {
+                this.getTableData(this.DATA)
+                // this.getTotal(this.DATA)
+                this.editDialog = false
+                resolve();
+              });
+          })
+        },
+
+        beforeRemove(file, fileList) {
+        return this.$confirm(`确定移除 ${ file.name }?`);
+      }
+      },
+    });
+  </script>
+</body>
+
+</html>

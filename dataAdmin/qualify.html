@@ -4,11 +4,40 @@
 
 <link rel="stylesheet" href="/admin/css/style.css" />
 <link rel="stylesheet" href="/admin/css/other.css" />
-<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+<!-- <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" /> -->
+<link rel="stylesheet" href="/admin/css/index.css">
 <script type="text/javascript" src="/admin/js/vue.js"></script>
 <script src="/admin/js/element.js"></script>
-<title>数据专员——合格名单</title>
+<title>数据专员——待入职名单</title>
+<style>
+  .el-card {
+    height: 100px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  }
 
+  .el-dialog {
+    width: 500px;
+  }
+
+  .el-form-item label:after {
+    content: "";
+    display: inline-block;
+    width: 100%;
+  }
+
+  .el-form-item__label {
+    text-align: justify;
+    height: 50px;
+  }
+
+  .el-form-item.is-required .el-form-item__label:before {
+    content: none !important;
+  }
+
+  .el-form-item {
+    width: 75%;
+  }
+</style>
 <body>
   <header class="header">
     <div class="container flex">
@@ -25,24 +54,20 @@
     <div class="slider">
       <div class="slider-body">
         <ul>
-          <li class="ul-item active">
+          <li class="ul-item ">
             <a class="slider-link " href="/dataAdmin/Dindex.html">报名总名单</a>
           </li>
           <li class="ul-item">
             <a class="slider-link " href="/dataAdmin/Dinterview.html">面试总名单</a>
           </li>
           <li class="ul-item">
-            <a class="slider-link active" href="/dataAdmin/qualify.html">合格名单</a>
+            <a class="slider-link active" href="/dataAdmin/qualify.html">待入职名单</a>
           </li>
           <li class="ul-item">
-            <a class="slider-link" href="/dataAdmin/havaJob.html">在职名单</a>
+            <a class="slider-link" href="/dataAdmin/haveJob.html">在职名单</a>
           </li>
-          <li class="ul-item">
-            <a class="slider-link" href="/dataAdmin/occupInjury.html">工伤名单</a>
-          </li>
-          <li class="ul-item">
-            <a class="slider-link" href="/dataAdmin/arbitration.html">仲裁名单</a>
-          </li>
+          
+          
         </ul>
       </div>
     </div>
@@ -59,11 +84,23 @@
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
             <el-input placeholder="请输入电话号码" v-model="DATA.phoneNumber" @keyup.enter.native="searchData">
           </el-col>
+          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <el-input placeholder="请输入推荐企业" v-model="DATA.recommendEnterprise" @keyup.enter.native="searchData">
+          </el-col>
+          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <el-input placeholder="请输入入职状态" v-model="DATA.state" @keyup.enter.native="searchData">
+          </el-col>
+          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <el-input placeholder="请输入部门名" v-model="DATA.deptName" @keyup.enter.native="searchData">
+          </el-col>
+          <!-- <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <el-input placeholder="请输入推荐人" v-model="DATA.employname" @keyup.enter.native="searchData">
+          </el-col> -->
           
 
         </el-row>
         <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
-          <el-table-column fixed prop="customerName" align="center" center label="姓名" width="80">
+          <el-table-column prop="name" align="center" center label="姓名" width="80">
           </el-table-column>
           <el-table-column prop="idNumber" align="center" label="身份证号" width="180">
           </el-table-column>
@@ -97,13 +134,16 @@
           </el-table-column>
           <el-table-column label="操作" fixed="right" align="center" width="218">
             <template slot-scope="scope">
-              <el-button size="small" type="primary" @click="updateList(scope.row)">
-                编辑
+              <el-button size="small" type="warning" @click="delayJob(scope.row)">
+                延期入职
               </el-button>
-              <el-button size="small" type="success" @click="through(scope.row.id,scope.row.name)">
+              <el-button size="small" type="success" @click="through(scope.row)">
                 入职
               </el-button>
-              <el-button size="small" style="margin-top: 5px;" type="danger" @click="sendBack(scope.row.id,scope.row.name)">
+              <el-button size="small" type="primary" @click="updateList(scope.row)">
+                编辑
+              </el-button>   
+              <el-button size="small" style="margin-top: 5px;margin-left: 23px;" type="danger" @click="sendBack(scope.row)">
                 退回
               </el-button>
             </template>
@@ -116,6 +156,70 @@
             </el-pagination>
           </template>
         </div>
+
+        <el-dialog title="编辑表单" :visible.sync="editDialog">
+          <el-form :model="update_form" ref="update_form" style="margin-left: 80px;" class="demo-ruleForm">
+            <el-form-item label="姓名" :label-width="formLabelWidth">
+              <el-input v-model="update_form.name" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="性别" :label-width="formLabelWidth">
+              <el-radio-group v-model="update_form.gender">
+                <el-radio :label="0">男</el-radio>
+                <el-radio :label="1">女</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="身份证" :label-width="formLabelWidth">
+              <el-input v-model="update_form.idNumber" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="年龄" :label-width="formLabelWidth">
+              <el-input v-model="update_form.age" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="电话" :label-width="formLabelWidth">
+              <el-input v-model="update_form.phoneNumber" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="学历" :label-width="formLabelWidth">
+              <el-select v-model="update_form.education" placeholder="请选择">
+                <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="区域" :label-width="formLabelWidth">
+              <el-input v-model="update_form.address" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+
+
+            <el-form-item label="专业技能" :label-width="formLabelWidth">
+              <el-input v-model="update_form.professionalSkills" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="证书" :label-width="formLabelWidth">
+              <el-radio-group v-model="update_form.hasCertificate">
+                <el-radio :label="0">是</el-radio>
+                <el-radio :label="1">否</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="残疾人" :label-width="formLabelWidth">
+              <el-radio-group v-model="update_form.isDisability">
+                <el-radio :label="0">是</el-radio>
+                <el-radio :label="1">否</el-radio>
+
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="推荐企业" :label-width="formLabelWidth">
+              <el-input v-model="update_form.recommendEnterprise" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="推荐岗位" :label-width="formLabelWidth">
+              <el-input v-model="update_form.recommendJob" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="面试时间" :label-width="formLabelWidth">
+              <el-input v-model="update_form.signUpTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+        
+          </el-form>
+          <div slot="footer" class="dialog-footer" style="text-align: center;">
+            <el-button @click="dialogFormVisible3 = false">取 消</el-button>
+            <el-button type="primary" @click="update">提交</el-button>
+          </div>
+        </el-dialog>
       </div>
     </div>
   </div>
@@ -125,28 +229,61 @@
       data: function () {
         return {
           loading: false,
+          editDialog:false,
+          update_form:"",
+          formLabelWidth:'70px',
+          options: [{
+            value: '本科',
+            label: '本科'
+          },
+          {
+            value: '专科',
+            label: '专科'
+          }, {
+            value: '高中',
+            label: '高中'
+          }, {
+            value: '研究生',
+            label: '研究生'
+          }, {
+            value: '博士',
+            label: '博士'
+          }, {
+            value: '初中',
+            label: '初中'
+          },
+          {
+            value: '小学',
+            label: '小学'
+          },
+          {
+            value: '其它',
+            label: '其它'
+          }
+          ],
+
           DATA: {
             
             page: 1,
             name: "",
-        
+            recommendEnterprise:"",
             idNumber: "",
-            
+            deptName:"",
             phoneNumber: "",
-            
-          
+            state:"",
+            // employname:""         
           },
           currentPage: 1,
           pagesize: 10,
           total: "",
           tableData: [
-            // { name: '张三', gender: '女', age: '12', cardNumber: '500227199801233288x', phoneNumber: '15736063175', education: "大专" }
+            { name: '张三', gender: '女', age: '12', cardNumber: '500227199801233288x', phoneNumber: '15736063175', education: "大专",hasCertificate:1}
           ]
         }
       },
       created() {
-        this.getTableData(this.DATA)
-        this.getTotal(this.DATA)
+        // this.getTableData(this.DATA)
+        // this.getTotal(this.DATA)
       },
       methods: {
         getTableDataURL(URL, options) {        //根据URL和参数对象生成附加参数的URL
@@ -207,7 +344,7 @@
         },
         getTotal(options) {
           return new Promise(resolve => {
-            let URL = "http://lcj525.vipgz4.idcfengye.com/waitInductionAllCount   "           //获取表一所有数据总数
+            let URL = "http://lcj525.vipgz4.idcfengye.com/waitInductionAllCount"           //获取表一所有数据总数
             URL = this.getCountURL(URL, options);
             console.log(URL)
             fetch(URL)
@@ -221,12 +358,143 @@
 
         filterData(tableData) {
           return tableData.map(item => {
-            item.isWechatAdded === 1 ? item.isWechatAdded = '是' : item.isWechatAdded = '否'
             item.hasCertificate === 1 ? item.hasCertificate = '是' : item.hasCertificate = '否'
             item.isDisability === 1 ? item.isDisability = '是' : item.isDisability = '否'
             return item;
           })
         },
+
+        updateList(currentRow){
+          this.editDialog = true
+          this.update_form = Object.assign({},currentRow)
+          this.update_form.gender === '男' ?this.update_form.gender = 0 : this.update_form.gender =1
+          this.update_form.hasCertificate === '是' ? this.update_form.hasCertificate = 0 : this.update_form.hasCertificate =1
+          this.update_form.isDisability === '是' ? this.update_form.isDisability = 0 : this.update_form.isDisability =1
+        },
+        update(){
+          this.update_form .gender === 0 ? this.update_form.gender = '男' : this.update_form.gender = '女'
+          let URL = ''
+          let opt ={
+            method : 'post',
+            body : JSON.stringify(this.update_form),
+            headers: {
+              "content-type": 'application/json'
+            },
+          }
+          fetch(URL,opt)
+          .then(res=>res.json())
+          .then(json=>{
+            this.$message({
+              type: 'success',
+              message: '修改成功'
+            });
+          })
+        },
+
+        through(currentRow){
+          let URL = 'http://lcj525.vipgz4.idcfengye.com/addOnTheJob'
+          let throughForm = {
+            customerId : currentRow.customerId,
+            phoneCallListId : currentRow.phoneCallListId,
+            employeeId : currentRow.employeeId,
+          }
+          let opt = {
+            method : 'post',
+            body : JSON.stringify(throughForm),
+            headers : {
+              'content-type' : 'application/json'
+            },
+          }
+          fetch(URL,opt)
+          .then(URL,opt)
+          .then(res=>res.json())
+          .then(json=>{
+            this.$message({
+              type: 'success',
+              message: currentRow.name + '成功入职'
+            });
+          })
+        },
+
+
+        sendBack(currentRow){
+          this.$prompt('退回理由', {
+            confirmButtonText: '退回',
+            cancelButtonText: '取消',
+          }).then(({ value }) => {
+            let URL = 'http://lcj525.vipgz4.idcfengye.com/backInterview'
+            let backForm = {
+              id : currentRow.id,
+              note : value
+            }
+            var opt = {
+              method: "POST",
+              body: JSON.stringify(backForm),
+              headers: {
+                "content-type": 'application/json'
+              }
+
+            }
+            
+            fetch(URL, opt)
+              .then(res => res.json())
+              .then(json => {
+                this.$message({
+                  type: 'success',
+                  message: currentRow.name + '的退回理由是: ' + value,
+
+                });
+                resolve();
+              });
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '取消输入'
+            });
+          });
+        },
+
+        delayJob(currentRow){
+          this.$prompt('延期入职', {
+            confirmButtonText: '退回',
+            cancelButtonText: '取消',
+          }).then(({ value }) => {
+            let URL = 'http://lcj525.vipgz4.idcfengye.com/addDelay'
+            let addDelay = {
+            customerId : currentRow.customerId,
+            phoneCallListId : currentRow.phoneCallListId,
+            employeeId : currentRow.employeeId,
+            delayTime : value,
+          }
+            let opt = {
+              method: "POST",
+              body: JSON.stringify(addDelay),
+              headers: {
+                "content-type": 'application/json'
+              },
+
+            }     
+            fetch(URL, opt)
+              .then(res => res.json())
+              .then(json => {
+                this.$message({
+                  type: 'success',
+                  message: currentRow.name + '的延期入职时间是: ' + value,
+
+                });
+                resolve();
+              });
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '取消输入'
+            });
+          });
+          
+
+        },
+
+
       },
     });
   </script>

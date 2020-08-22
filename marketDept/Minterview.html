@@ -26,18 +26,14 @@
     <div class="slider">
       <div class="slider-body">
         <ul>
-          <li class="ul-item active">
-            <a class="slider-link " href="/dataAdmin/Dindex.html">报名总名单</a>
+          
+          <li class="ul-item">
+            <a class="slider-link active " href="/marketDept/Minterview.html">面试名单</a>
           </li>
           <li class="ul-item">
-            <a class="slider-link active " href="/dataAdmin/Dinterview.html">面试总名单</a>
+            <a class="slider-link" href="/marketDept/Mqualify.html">待入职名单</a>
           </li>
-          <li class="ul-item">
-            <a class="slider-link" href="/dataAdmin/qualify.html">待入职名单</a>
-          </li>
-          <li class="ul-item">
-            <a class="slider-link" href="/dataAdmin/havaJob.html">在职名单</a>
-          </li>
+          
           
         </ul>
       </div>
@@ -65,7 +61,7 @@
             <el-input placeholder="请输入面试时间" v-model="DATA.interviewTime" @keyup.enter.native="searchData">
           </el-col>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入部门名" v-model="DATA.deptName" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入报名时间" v-model="DATA.signUpTime" @keyup.enter.native="searchData">
           </el-col>
           <el-col :span="3" style="margin-top: 20px;margin-bottom: 20px;">
             <el-input placeholder="请输入推荐人" v-model="DATA.customerName" @keyup.enter.native="searchData">
@@ -81,7 +77,7 @@
 
         </el-row>
         <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
-          <el-table-column fixed prop="name" align="center" center label="姓名" width="80">
+          <el-table-column fixed prop="customerName" align="center" center label="姓名" width="80">
           </el-table-column>
           <el-table-column prop="idNumber" align="center" label="身份证号" width="180">
           </el-table-column>
@@ -107,7 +103,8 @@
           </el-table-column>
           <el-table-column prop="deptName" align="center" label="部门名" :show-overflow-tooltip="true">
           </el-table-column>
-          
+          <el-table-column prop="signUpTime" align="center" label="报名时间" width="140">
+          </el-table-column>
           <el-table-column prop="interviewTime" align="center" label="面试时间" width="140">
           </el-table-column>
           <el-table-column prop="employeeName" align="center" label="推荐人" width="80" :show-overflow-tooltip="true">
@@ -146,16 +143,17 @@
           loading: false,
           DATA: {
             page: 1,
-            name: "",
+            customerName: "",
             deptName: "",
             address: "",
-            
+            date: "",
             idNumber: "",
             gender: "",/*多条件查询——性别单选框的默认选项*/
-            employeeName:"",
+            hasCertificate: "", /*多条件查询——是否为有证书单选框的默认选项*/
+            isDisability: "",/*多条件查询——是否为残疾人单选框的默认选项*/
             phoneNumber: "",
             recommendEnterprise: "",
-            
+            signUpTime: "",
             interviewTime: "",
           },
           currentPage: 1,

@@ -4,11 +4,41 @@
 
 <link rel="stylesheet" href="/admin/css/style.css" />
 <link rel="stylesheet" href="/admin/css/other.css" />
-<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+<!-- <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" /> -->
+<link rel="stylesheet" href="/admin/css/index.css">
 <script type="text/javascript" src="/admin/js/vue.js"></script>
 <script src="/admin/js/element.js"></script>
-<title>数据专员——入职名单</title>
+<title>数据专员——在职名单</title>
+<style>
+  .el-card {
+    height: 100px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  }
 
+  .el-dialog {
+    width: 500px;
+  }
+
+  .el-form-item label:after {
+    content: "";
+    display: inline-block;
+    width: 100%;
+  }
+
+  .el-form-item__label {
+    text-align: justify;
+    height: 50px;
+  }
+
+  .el-form-item.is-required .el-form-item__label:before {
+    content: none !important;
+  }
+
+  .el-form-item {
+    width: 75%;
+  }
+
+</style>
 <body>
   <header class="header">
     <div class="container flex">
@@ -26,23 +56,18 @@
       <div class="slider-body">
         <ul>
           <li class="ul-item active">
-            <a class="slider-link active" href="/dataAdmin/index.html">报名总名单</a>
+            <a class="slider-link " href="/dataAdmin/Dindex.html">报名总名单</a>
           </li>
           <li class="ul-item">
-            <a class="slider-link " href="/dataAdmin/interview.html">面试总名单</a>
+            <a class="slider-link " href="/dataAdmin/Dinterview.html">面试总名单</a>
           </li>
           <li class="ul-item">
-            <a class="slider-link" href="/dataAdmin/qualify.html">合格名单</a>
+            <a class="slider-link" href="/dataAdmin/qualify.html">待入职名单</a>
           </li>
           <li class="ul-item">
-            <a class="slider-link" href="/dataAdmin/havaJob.html">在职名单</a>
+            <a class="slider-link active" href="/dataAdmin/haveJob.html">在职名单</a>
           </li>
-          <li class="ul-item">
-            <a class="slider-link" href="/dataAdmin/occupInjury.html">工伤名单</a>
-          </li>
-          <li class="ul-item">
-            <a class="slider-link" href="/dataAdmin/arbitration.html">仲裁名单</a>
-          </li>
+          
         </ul>
       </div>
     </div>
@@ -59,86 +84,52 @@
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
             <el-input placeholder="请输入电话号码" v-model="DATA.phoneNumber" @keyup.enter.native="searchData">
           </el-col>
+          
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入专业技能" v-model="DATA.professionalSkills" @keyup.enter.native="searchData">
-          </el-col>
-          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入区域" v-model="DATA.aera" @keyup.enter.native="searchData">
-          </el-col>
-          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入面试时间" v-model="DATA.date" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入推荐企业" v-model="DATA.recommendEnterprise" @keyup.enter.native="searchData">
           </el-col>
           <el-col :span="3" style="margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入学历" v-model="DATA.education" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入在职状态" v-model="DATA.state" @keyup.enter.native="searchData">
           </el-col>
           
 
-          <el-col :span="6" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <span style="font-size: 14px;">性别</span>
-            <el-radio-group v-model="DATA.gender" size="mini" @change="changeTable1">
-              <el-radio label="男">男</el-radio>
-              <el-radio label="女">女</el-radio>
-            </el-radio-group>
-          </el-col>
-
-          <el-col :span="6" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <span style="font-size: 14px;">是否有证书</span>
-            <el-radio-group v-model="DATA.hasCertificate" size="mini" @change="changeTable1">
-              <el-radio label="1">是</el-radio>
-              <el-radio label="0">否</el-radio>
-            </el-radio-group>
-          </el-col>
-
-          <el-col :span="7" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <span style="font-size: 14px;">是否为残疾人</span>
-            <el-radio-group v-model="DATA.isDisability" size="mini" @change="changeTable1">
-              <el-radio label="1">是</el-radio>
-              <el-radio label="0">否</el-radio>
-            </el-radio-group>
-          </el-col>
-
         </el-row>
         <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
-          <el-table-column fixed prop="name" center label="姓名">
+          <el-table-column prop="name" align="center" center label="姓名" width="80">
           </el-table-column>
-          <el-table-column prop="cardNumber" center label="身份证号">
+          <el-table-column prop="idNumber" align="center" label="身份证号" width="180">
           </el-table-column>
-          <el-table-column prop="gender" center label="性别">
+          <el-table-column prop="gender" align="center" label="性别" width="50">
           </el-table-column>
-          <el-table-column prop="age" label="年龄">
+          <el-table-column prop="age" align="center" label="年龄" width="50">
           </el-table-column>
-          <el-table-column prop="phoneNumber" label="电话号码">
+          <el-table-column prop="phoneNumber" align="center" label="电话号码" width="120">
           </el-table-column>
-          <el-table-column prop="education" label="学历">
+          <el-table-column prop="state" align="center" label="入职状态" >
           </el-table-column>
-          <el-table-column prop="area" label="区域">
+          <el-table-column prop="recommendEnterprise" align="center" label="推荐企业" :show-overflow-tooltip="true">
           </el-table-column>
-          <el-table-column prop="skill" label="专业技能">
+          <el-table-column prop="recommendJob" align="center" label="推荐岗位" :show-overflow-tooltip="true">
           </el-table-column>
-          <el-table-column prop="subject" label="证书">
+          <el-table-column prop="contractExpireTime" align="center" label="合同到期时间" width="120" :show-overflow-tooltip="true">
           </el-table-column>
-          <el-table-column prop="zip" label="残疾人">
+          <el-table-column prop="emergencyContact" align="center" label="紧急联系人" width="100" :show-overflow-tooltip="true">
           </el-table-column>
-          <el-table-column prop="zip" label="推荐企业">
+          <el-table-column prop="emergencyContactPhone" align="center" label="紧急联系电话" width="120" :show-overflow-tooltip="true">
           </el-table-column>
-          <el-table-column prop="zip" label="推荐岗位">
+          <el-table-column prop="insurance" align="center" label="保险类别" :show-overflow-tooltip="true">
           </el-table-column>
-          <el-table-column prop="zip" label="报名时间">
+          <el-table-column prop="unit" align="center" label="参保单位" :show-overflow-tooltip="true">
           </el-table-column>
-          <el-table-column prop="zip" label="面试时间">
+          <el-table-column prop="departureTime" align="center" label="离职时间" :show-overflow-tooltip="true">
           </el-table-column>
-          <el-table-column prop="zip" label="备注">
-          </el-table-column>
-          <el-table-column label="操作" fixed="right" align="center" width="190">
+          <el-table-column label="操作" fixed="right" align="center" width="210">
             <template slot-scope="scope">
-              <el-button size="small" type="primary" @click="updatePhone(scope.row.id)">
+              <el-button size="small" type="primary" @click="updateList(scope.row)">
                 编辑
               </el-button>
-              <el-button size="small" type="success" @click="through(scope.row.id,scope.row.name)">
-                通过
-              </el-button>
-              <el-button size="small" style="margin-top: 5px;" type="danger">
-                退回
+              <el-button size="small" style="margin-top: 5px;" type="danger" @click="dimission(scope.row)">
+                离职
               </el-button>
             </template>
           </el-table-column>
@@ -146,10 +137,69 @@
         <div class="footer" style="width: 100%;margin-top:1rem;">
           <template>
             <el-pagination :current-page="currentPage" :page-size="pagesize" :page-sizes="10" :total="total"
-              @current-change="handleCurrentChange" background layout="prev, pager, next, jumper">
+              @current-change="handleCurrentChange" background layout="total,prev, pager, next, jumper">
             </el-pagination>
           </template>
         </div>
+
+
+        <el-dialog title="编辑表单" :visible.sync="editDialog">
+          <el-form :model="update_form" ref="update_form" style="margin-left: 80px;" class="demo-ruleForm">
+            <el-form-item label="姓名" :label-width="formLabelWidth">
+              <el-input v-model="update_form.name" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="性别" :label-width="formLabelWidth">
+              <el-radio-group v-model="update_form.gender">
+                <el-radio :label="0">男</el-radio>
+                <el-radio :label="1">女</el-radio>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item label="身份证" :label-width="formLabelWidth">
+              <el-input v-model="update_form.idNumber" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="年龄" :label-width="formLabelWidth">
+              <el-input v-model="update_form.age" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="电话" :label-width="formLabelWidth">
+              <el-input v-model="update_form.phoneNumber" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="入职状态" :label-width="formLabelWidth">
+              <el-input v-model="update_form.state" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="推荐企业" :label-width="formLabelWidth">
+              <el-input v-model="update_form.recommendEnterprise" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="推荐岗位" :label-width="formLabelWidth">
+              <el-input v-model="update_form.recommendJob" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="入职时间" :label-width="formLabelWidth">
+              <el-input v-model="update_form.inductionTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="合同到期时间" :label-width="formLabelWidth">
+              <el-input v-model="update_form.contractExpireTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="紧急联系人" :label-width="formLabelWidth">
+              <el-input v-model="update_form.emergencyContact" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="紧急联系电话" :label-width="formLabelWidth">
+              <el-input v-model="update_form.emergencyContactPhone" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="保险类别" :label-width="formLabelWidth">
+              <el-input v-model="update_form.insurance" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="参保单位" :label-width="formLabelWidth">
+              <el-input v-model="update_form.unit" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="离职时间" :label-width="formLabelWidth">
+              <el-input v-model="update_form.departureTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+        
+          </el-form>
+          <div slot="footer" class="dialog-footer" style="text-align: center;">
+            <el-button @click="dialogFormVisible3 = false">取 消</el-button>
+            <el-button type="primary" @click="update">提交</el-button>
+          </div>
+        </el-dialog>
       </div>
     </div>
   </div>
@@ -159,25 +209,21 @@
       data: function () {
         return {
           loading: false,
+          editDialog:false,
+          formLabelWidth:'100px',
+          update_form:"",
           DATA: {
-            DATA: {
             page: 1,
             name: "",
-            aera:"",
-            date:"",
-            idNumber: "",
-            gender: "男",/*多条件查询——性别单选框的默认选项*/
-            hasCertificate: "0", /*多条件查询——是否为有证书单选框的默认选项*/
-            isDisability: "0",/*多条件查询——是否为残疾人单选框的默认选项*/
+            idNumber: "",   
             phoneNumber: "",
-            professionalSkills: "",
-            sourceOfData: "",
-            education: ""
-          },
+            recommendEnterprise: "",
+            state:"",
+          
           },
           currentPage: 1,
           pagesize: 10,
-          total: 10,
+          total: "",
           tableData: [
             { name: '张三', gender: '女', age: '12', cardNumber: '500227199801233288x', phoneNumber: '15736063175', education: "大专" }
           ]
@@ -226,21 +272,78 @@
         },
         
         getTableData(options) {
-          let URL = this.getURL(
-            "http://127.0.0.1:8000/test/getData", //请求地址
-            options
-          );
           this.loading = true;
-          fetch(URL)
-            .then(res => res.json())
-            .then(json => {
-              this.total = json.total
-              this.tableData = json.tableData;
-              setTimeout(() => {
-                this.loading = false;
-              }, 500);
+          let URL = "http://lcj525.vipgz4.idcfengye.com/onTheJobAll"
+          URL = this.getTableDataURL(URL, options);
+          return new Promise(resolve => {
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+                this.tableData = this.filterData(json);
+                resolve();
+                setTimeout(() => {
+                  this.loading = false;
+                }, 500);
+              });
+          });
+        },
+        getTotal(options) {
+          return new Promise(resolve => {
+            let URL = "http://lcj525.vipgz4.idcfengye.com/onTheJobAllCount"           //获取表一所有数据总数
+            URL = this.getCountURL(URL, options);
+            console.log(URL)
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+                this.total = json.count;
+                resolve();
+              });
+          });
+        },
+
+        filterData(tableData) {
+          return tableData.map(item => {
+            
+            return item;
+          })
+        },
+
+        updateList(currentRow){
+          this.editDialog = true
+          this.update_form = Object.assign({},currentRow)
+          this.update_form.gender === '男' ? this.update_form.gender = 0 : this.update_form.gender = 1
+        },
+        update(currentRow){
+          this.update_form.gender === 0 ? this.update_form.gender = '男' : this.update_form.gender = '女'
+          let URL = 'http://lcj525.vipgz4.idcfengye.com/updateOnTheJob'
+          let opt = {
+            method : 'post',
+            body : JSON.stringify(this.update_form),
+            headers:{
+              'content-type' : 'application/json'
+            },
+          }
+          fetch(URL,opt)
+          .then(res=>res.json())
+          .then(json=>{
+            this.$message({
+              type: 'success',
+              message: '修改成功'
             });
-        }
+          })
+        },
+        dimission(currentRow){
+          let URL = ''
+          let opt = {}
+          fetch(URL,opt)
+          .then(res=>res.json())
+          .then(json=>{
+            this.$message({
+              type : 'success',
+              message : currentRow.name + ' 离职成功'
+            })
+          })
+        },
       },
     });
   </script>
