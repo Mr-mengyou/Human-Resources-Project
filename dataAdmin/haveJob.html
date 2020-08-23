@@ -76,26 +76,26 @@
       <div id="app">
         <el-row>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入姓名" v-model="DATA.name" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入姓名" clearable v-model="DATA.name" @change="searchData">
           </el-col>
           <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="输入身份证号" v-model="DATA.idNumber" @keyup.enter.native="searchData">
+            <el-input placeholder="输入身份证号" clearable v-model="DATA.idNumber" @change="searchData">
           </el-col>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入电话号码" v-model="DATA.phoneNumber" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入电话号码" clearable v-model="DATA.phoneNumber" @change="searchData">
           </el-col>
           
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入推荐企业" v-model="DATA.recommendEnterprise" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入推荐企业" clearable v-model="DATA.recommendEnterprise" @change="searchData">
           </el-col>
           <el-col :span="3" style="margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入在职状态" v-model="DATA.state" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入在职状态" clearable v-model="DATA.state" @change="searchData">
           </el-col>
           
 
         </el-row>
         <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
-          <el-table-column prop="name" align="center" center label="姓名" width="80">
+          <el-table-column fixed prop="customerName" align="center" center label="姓名" width="80">
           </el-table-column>
           <el-table-column prop="idNumber" align="center" label="身份证号" width="180">
           </el-table-column>
@@ -121,12 +121,20 @@
           </el-table-column>
           <el-table-column prop="unit" align="center" label="参保单位" :show-overflow-tooltip="true">
           </el-table-column>
-          <el-table-column prop="departureTime" align="center" label="离职时间" :show-overflow-tooltip="true">
+          <el-table-column prop="departureTime" align="center" width="100" label="离职时间" :show-overflow-tooltip="true">
           </el-table-column>
-          <el-table-column label="操作" fixed="right" align="center" width="210">
+          <el-table-column prop="deptName" align="center" width="100" label="部门名" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="employeeName" align="center" width="100" label="推荐人" :show-overflow-tooltip="true">
+          </el-table-column>
+          
+          <el-table-column label="操作" fixed="right" align="center" width="245">
             <template slot-scope="scope">
               <el-button size="small" type="primary" @click="updateList(scope.row)">
                 编辑
+              </el-button>
+              <el-button size="small" type="warning" @click="applyInjury(scope.row)">
+                申请工伤
               </el-button>
               <el-button size="small" style="margin-top: 5px;" type="danger" @click="dimission(scope.row)">
                 离职
@@ -146,7 +154,7 @@
         <el-dialog title="编辑表单" :visible.sync="editDialog">
           <el-form :model="update_form" ref="update_form" style="margin-left: 80px;" class="demo-ruleForm">
             <el-form-item label="姓名" :label-width="formLabelWidth">
-              <el-input v-model="update_form.name" autocomplete="off" size="small"></el-input>
+              <el-input v-model="update_form.customerName" autocomplete="off" size="small"></el-input>
             </el-form-item>
             <el-form-item label="性别" :label-width="formLabelWidth">
               <el-radio-group v-model="update_form.gender">
@@ -200,6 +208,56 @@
             <el-button type="primary" @click="update">提交</el-button>
           </div>
         </el-dialog>
+
+
+        <el-dialog title="申请工伤" :visible.sync="applyDialog">
+          <el-form :model="applyForm" ref="applyForm" style="margin-left: 80px;" class="demo-ruleForm">
+            <el-form-item label="出险时间" :label-width="formLabelWidth">
+              <el-input v-model="applyForm.outOfTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="治疗医院" :label-width="formLabelWidth">
+              <el-input v-model="applyForm.hospital" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="出院时间" :label-width="formLabelWidth">
+              <el-input v-model="applyForm.dischargeTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="治疗费" :label-width="formLabelWidth">
+              <el-input v-model="applyForm.cost" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="报案时间" :label-width="formLabelWidth">
+              <el-input v-model="applyForm.reportTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="工伤认定时间" :label-width="formLabelWidth">
+              <el-input v-model="applyForm.submitIdentifiedTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="认定结果" :label-width="formLabelWidth">
+              <el-input v-model="applyForm.identifiedResults" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="入职时间" :label-width="formLabelWidth">
+              <el-input v-model="applyForm.inductionTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="工伤鉴定时间" :label-width="formLabelWidth">
+              <el-input v-model="applyForm.submitIdentificationTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="鉴定结果" :label-width="formLabelWidth">
+              <el-input v-model="applyForm.identificationResults" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="理赔结果" :label-width="formLabelWidth">
+              <el-input v-model="applyForm.claimsResults" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="赔付金额" :label-width="formLabelWidth">
+              <el-input v-model="applyForm.payAmount" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="备注" :label-width="formLabelWidth">
+              <el-input v-model="applyForm.note" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+        
+          </el-form>
+          <div slot="footer" class="dialog-footer" style="text-align: center;">
+            <el-button @click="applyDialog = false">取 消</el-button>
+            <el-button type="primary" @click="apply">提交申请</el-button>
+          </div>
+        </el-dialog>
       </div>
     </div>
   </div>
@@ -210,8 +268,12 @@
         return {
           loading: false,
           editDialog:false,
+          applyDialog:false,
           formLabelWidth:'100px',
-          update_form:"",
+          update_form:{},
+          applyForm: {
+
+          },
           DATA: {
             page: 1,
             name: "",
@@ -225,12 +287,13 @@
           pagesize: 10,
           total: "",
           tableData: [
-            { name: '张三', gender: '女', age: '12', cardNumber: '500227199801233288x', phoneNumber: '15736063175', education: "大专" }
+            // { name: '张三', gender: '女', age: '12', cardNumber: '500227199801233288x', phoneNumber: '15736063175', education: "大专" }
           ]
         }
       },
       created() {
-        // this.getTableData()
+        this.getTableData(this.DATA)
+        this.getTotal(this.DATA)
       },
       methods: {
         getTableDataURL(URL, options) {        //根据URL和参数对象生成附加参数的URL
@@ -255,12 +318,13 @@
         searchData() {            //表一所有搜索框
           this.DATA.page = 1
           this.getTableData(this.DATA);
+          this.getTotal(this.DATA)
         },
         
         handleCurrentChange(size) {       //改变表一page
-          this.currentPage = currentPage;
-          this.DATA.page = currentPage;
-          this.getTableData(this.DATA2);
+          
+          this.DATA.page = size;
+          this.getTableData(this.DATA);
         },
         
         changeTable1() {                //改变表一任何一个单选框
@@ -330,6 +394,38 @@
               type: 'success',
               message: '修改成功'
             });
+          })
+        },
+        applyInjury(currentRow){
+          this.applyDialog = true
+          this.applyForm['onTheJobId'] = currentRow.id
+          this.applyForm['customerId'] = currentRow.customerId
+          this.applyForm['phoneCallListId'] = currentRow.phoneCallListId
+        },
+        apply(){
+          let URL = 'http://lcj525.vipgz4.idcfengye.com/applyInjury'
+          let opt = {
+            method : 'post',
+            body : JSON.stringify(this.applyForm),
+            headers : {
+              'content-type' : 'application/json'
+            },
+          }
+          console.log(this.applyForm)
+          fetch(URL,opt)
+          .then(res=>res.json())
+          .then(json=>{
+            this.applyDialog = false
+            this.$message({
+              type: 'success',
+              message: '申请工伤成功'
+            })
+          })
+          .catch(error=>{
+            this.$message({
+              type: 'danger',
+              message: '申请工伤失败'
+            })
           })
         },
         dimission(currentRow){

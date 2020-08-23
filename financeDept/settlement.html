@@ -76,16 +76,23 @@
       <div id="app">
         <el-row>
             <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-              <el-input placeholder="请输入姓名" v-model="DATA.name" @keyup.enter.native="searchData">
+              <el-input placeholder="请输入姓名" clearable v-model="DATA.name" @change="searchData">
             </el-col>
             <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-              <el-input placeholder="输入身份证号" v-model="DATA.idNumber" @keyup.enter.native="searchData">
+              <el-input placeholder="输入身份证号" clearable v-model="DATA.idNumber" @change="searchData">
             </el-col>
             <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-              <el-input placeholder="请输入电话号码" v-model="DATA.phoneNumber" @keyup.enter.native="searchData">
+              <el-input placeholder="请输入电话号码" clearable v-model="DATA.phoneNumber" @change="searchData">
             </el-col>
-            <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-              <el-input placeholder="请输入结算状态" v-model="DATA.state" @keyup.enter.native="searchData">
+            <el-col :span="5" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+              <el-select v-model="DATA.settlementState"  @change="changeStatus" clearable placeholder="请选择结算状态">
+                <el-option
+                  v-for="item in options"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
             </el-col>
         </el-row>
         <!-- 表格 -->
@@ -106,20 +113,13 @@
             </el-table-column>
             <el-table-column prop="recommendJob" align="center" label="推荐岗位" :show-overflow-tooltip="true">
             </el-table-column>
-            <el-table-column prop="contractExpireTime" align="center" label="合同到期时间" width="120" :show-overflow-tooltip="true">
+            <el-table-column prop="settlementState" align="center" label="结算状态" width="120" :show-overflow-tooltip="true">
             </el-table-column>
-            <el-table-column prop="emergencyContact" align="center" label="紧急联系人" width="100" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="emergencyContactPhone" align="center" label="紧急联系电话" width="120" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="insurance" align="center" label="保险类别" :show-overflow-tooltip="true">
-            </el-table-column>
-            <el-table-column prop="unit" align="center" label="参保单位" :show-overflow-tooltip="true">
-            </el-table-column>
+            
             <el-table-column label="操作" fixed="right" align="center" width="125">
             <template slot-scope="scope">
               <el-button size="small" type="primary" @click="updateList(scope.row)">
-                编辑
+                详情
               </el-button>    
             </template>
           </el-table-column>
@@ -138,8 +138,25 @@
           <el-form :inline="true" :model="update_form" ref="update_form" style="margin-left: 100px;" class="demo-ruleForm">
             
             <el-form-item label="姓名" :label-width="formLabelWidth">
-              <el-input v-model="update_form.name" autocomplete="off" style="width: 100px;" size="small"></el-input>
-              <span style="font-size: 12px;color: red;">结算状态:{{ state }}</p></span>
+              <el-input v-model="update_form.name" autocomplete="off"  size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="联系方式" :label-width="formLabelWidth">
+              <el-input v-model="update_form.phoneNumber" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="参保单位" :label-width="formLabelWidth">
+              <el-input v-model="update_form.unit"  autocomplete="off" size="small"></el-input>  
+            </el-form-item>
+            <el-form-item label="合同到期时间" :label-width="formLabelWidth">
+              <el-input v-model="update_form.contractExpireTime"  autocomplete="off" size="small"></el-input>  
+            </el-form-item>
+            <el-form-item label="保险类别" :label-width="formLabelWidth">
+              <el-input v-model="update_form.insurance"  autocomplete="off" size="small"></el-input>  
+            </el-form-item>
+            <el-form-item label="紧急联系人" :label-width="formLabelWidth">
+              <el-input v-model="update_form.emergencyContact"  autocomplete="off" size="small"></el-input>  
+            </el-form-item>
+            <el-form-item label="紧急联系电话" :label-width="formLabelWidth">
+            <el-input v-model="update_form.emergencyContactPhone"  autocomplete="off" size="small"></el-input>  
             </el-form-item>
             <el-form-item label="满岗标准" :label-width="formLabelWidth">
                 <el-input v-model="update_form.standard" autocomplete="off" size="small"></el-input>
@@ -150,7 +167,10 @@
             <el-form-item label="结算标准" :label-width="formLabelWidth">
               <el-input v-model="update_form.settlementStandard" autocomplete="off" size="small"></el-input>
             </el-form-item>
-            <el-form-item label="出勤时/天" :label-width="formLabelWidth">
+            <el-form-item label="特殊说明" :label-width="formLabelWidth">
+              <el-input v-model="update_form.mark" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="出勤工时/天" :label-width="formLabelWidth">
                 <el-col :span =8>
                     <el-input v-model="update_form.attendanceDays" style="width: 70px;" autocomplete="off" size="small"></el-input>
                 </el-col>
@@ -161,13 +181,15 @@
             </el-form-item>
             <el-form-item label="出勤单价" :label-width="formLabelWidth">
                 <el-input v-model="update_form.price" style="width: 65px;" autocomplete="off" size="small"></el-input>
-                <span style="font-size: 12px;color: red;">特殊说明:{{ mark }}</span>
             </el-form-item>
             <el-form-item label="结算所属周期" :label-width="formLabelWidth">
                 <el-input v-model="update_form.cycle"  autocomplete="off" size="small"></el-input>  
             </el-form-item>
             <el-form-item label="结算时间" :label-width="formLabelWidth">
                 <el-input v-model="update_form.settlementTime"  autocomplete="off" size="small"></el-input>  
+            </el-form-item>
+            <el-form-item label="结算状态" :label-width="formLabelWidth">
+              <el-input v-model="update_form.settlementState" autocomplete="off" style="width: 100px;" size="small"></el-input>
             </el-form-item>
             <el-form-item label="凭证" :label-width="formLabelWidth">
                 <el-upload
@@ -210,14 +232,25 @@
           formLabelWidth:'120px',
           //编辑表单
           fileList: [],
-          mark:'因各种原因请假，则为200/天',
-          state:'已结算',
+          
           update_form:{},
+          options: [{
+          value: '待结算',
+          label: '待结算'
+          }, {
+          value: '持续结算',
+          label: '持续结算'
+          },  {
+          value: '已完结',
+          label: '已完结'
+          }, 
+          ],
           
           DATA: {
             page: 1,
             // pagesize: 10,
             name: '',
+            idNumber:"",
             cardNumber: "",
             phoneNumber: ""
           },
@@ -225,7 +258,7 @@
           pagesize: 10,
           total: "",
           tableData: [
-            { name: '张三', gender: '女', age: '12', cardNumber: '500227199801233288x', phoneNumber: '15736063175', education: "大专" }
+            // { name: '张三', gender: '女', age: '12', cardNumber: '500227199801233288x', phoneNumber: '15736063175', education: "大专" }
           ]
         }
       },
@@ -279,7 +312,7 @@
         },
 
         getTableData(options) {
-          let URL = "http://lcj525.vipgz4.idcfengye.com/signUpList"
+          let URL = "http://lcj525.vipgz4.idcfengye.com/settlementAll"
           // this.loading = true;
           URL = this.getTableDataURL(URL, options);
           return new Promise(resolve => {
@@ -299,7 +332,7 @@
         },
         getTotal(options) {
           return new Promise(resolve => {
-            let URL = "http://lcj525.vipgz4.idcfengye.com/signUpListCount"           //获取表一所有数据总数
+            let URL = "http://lcj525.vipgz4.idcfengye.com/settlementAllCount"           //获取表一所有数据总数
             URL = this.getCountURL(URL, options);
             console.log(URL)
             fetch(URL)
@@ -319,16 +352,15 @@
           this.editDialog = true
           
           this.update_form = Object.assign({}, currentRow)
-          delete this.update_form.name,this.update_form.idNumber,this.update_form.gender,this.update_form.phoneNumber,this.update_form.recommendEnterprise,this.update_form.recommendJob,this.update_form.inductionTime,this.update_form.state,this.update_form.contractExpireTime,
-          this.update_form.emergencyContact,this.update_form.emergencyContactPhone,this.update_form.insurance,this.update_form.unit
-          this.mark = this.update_form.mark
-          this.state = this.update_form.state
+          
+          
         },
 
         update() {
           //编辑 重新提交表单
           let URL = "http://lcj525.vipgz4.idcfengye.com/updateSettlement"
-          
+          delete this.update_form.name,this.update_form.idNumber,this.update_form.gender,this.update_form.phoneNumber,this.update_form.recommendEnterprise,this.update_form.recommendJob,this.update_form.inductionTime,this.update_form.state,this.update_form.contractExpireTime,
+          this.update_form.emergencyContact,this.update_form.emergencyContactPhone,this.update_form.insurance,this.update_form.unit
           var opt = {
             method: "POST",
             body: JSON.stringify(this.update_form),
@@ -346,6 +378,11 @@
                 resolve();
               });
           })
+        },
+        changeStatus(val){
+          this.DATA.page = 1
+          this.getTableData(this.DATA);
+          this.getTotal(this.DATA)
         },
 
         beforeRemove(file, fileList) {
