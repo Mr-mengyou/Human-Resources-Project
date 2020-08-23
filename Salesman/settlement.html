@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8" />
+
+<link rel="stylesheet" href="/admin/css/style.css" />
+<link rel="stylesheet" href="/admin/css/other.css" />
+<!-- <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" /> -->
+<link rel="stylesheet" href="/admin/css/index.css">
+<script type="text/javascript" src="/admin/js/vue.js"></script>
+<script src="/admin/js/element.js"></script>
+<title>业务员——结算名单</title>
+<style>
+  .el-card {
+    height: 100px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  }
+
+  .el-dialog {
+    width: 80%;
+    
+    
+  }
+
+  .el-form-item label:after {
+    content: "";
+    display: inline-block;
+    width: 100%;
+  }
+
+  .el-form-item__label {
+    text-align: justify;
+    height: 50px;
+  }
+
+  .el-form-item.is-required .el-form-item__label:before {
+    content: none !important;
+  }
+
+  .el-form-item {
+    width: 45%;
+    margin-left: 30px;
+  }
+
+
+
+  /* .el-tooltip__popper,
+  .el-tooltip__popper.is-dark {
+    background: #f5f5f5 !important;
+    color: #303133 !important;
+  } */
+</style>
+<body>
+  <header class="header">
+    <div class="container flex">
+      <div class="left">
+        <img class="logo" src="/admin/images/2.jpg" />
+      </div>
+      <div class="right flex">
+        <p class="font">用户1</p>
+        <p class="font exit">退出</p>
+      </div>
+    </div>
+  </header>
+  <div class="body flex">
+    <div class="slider">
+      <div class="slider-body">
+        <ul>
+          <li class="ul-item active">
+            <a class="slider-link " href="/Salesman/index.html">电话名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link " href="/Salesman/apply.html">报名名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link" href="/Salesman/interview.html">面试名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link" href="/Salesman/wait_hire.html">待入职名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link" href="/Salesman/hire.html">入职名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link active" href="/Salesman/settlement.html">结算名单</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link" href="/Salesman/phoneRecords.html">电话记录</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="main">
+      <!-- 主体  -->
+      <div id="app">
+        <el-row>
+            <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+              <el-input placeholder="请输入姓名" v-model="DATA.name" @keyup.enter.native="searchData">
+            </el-col>
+            <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+              <el-input placeholder="输入身份证号" v-model="DATA.idNumber" @keyup.enter.native="searchData">
+            </el-col>
+            <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+              <el-input placeholder="请输入电话号码" v-model="DATA.phoneNumber" @keyup.enter.native="searchData">
+            </el-col>
+            <el-col :span="5" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+              <el-select v-model="DATA.settlementState"  @change="changeStatus" clearable placeholder="请选择结算状态">
+                <el-option
+                  v-for="item in options"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
+            </el-col>
+        </el-row>
+        <!-- 表格 -->
+        <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
+            <el-table-column fixed prop="name" align="center" center label="姓名" width="80">
+            </el-table-column>
+            <el-table-column prop="idNumber" align="center" label="身份证号" width="180">
+            </el-table-column>
+            <el-table-column prop="gender" align="center" label="性别" width="50">
+            </el-table-column>
+            <el-table-column prop="age" align="center" label="年龄" width="50">
+            </el-table-column>
+            <el-table-column prop="phoneNumber" align="center" label="电话号码" width="120">
+            </el-table-column>
+            <el-table-column prop="onTheJobState" align="center" label="在职状态" >
+            </el-table-column>
+            <el-table-column prop="recommendEnterprise" align="center" label="推荐企业" :show-overflow-tooltip="true">
+            </el-table-column>
+            <el-table-column prop="recommendJob" align="center" label="推荐岗位" :show-overflow-tooltip="true">
+            </el-table-column>    
+            <el-table-column prop="settlementState" align="center" label="结算状态" :show-overflow-tooltip="true">
+            </el-table-column>
+            <el-table-column label="操作" fixed="right" align="center" width="125">
+            <template slot-scope="scope">
+              <el-button size="small" type="primary" @click="detail(scope.row)">
+                详情
+              </el-button>    
+            </template>
+          </el-table-column>
+        </el-table>
+        <div class="footer" style="width: 100%;margin-top:1rem;">
+          <template>
+            <el-pagination :current-page="currentPage" :page-size="pagesize" :page-sizes="10" :total="total"
+              @current-change="handleCurrentChange" background layout="total,prev, pager, next, jumper">
+            </el-pagination>
+          </template>
+        </div>
+
+        <!-- 结算详情 -->
+        <el-dialog title="结算详情" :visible.sync="editDialog">
+            
+          <el-form :inline="true" :model="update_form" ref="update_form" style="margin-left: 100px;" class="demo-ruleForm">
+            
+            <el-form-item label="姓名" :label-width="formLabelWidth">
+              <el-input v-model="update_form.name" autocomplete="off" style="width: 100px;" size="small"></el-input>
+              <span style="font-size: 12px;color: red;">结算状态：{{ settlementState }}</p></span>
+            </el-form-item>
+            <el-form-item label="联系方式" :label-width="formLabelWidth">
+              <el-input v-model="update_form.phoneNumber" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="参保单位" :label-width="formLabelWidth">
+              <el-input v-model="update_form.unit"  autocomplete="off" size="small"></el-input>  
+            </el-form-item>
+            <el-form-item label="合同到期时间" :label-width="formLabelWidth">
+              <el-input v-model="update_form.contractExpireTime"  autocomplete="off" size="small"></el-input>  
+            </el-form-item>
+            <el-form-item label="保险类别" :label-width="formLabelWidth">
+              <el-input v-model="update_form.insurance"  autocomplete="off" size="small"></el-input>  
+            </el-form-item>
+            <el-form-item label="紧急联系人" :label-width="formLabelWidth">
+              <el-input v-model="update_form.emergencyContact"  autocomplete="off" size="small"></el-input>  
+            </el-form-item>
+            <el-form-item label="紧急联系电话" :label-width="formLabelWidth">
+            <el-input v-model="update_form.emergencyContactPhone"  autocomplete="off" size="small"></el-input>  
+            </el-form-item>
+            <el-form-item label="满岗标准" :label-width="formLabelWidth">
+                <el-input v-model="update_form.standard" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="结算次数" :label-width="formLabelWidth">
+              <el-input v-model="update_form.settlementNumber" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="结算标准" :label-width="formLabelWidth">
+              <el-input v-model="update_form.settlementStandard" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="出勤时/天" :label-width="formLabelWidth">
+                <el-col :span =8>
+                    <el-input v-model="update_form.attendanceDays" style="width: 70px;" autocomplete="off" size="small"></el-input>
+                </el-col>
+                <el-col :span=6>-</el-col>
+                <el-col :span =8>
+                <el-input v-model="update_form.attendanceHours" style="width: 70px;" autocomplete="off" size="small"></el-input>
+                </el-col>
+            </el-form-item>
+            <el-form-item label="出勤单价" :label-width="formLabelWidth">
+                <el-input v-model="update_form.price" style="width: 65px;" autocomplete="off" size="small"></el-input>
+                <span style="font-size: 12px;color: red;">特殊说明:{{ mark }}</span>
+            </el-form-item>
+            <el-form-item label="结算所属周期" :label-width="formLabelWidth">
+                <el-input v-model="update_form.cycle"  autocomplete="off" size="small"></el-input>  
+            </el-form-item>
+            <el-form-item label="结算时间" :label-width="formLabelWidth">
+                <el-input v-model="update_form.settlementTime"  autocomplete="off" size="small"></el-input>  
+            </el-form-item>
+            
+
+            <el-form-item label="凭证" :label-width="formLabelWidth">
+                
+            </el-form-item>
+          
+          </el-form>
+          
+        </el-dialog>
+
+      </div>
+    </div>
+  </div>
+  <script>
+    new Vue({
+      el: '#app',
+      data: function () {
+        return {
+          loading: false,
+          editDialog:false,
+          formLabelWidth:'120px',
+          
+          mark:'因各种原因请假，则为200/天l',
+          settlementState:'',
+          update_form:{},
+          options: [{
+          value: '待结算',
+          label: '待结算'
+          }, {
+          value: '持续结算',
+          label: '持续结算'
+          },  {
+          value: '已完结',
+          label: '已完结'
+          }, 
+          ],
+          DATA: {
+            page: 1,
+            // pagesize: 10,
+            name: '',
+            cardNumber: "",
+            phoneNumber: "",
+            settlementState:"",
+          },
+          currentPage: 1,
+          pagesize: 10,
+          total: "",
+          tableData: [
+            // { name: '张三', gender: '女', age: '12', cardNumber: '500227199801233288x', phoneNumber: '15736063175', education: "大专" }
+          ]
+        }
+      },
+      created() {
+        this.getTableData(this.DATA)
+        this.getTotal(this.DATA)
+      },
+      methods: {
+        getTableDataURL(URL, options) {        //根据URL和参数对象生成附加参数的URL
+          URL += "?";
+          for (let [key, value] of Object.entries(options)) {
+            if (value !== "") URL += "" + key + "=" + value + "&";
+          }
+          return URL.slice(0, URL.length - 1);
+        },
+        getCountURL(URL, options) {
+          URL += "?";                //根据URL和参数对象生成附加参数不带page的URL
+          for (let [key, value] of Object.entries(options)) {
+            if (value !== "" && key !== 'page') URL += "" + key + "=" + value + "&";
+          }
+          return URL.slice(0, URL.length - 1);
+        },
+        // getURL(URL, options) {
+        //   URL += "?";
+        //   for (let [key, value] of Object.entries(options)) {
+        //     if (value !== "") URL += "" + key + "=" + value + "&";
+        //   }
+        //   return URL.slice(0, URL.length - 1);
+        // },
+        initForm(obj) {
+          for (let key in obj) {
+            obj[key] = "";
+          }
+        },
+        searchData() {            //表一所有搜索框
+          this.DATA.page = 1
+          this.getTableData(this.DATA);
+          this.getTotal(this.DATA)
+        },
+        handleCurrentChange(size) {
+          this.currentPage = currentPage;
+          this.DATA.page = currentPage;
+          this.getTableData(this.DATA);
+        },
+        changeTable1() {                //改变表一任何一个单选框
+          this.getTotal(this.DATA).then(() => {
+            this.getTableData(this.DATA)
+          }).catch(err => {
+            this.$message.error(err);
+          })
+        },
+
+        getTableData(options) {
+          let URL = "http://lcj525.vipgz4.idcfengye.com/settlement"
+          // this.loading = true;
+          URL = this.getTableDataURL(URL, options);
+          return new Promise(resolve => {
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+                
+
+                this.tableData = json;
+
+                resolve();
+                setTimeout(() => {
+                  this.loading = false;
+                }, 500);
+              });
+          });
+        },
+        getTotal(options) {
+          return new Promise(resolve => {
+            let URL = "http://lcj525.vipgz4.idcfengye.com/settlementCount"           //获取表一所有数据总数
+            URL = this.getCountURL(URL, options);
+            console.log(URL)
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+                console.log(json)
+                this.total = json.count;
+                
+                resolve();
+              });
+          });
+        },
+
+        
+
+   
+        detail(currentRow) {
+          this.editDialog = true
+          this.update_form = Object.assign({}, currentRow)
+          // this.mark = this.update_form.mark          
+          this.settlementState = this.update_form.settlementState
+        },
+
+        changeStatus(val){
+          this.DATA.page = 1
+          this.getTableData(this.DATA);
+          this.getTotal(this.DATA)
+        },
+
+        
+
+        
+      },
+    });
+  </script>
+</body>
+
+</html>

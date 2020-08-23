@@ -38,7 +38,7 @@
           <li class="ul-item">
             <a class="slider-link" href="/dataAdmin/havaJob.html">在职名单</a>
           </li>
-          
+
         </ul>
       </div>
     </div>
@@ -68,7 +68,7 @@
             <el-input placeholder="请输入部门名" v-model="DATA.deptName" @keyup.enter.native="searchData">
           </el-col>
           <el-col :span="3" style="margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入推荐人" v-model="DATA.customerName" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入推荐人" v-model="DATA.employeeName" @keyup.enter.native="searchData">
           </el-col>
 
           <el-col :span="6" style="margin-left: 20px;margin-top: 30px;margin-bottom: 20px;">
@@ -81,7 +81,7 @@
 
         </el-row>
         <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
-          <el-table-column fixed prop="name" align="center" center label="姓名" width="80">
+          <el-table-column fixed prop="customerName" align="center" center label="姓名" width="80">
           </el-table-column>
           <el-table-column prop="idNumber" align="center" label="身份证号" width="180">
           </el-table-column>
@@ -107,7 +107,7 @@
           </el-table-column>
           <el-table-column prop="deptName" align="center" label="部门名" :show-overflow-tooltip="true">
           </el-table-column>
-          
+
           <el-table-column prop="interviewTime" align="center" label="面试时间" width="140">
           </el-table-column>
           <el-table-column prop="employeeName" align="center" label="推荐人" width="80" :show-overflow-tooltip="true">
@@ -123,7 +123,7 @@
               <el-button size="small" type="danger" @click="backSignup(scope.row)">
                 退回
               </el-button>
-              
+
             </template>
           </el-table-column>
         </el-table>
@@ -142,20 +142,21 @@
       el: '#app',
       data: function () {
         return {
-          addInterviewForm:'',
+          addInterviewForm: '',
           loading: false,
           DATA: {
             page: 1,
+
             name: "",
             deptName: "",
             address: "",
-            
+
             idNumber: "",
             gender: "",/*多条件查询——性别单选框的默认选项*/
-            employeeName:"",
+            employeeName: "",
             phoneNumber: "",
             recommendEnterprise: "",
-            
+
             interviewTime: "",
           },
           currentPage: 1,
@@ -191,14 +192,14 @@
           }
         },
         searchData() {            //表一所有搜索框
-          this.DATA.page = 1
-          this.getTableData(this.DATA);
+          // this.DATA.page = 1
+          this.getTableData(this.DATA)
+          this.getTotal(this.DATA)
         },
 
         handleCurrentChange(size) {       //改变表一page
-          this.currentPage = currentPage;
-          this.DATA.page = currentPage;
-          this.getTableData(this.DATA2);
+          this.DATA.page = size;
+          this.getTableData(this.DATA);
         },
 
         changeTable1() {                //改变表一任何一个单选框
@@ -243,35 +244,41 @@
 
         filterData(tableData) {
           return tableData.map(item => {
-           
+
             item.hasCertificate === 1 ? item.hasCertificate = '是' : item.hasCertificate = '否'
             item.isDisability === 1 ? item.isDisability = '是' : item.isDisability = '否'
             return item;
           })
         },
 
-        through(currentRow){
-            let URL = 'http://lcj525.vipgz4.idcfengye.com/addWaitInduction'
-            this.addInterviewForm = {
-              customerId:currentRow.customerId,
-              phoneCallListId:currentRow.phoneCallListId,
-              employeeId:currentRow.employeeId,
+        through(currentRow) {
+          let URL = 'http://lcj525.vipgz4.idcfengye.com/addWaitInduction'
+          
+          this.addInterviewForm = {
+            interviewId : currentRow.interviewInfoId,
+            customerId: currentRow.customerId,
+            phoneCallListId: currentRow.phoneCallListId,
+            employeeId: currentRow.employeeId,
+          }
+          console.log(this.addInterviewForm)
+          let opt = {
+            method: 'post',
+            body: JSON.stringify(this.addInterviewForm),
+            headers: {
+              "content-type": 'application/json'
             }
-            let opt = {
-              method:'post',
-              body:JSON.stringify(this.addInterviewForm),
-              headers:{
-                "content-type": 'application/json'
-              }
-            }
-            fetch(URL.opt)
-            .then(res=>res.json())
-            .then(json=>{
+          }
+          fetch(URL,opt)
+            .then(res => res.json())
+            .then(json => {
+              this.$message({
+              type: 'success',
+              message: currentRow.customerName + '成功通过面试'
+            })
               this.getTableData(this.DATA)
               this.getTotal(this.DATA)
-             
             })
- 
+
         },
 
         backSignup(currentRow) {           //退回
@@ -283,9 +290,9 @@
           }).then(({ value }) => {
             let URL = 'http://lcj525.vipgz4.idcfengye.com/backInterview'
             this.backForm = {
-              phoneCallListId: currentRow.phoneCallListId,
+              id: currentRow.interviewInfoId,
               note: value
-              
+
             }
             var opt = {
               method: "POST",
@@ -301,7 +308,7 @@
                 .then(json => {
                   this.$message({
                     type: 'success',
-                    message: currentRow.name + ' 的退回原因为：' +value
+                    message: currentRow.customerName + ' 的退回原因为：' + value
 
                   });
                   this.getTableData(this.DATA)
@@ -318,6 +325,10 @@
           });
 
         },
+        
+
+
+
       },
     });
   </script>

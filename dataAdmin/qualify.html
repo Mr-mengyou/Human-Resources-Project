@@ -277,13 +277,13 @@
           pagesize: 10,
           total: "",
           tableData: [
-            { name: '张三', gender: '女', age: '12', cardNumber: '500227199801233288x', phoneNumber: '15736063175', education: "大专",hasCertificate:1}
+            // { name: '张三', gender: '女', age: '12', cardNumber: '500227199801233288x', phoneNumber: '15736063175', education: "大专",hasCertificate:1}
           ]
         }
       },
       created() {
-        // this.getTableData(this.DATA)
-        // this.getTotal(this.DATA)
+        this.getTableData(this.DATA)
+        this.getTotal(this.DATA)
       },
       methods: {
         getTableDataURL(URL, options) {        //根据URL和参数对象生成附加参数的URL
@@ -306,14 +306,15 @@
           }
         },
         searchData() {            //表一所有搜索框
-          this.DATA.page = 1
-          this.getTableData(this.DATA);
+          
+          this.getTableData(this.DATA)
+          this.getTotal(this.DATA)
         },
         
         handleCurrentChange(size) {       //改变表一page
-          this.currentPage = currentPage;
-          this.DATA.page = currentPage;
-          this.getTableData(this.DATA2);
+          
+          this.DATA.page = size;
+          this.getTableData(this.DATA);
         },
         
         changeTable1() {                //改变表一任何一个单选框
@@ -422,7 +423,7 @@
             confirmButtonText: '退回',
             cancelButtonText: '取消',
           }).then(({ value }) => {
-            let URL = 'http://lcj525.vipgz4.idcfengye.com/backInterview'
+            let URL = 'http://lcj525.vipgz4.idcfengye.com/backWaitInduction'
             let backForm = {
               id : currentRow.id,
               note : value
@@ -442,8 +443,9 @@
                 this.$message({
                   type: 'success',
                   message: currentRow.name + '的退回理由是: ' + value,
-
-                });
+                })
+                this.getTableData(this.DATA)
+                this.getTotal(this.DATA)
                 resolve();
               });
           }).catch(() => {
