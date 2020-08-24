@@ -558,9 +558,6 @@
 
 
 
-
-
-
       </div>
     </div>
   </div>
@@ -726,7 +723,7 @@
           total: '',
           currentPage2: 1,
           pagesize2: 10,
-          total2: 10,
+          total2: "",
           tableData: [
             // { id: '1', name: '张三三三', gender: '女', age: '12', cardNumber: '50011119980711111X', phoneNumber: '13678410204', education: "大专", skill: "精通ppt,execl等Microsoft软件,前端知识，后端知识", area: "渝中区人民路232号" }
           ],
@@ -919,15 +916,15 @@
           //   content:this.affair_form.content,
           //   time:this.affair_form.time1+""+this.affair_form.time2
           // }
-          let _this = this
-          console.log(_this.affair_form)
-          _this.affair_form = {
+          
+          // console.log(_this.affair_form)
+          this.affair_form = {
             time: this.affair_form.time1 + " " + this.affair_form.time2,
             content: this.affair_form.content
           }
           var opt = {
             method: "POST",
-            body: JSON.stringify(_this.affair_form),
+            body: JSON.stringify(this.affair_form),
             headers: {
               "content-type": 'application/json'
             }

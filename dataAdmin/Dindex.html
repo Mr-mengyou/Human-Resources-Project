@@ -32,6 +32,13 @@
   .el-form-item {
     width: 75%;
   }
+  /* .el-radio:focus:not(.is-focus):not(:active) {
+  -webkit-box-shadow: 0 0 2px 2px #fff;
+  box-shadow: 0 0 2px 2px #fff;
+  }
+  .el-radio__inner {
+    border-left: 1px solid #d8dce5
+  } */
 </style>
 
 <body>
@@ -62,7 +69,7 @@
           <li class="ul-item">
             <a class="slider-link" href="/dataAdmin/havaJob.html">在职名单</a>
           </li>
-          
+
         </ul>
       </div>
     </div>
@@ -80,7 +87,8 @@
             <el-input placeholder="请输入电话号码" clearable v-model="DATA.phoneNumber" @keyup.enter.native="searchData">
           </el-col>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入推荐企业" clearable v-model="DATA.recommendEnterprise" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入推荐企业" clearable v-model="DATA.recommendEnterprise"
+              @keyup.enter.native="searchData">
           </el-col>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
             <el-input placeholder="请输入区域" clearable v-model="DATA.address" @keyup.enter.native="searchData">
@@ -97,17 +105,17 @@
           <el-col :span="3" style="margin-top: 20px;margin-bottom: 20px;">
             <el-input placeholder="请输入推荐人" clearable v-model="DATA.employeeName" @keyup.enter.native="searchData">
           </el-col>
-          
-          
+
+
           <el-col :span="6" style="margin-left: 20px;margin-top: 30px;margin-bottom: 20px;">
             <span style="font-size: 14px;">性别：</span>
             <el-radio-group v-model="DATA.gender" size="mini" @change="changeTable1">
-              <el-radio label="男">男</el-radio>
-              <el-radio label="女">女</el-radio>
+              <el-radio label="男" @click.native.prevent='handleCancel("男")'>男</el-radio>
+              <el-radio label="女" @click.native.prevent='handleCancel("女")'>女</el-radio>
             </el-radio-group>
           </el-col>
         </el-row>
-        
+
         <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
           <el-table-column fixed prop="customerName" align="center" center label="姓名" width="80">
           </el-table-column>
@@ -223,12 +231,12 @@
             <el-form-item label="面试时间" :label-width="formLabelWidth">
               <el-input v-model="update_form.signUpTime" autocomplete="off" size="small"></el-input>
             </el-form-item>
-            </el-form>
-            <div slot="footer" class="dialog-footer" style="text-align: center;">
-              <el-button @click="dialogFormVisible3 = false">取 消</el-button>
-              <el-button type="primary" @click="update">提交</el-button>
-            </div>
-            </el-dialog>
+          </el-form>
+          <div slot="footer" class="dialog-footer" style="text-align: center;">
+            <el-button @click="dialogFormVisible3 = false">取 消</el-button>
+            <el-button type="primary" @click="update">提交</el-button>
+          </div>
+        </el-dialog>
 
       </div>
     </div>
@@ -238,7 +246,7 @@
       el: '#app',
       data: function () {
         return {
-          total:"",
+          total: "",
           loading: false,
           updateDialog: false,
           formLabelWidth: '70px', /*表单Label长度*/
@@ -248,22 +256,22 @@
 
           // 查询
           DATA: {
-              name:'',
-              page: 1,
-              pagesize: 10,
-              employeeName:"",
-              deptName:"",
-              address: "",
-              
-              idNumber: "",
-              gender: "",/*多条件查询——性别单选框的默认选项*/
-             
-              phoneNumber: "",
-              recommendEnterprise: "",
-              signUpTime: "",
-              interviewTime: ""
-            },
-          
+            name: '',
+            page: 1,
+            pagesize: 10,
+            employeeName: "",
+            deptName: "",
+            address: "",
+
+            idNumber: "",
+            gender: "",/*多条件查询——性别单选框的默认选项*/
+
+            phoneNumber: "",
+            recommendEnterprise: "",
+            signUpTime: "",
+            interviewTime: ""
+          },
+
           currentPage: 1,
           pagesize: 10,
           total: "",
@@ -272,7 +280,7 @@
           ]
         }
       },
-      
+
       created() {
         this.getTableData(this.DATA)
         this.getTotal(this.DATA)
@@ -298,13 +306,13 @@
           }
         },
         searchData() {            //表一所有搜索框
-          
+
           this.getTableData(this.DATA);
           this.getTotal(this.DATA)
         },
 
         handleCurrentChange(size) {       //改变表一page
-          
+
           this.DATA.page = size;
           this.getTableData(this.DATA);
         },
@@ -319,8 +327,8 @@
 
 
         getTableData(options) {              //获取表格数据
-          
-          
+
+
           this.loading = true;
           let URL = "http://lcj525.vipgz4.idcfengye.com/signUpListAll"
           URL = this.getTableDataURL(URL, options);
@@ -356,7 +364,7 @@
 
         filterData(tableData) {
           return tableData.map(item => {
-           
+
             item.hasCertificate === 1 ? item.hasCertificate = '是' : item.hasCertificate = '否'
             item.isDisability === 1 ? item.isDisability = '是' : item.isDisability = '否'
             return item;
@@ -369,13 +377,13 @@
         {
           // console.log(rowId)
           this.updateDialog = true
-          
+
           this.update_form = Object.assign({}, rowId)
           console.log(this.update_form)
-          this.update_form.signUpInfoId = this.update_form.signUpId 
+          this.update_form.signUpInfoId = this.update_form.signUpId
           // this.update_form.name = this.update_form.customerName
-          
-          
+
+
           // this.update_form.gender === '女' ? this.update_form.gender = 1 : this.update_form.gender = 0
           this.update_form.hasCertificate === '无' ? this.update_form.hasCertificate = 0 : this.update_form.hasCertificate = 1
           this.update_form.isDisability === '否' ? this.update_form.isDisability = 0 : this.update_form.isDisability = 1
@@ -384,7 +392,7 @@
         },
 
         update() {                               //提交编辑表单
-          
+
           console.log(JSON.stringify(this.update_form))
           let URL = "http://lcj525.vipgz4.idcfengye.com/updataSignUp"
           this.update_form.name = this.update_form.customerName
@@ -409,30 +417,30 @@
           })
         },
 
-        through(currentRow){
-            let URL = 'http://lcj525.vipgz4.idcfengye.com/addInterview'
-            this.addInterviewForm = {
-              signUpId:currentRow.signUpId,
-              customerId:currentRow.customerId,
-              phoneCallListId:currentRow.phoneCallListId,
-              employeeId:currentRow.employeeId,
+        through(currentRow) {
+          let URL = 'http://lcj525.vipgz4.idcfengye.com/addInterview'
+          this.addInterviewForm = {
+            signUpId: currentRow.signUpId,
+            customerId: currentRow.customerId,
+            phoneCallListId: currentRow.phoneCallListId,
+            employeeId: currentRow.employeeId,
+          }
+          let opt = {
+            method: 'post',
+            body: JSON.stringify(this.addInterviewForm),
+            headers: {
+              "content-type": 'application/json'
             }
-            let opt = {
-              method:'post',
-              body:JSON.stringify(this.addInterviewForm),
-              headers:{
-                "content-type": 'application/json'
-              }
-            }
-            fetch(URL,opt)
-            .then(res=>res.json())
-            .then(json=>{
+          }
+          fetch(URL, opt)
+            .then(res => res.json())
+            .then(json => {
               this.getTableData(this.DATA)
               this.getTotal(this.DATA)
               console.log("1")
-             
+
             })
- 
+
         },
 
         backSignup(currentRow) {           //退回
@@ -446,7 +454,7 @@
             this.backForm = {
               id: currentRow.signUpId,
               note: value
-              
+
             }
             var opt = {
               method: "POST",
@@ -462,7 +470,7 @@
                 .then(json => {
                   this.$message({
                     type: 'success',
-                    message: currentRow.customerName + ' 的退回原因为：' +value
+                    message: currentRow.customerName + ' 的退回原因为：' + value
 
                   });
                   this.getTableData(this.DATA)
@@ -479,6 +487,11 @@
           });
 
         },
+
+        handleCancel(value) {
+          this.DATA.gender = value == this.DATA.gender ? '' : value
+        }
+
 
 
 

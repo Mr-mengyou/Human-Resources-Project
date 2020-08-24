@@ -62,28 +62,18 @@
     <div class="slider">
       <div class="slider-body">
         <ul>
-          <!-- <li class="ul-item active">
-            <a class="slider-link " href="/Salesman/index.html">电话名单</a>
-          </li>
-          <li class="ul-item">
-            <a class="slider-link " href="/Salesman/apply.html">报名名单</a>
-          </li>
-          <li class="ul-item">
-            <a class="slider-link" href="/Salesman/interview.html">面试名单</a>
-          </li>
-          <li class="ul-item">
-            <a class="slider-link " href="/Salesman/wait_hire.html">待入职名单</a>
-          </li>
-          <li class="ul-item">
-            <a class="slider-link" href="/Salesman/hire.html">入职名单</a>
-          </li>
-          <li class="ul-item">
-            <a class="slider-link" href="/Salesman/other.html">结算名单</a>
-          </li> -->
+          
           <li class="ul-item">
             <a class="slider-link active" href="/other/authorityManage.html">权限分配
             </a>
           </li>
+          <li class="ul-item">
+            <a class="slider-link " href="/other/sysSetting.html">系统设置</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link " href="/other/customer.html">公海名单</a>
+          </li>
+
         </ul>
       </div>
     </div>
@@ -134,13 +124,15 @@
               show-checkbox
               node-key="id"
               ref="tree"
+              :default-checked-keys="[10]"
+              
               :props="defaultProps">
             </el-tree>
             
           
             
             <div slot="footer" class="dialog-footer" style="text-align: center;">
-              <el-button @click="dialogFormVisible3 = false">取 消</el-button>
+              <el-button @click="allotDialog = false">取 消</el-button>
               <el-button type="primary" @click="allot">确认分配</el-button>
             </div>
           </el-dialog>
@@ -387,11 +379,12 @@
 
         permissAllot(){
           this.allotDialog = true
+          
 
 
         },
         allot(){
-          console.log(this.$refs.tree.getHalfCheckedNodes())
+          console.log(this.$refs.tree.setCurrentKey(1))
         },
         
         

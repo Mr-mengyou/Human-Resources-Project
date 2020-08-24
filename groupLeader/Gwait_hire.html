@@ -63,13 +63,13 @@
       <div class="slider-body">
         <ul>
           <li class="ul-item">
-            <a class="slider-link active" href="/groupLeader/Gapply.html">报名名单</a>
+            <a class="slider-link " href="/groupLeader/Gapply.html">报名名单</a>
           </li> 
           <li class="ul-item">
             <a class="slider-link" href="/groupLeader/Ginterview.html">面试名单</a>
           </li>
           <li class="ul-item">
-            <a class="slider-link" href="/groupLeader/Gwait_hire.html">待入职名单</a>
+            <a class="slider-link active" href="/groupLeader/Gwait_hire.html">待入职名单</a>
           </li>
           <li class="ul-item">
             <a class="slider-link" href="/groupLeader/phoneRecord.html">电话记录名单</a>
@@ -82,20 +82,20 @@
       <div id="app">
         <el-row>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入姓名" v-model="DATA.name" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入姓名" clearable v-model="DATA.name" @change="searchData">
           </el-col>
           <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="输入身份证号" v-model="DATA.idNumber" @keyup.enter.native="searchData">
+            <el-input placeholder="输入身份证号" clearable v-model="DATA.idNumber" @change="searchData">
           </el-col>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入电话号码" v-model="DATA.phoneNumber" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入电话号码" clearable v-model="DATA.phoneNumber" @change="searchData">
           </el-col>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入员工姓名" v-model="DATA.employeeName" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入员工姓名" clearable v-model="DATA.employeeName" @change="searchData">
           </el-col>
         </el-row>
         <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
-          <el-table-column fixed prop="name" align="center"  label="姓名">
+          <el-table-column fixed prop="customerName" align="center"  label="姓名">
           </el-table-column>
           <el-table-column prop="idNumber" align="center"  label="身份证号" width="180">
           </el-table-column>
@@ -119,13 +119,13 @@
           </el-table-column>
           <el-table-column prop="recommendJob" align="center" label="推荐岗位" :show-overflow-tooltip="true">
           </el-table-column>       
-          <el-table-column prop="interviewQualifiedTime" align="center" label="面试合格时间" width="100">
+          <el-table-column prop="interviewQualifiedTime" align="center" label="面试合格时间" width="110">
           </el-table-column>
           <el-table-column prop="delayTime" align="center" label="延迟入职时间" width="150">
           </el-table-column>
           <el-table-column prop="note" align="center" label="备注" >
           </el-table-column>
-          <el-table-column prop="employeeName" align="center" label="员工姓名"" >
+          <el-table-column prop="employeeName" align="center" label="员工姓名" >
           </el-table-column>
           <el-table-column label="操作" fixed="right" align="center" width="125">
             <template slot-scope="scope">
@@ -314,7 +314,7 @@
         },
 
         getTableData(options) {
-          let URL = "http://lcj525.vipgz4.idcfengye.com/waitInduction"
+          let URL = "http://lcj525.vipgz4.idcfengye.com/waitInductionGroup"
           // this.loading = true;
           URL = this.getTableDataURL(URL, options);
           return new Promise(resolve => {
@@ -334,7 +334,7 @@
         },
         getTotal(options) {
           return new Promise(resolve => {
-            let URL = "http://lcj525.vipgz4.idcfengye.com/waitInductionCount"           //获取表一所有数据总数
+            let URL = "http://lcj525.vipgz4.idcfengye.com/waitInductionGroupCount"           //获取表一所有数据总数
             URL = this.getCountURL(URL, options);
             console.log(URL)
             fetch(URL)

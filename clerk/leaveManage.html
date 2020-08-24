@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="/admin/css/index.css">
 <script type="text/javascript" src="/admin/js/vue.js"></script>
 <script src="/admin/js/element.js"></script>
-<title>组长——电话记录</title>
+<title>文员——离职管理</title>
 <style>
     .el-card {
         height: 100px;
@@ -63,17 +63,18 @@
         <div class="slider">
             <div class="slider-body">
                 <ul>
+
                     <li class="ul-item">
-                        <a class="slider-link active" href="/groupLeader/directorPhone.html">通话记录</a>
+                        <a class="slider-link " href="/clerk/staffManage.html">员工管理</a>
                     </li>
                     <li class="ul-item">
-                      <a class="slider-link " href="/groupLeader/staffManagement.html">员工管理</a>
+                        <a class="slider-link" href="/clerk/staffRecord.html">档案管理</a>
                     </li>
                     <li class="ul-item">
-                      <a class="slider-link" href="/groupLeader/staffRecord.html">档案管理</a>
+                        <a class="slider-link active" href="/clerk/leaveManage.html">离职管理</a>
                     </li>
                     <li class="ul-item">
-                      <a class="slider-link " href="/groupLeader/leaveManagement.html">离职管理</a>
+                        <a class="slider-link " href="/dataAdmin/occupInjury.html">工伤名单</a>
                     </li>
                 </ul>
             </div>
@@ -83,11 +84,11 @@
             <div id="app">
                 <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-bottom:2rem;margin-top: 2rem;">
                     <div class="mobileSize">
-                        <el-input placeholder="请输入姓名" v-model="DATA.name" @keyup.enter.native="searchData">
+                        <el-input placeholder="请输入姓名" clearable v-model="DATA.name" @change="searchData">
                         </el-input>
                     </div>
                     <div class="mobileSize">
-                        <el-input placeholder="输入工号" v-model="DATA.idNumber" @keyup.enter.native="searchData">
+                        <el-input placeholder="输入工号" clearable v-model="DATA.idWork" @change="searchData">
                         </el-input>
                     </div>
 
@@ -95,7 +96,7 @@
                 <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
                     <el-table-column fixed prop="idWork" align="center" label="工号">
                     </el-table-column>
-                    <el-table-column fixed prop="employeeName" align="center" label="员工姓名">
+                    <el-table-column fixed prop="name" align="center" label="员工姓名">
                     </el-table-column>
                     <el-table-column prop="idNumber" align="center" label="身份证号">
                     </el-table-column>
@@ -137,28 +138,34 @@
                 <el-dialog title="编辑离职原因" :visible.sync="editDialog">
                     <el-form :model="editForm" ref="editForm" style="margin-left: 80px;" class="demo-ruleForm">
                         <el-form-item label="工号" :label-width="formLabelWidth">
-                            <el-input v-model="editForm.idWork" autocomplete="off" size="small" :disabled="true"></el-input>
+                            <el-input v-model="editForm.idWork" autocomplete="off" size="small" :disabled="true">
+                            </el-input>
                         </el-form-item>
                         <el-form-item label="姓名" :label-width="formLabelWidth">
-                            <el-input v-model="editForm.employeeName" autocomplete="off" size="small" :disabled="true"></el-input>
+                            <el-input v-model="editForm.name" autocomplete="off" size="small" :disabled="true">
+                            </el-input>
                         </el-form-item>
-                        <el-form-item label="性别" :label-width="formLabelWidth" >
+                        <el-form-item label="性别" :label-width="formLabelWidth">
                             <el-radio-group v-model="editForm.gender">
                                 <el-radio disabled :label="0">男</el-radio>
                                 <el-radio disabled :label="1">女</el-radio>
                             </el-radio-group>
                         </el-form-item>
                         <el-form-item label="身份证号" :label-width="formLabelWidth">
-                            <el-input v-model="editForm.idNumber" autocomplete="off" size="small" :disabled="true"></el-input>
+                            <el-input v-model="editForm.idNumber" autocomplete="off" size="small" :disabled="true">
+                            </el-input>
                         </el-form-item>
                         <el-form-item label="岗位" :label-width="formLabelWidth">
-                            <el-input v-model="editForm.position" autocomplete="off" size="small" :disabled="true"></el-input>
+                            <el-input v-model="editForm.position" autocomplete="off" size="small" :disabled="true">
+                            </el-input>
                         </el-form-item>
                         <el-form-item label="部门名" :label-width="formLabelWidth">
-                            <el-input v-model="editForm.deptName" autocomplete="off" size="small" :disabled="true"></el-input>
+                            <el-input v-model="editForm.deptName" autocomplete="off" size="small" :disabled="true">
+                            </el-input>
                         </el-form-item>
                         <el-form-item label="入职时间" :label-width="formLabelWidth">
-                            <el-input v-model="editForm.inductionTime" autocomplete="off" size="small" :disabled="true"></el-input>
+                            <el-input v-model="editForm.inductionTime" autocomplete="off" size="small" :disabled="true">
+                            </el-input>
                         </el-form-item>
                         <el-form-item label="离职原因" :label-width="formLabelWidth">
                             <el-input v-model="editForm.leavingReason" autocomplete="off" size="small"></el-input>
@@ -203,7 +210,7 @@
 
                     DATA: {
                         page: 1,
-                        pagesize: 10,
+
                         employeeName: '',
                         idWork: '',
 
@@ -246,8 +253,8 @@
                     this.getTotal(this.DATA)
                 },
                 handleCurrentChange(size) {
-                    this.currentPage = currentPage;
-                    this.DATA.page = currentPage;
+
+                    this.DATA.page = size;
                     this.getTableData(this.DATA);
                 },
 
@@ -260,14 +267,14 @@
                 },
 
                 getTableData(options) {
-                    let URL = "http://lcj525.vipgz4.idcfengye.com/getPhoneRecordDept"
+                    let URL = "http://lcj525.vipgz4.idcfengye.com/departure"
                     // this.loading = true;
                     URL = this.getTableDataURL(URL, options);
                     return new Promise(resolve => {
                         fetch(URL)
                             .then(res => res.json())
                             .then(json => {
-                                this.tableData = this.filterData(json);
+                                this.tableData = json;
 
                                 resolve();
                                 setTimeout(() => {
@@ -278,7 +285,7 @@
                 },
                 getTotal(options) {
                     return new Promise(resolve => {
-                        let URL = "http://lcj525.vipgz4.idcfengye.com/getPhoneRecordDeptCount"           //获取表一所有数据总数
+                        let URL = "http://lcj525.vipgz4.idcfengye.com/departureCount"           //获取表一所有数据总数
                         URL = this.getCountURL(URL, options);
                         console.log(URL)
                         fetch(URL)
@@ -292,23 +299,48 @@
                     });
                 },
 
-                filterData(tableData) {
-                    return tableData.map(item => {
-                        // item.isWechatAdded === 1 ? item.isWechatAdded = '是' : item.isWechatAdded = '否'
-                        item.gender == '男' ? item.gender = 0 : item.gender = 1
-                        return item;
-                    })
-                },
+
                 editLeave(currentRow) {
                     this.editDialog = true
                     this.editForm = Object.assign({}, currentRow)
                     this.editForm.confirm == '正常' ? this.editForm.confirm = 0 : this.editForm.confirm = 1
-                    this.editForm.gender == '男'?this.editForm.gender = 0 : this.editForm.gender = 1
-                
+                    this.editForm.gender == '男' ? this.editForm.gender = 0 : this.editForm.gender = 1
+
                 },
                 edit() {
-                    this.editForm.gender == 0 ?this.editForm.gender = '男':this.editForm.gender = '女'
+                    this.editForm.confirm == 0 ? this.editForm.confirm = '正常' : this.editForm.confirm = '异常'
+                    this.editForm.id = this.editForm.employeeId
+                    this.editForm.gender == 0 ? this.editForm.gender = '男' : this.editForm.gender = '女'
+                    let URL = "http://lcj525.vipgz4.idcfengye.com/updateDeparture"
+                    let opt = {
+                        method: 'post',
+                        body: JSON.stringify(this.editForm),
+                        headers: {
+                            'content-type': 'application/json'
+                        }
+                    }
+                    fetch(URL, opt)
+                        .then(res => res.json())
+                        .then(json => {
+                            if (json.statusCode == 1) {
+                                this.editDialog = false
+                                this.$message({
+                                    type: 'success',
+                                    message: '修改成功'
+                                })
 
+                                this.getTableData(this.DATA)
+                                this.getTotal(this.DATA)
+
+                            }
+                            else{
+                                this.$message({
+                                    type: 'danger',
+                                    message: '修改失败'
+                                })
+                            }
+
+                        })
                 },
 
 

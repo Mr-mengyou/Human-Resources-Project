@@ -84,23 +84,23 @@
       <div id="app">
         <el-row>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入姓名" v-model="DATA.name" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入姓名" clearable v-model="DATA.name" @change="searchData">
           </el-col>
           <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="输入身份证号" v-model="DATA.idNumber" @keyup.enter.native="searchData">
+            <el-input placeholder="输入身份证号" clearable v-model="DATA.idNumber" @change="searchData">
           </el-col>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入电话号码" v-model="DATA.phoneNumber" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入电话号码" clearable v-model="DATA.phoneNumber" @change="searchData">
           </el-col>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入员工姓名" v-model="DATA.employeeName" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入员工姓名" clearable v-model="DATA.employeeName" @change="searchData">
           </el-col>
         </el-row>
 
 
         <!-- 表格 -->
         <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
-          <el-table-column fixed prop="name" align="center"  label="姓名">
+          <el-table-column fixed prop="customerName" align="center"  label="姓名">
           </el-table-column>
           <el-table-column prop="idNumber" align="center"  label="身份证号" width="180">
           </el-table-column>
@@ -312,8 +312,8 @@
           this.getTotal(this.DATA)
         },
         handleCurrentChange(size) {
-          this.currentPage = currentPage;
-          this.DATA.page = currentPage;
+          
+          this.DATA.page = size;
           this.getTableData(this.DATA);
         },
         changeTable1() {                //改变表一任何一个单选框
@@ -345,7 +345,7 @@
         },
         getTotal(options) {
           return new Promise(resolve => {
-            let URL = "http://lcj525.vipgz4.idcfengye.com/signUpListtCount"           //获取表一所有数据总数
+            let URL = "http://lcj525.vipgz4.idcfengye.com/signUpListGroupCount"           //获取表一所有数据总数
             URL = this.getCountURL(URL, options);
             console.log(URL)
             fetch(URL)
