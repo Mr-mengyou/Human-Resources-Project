@@ -68,10 +68,14 @@
             </a>
           </li>
           <li class="ul-item">
-            <a class="slider-link " href="/other/sysSetting.html">系统设置</a>
+            <a class="slider-link " href="/other/companyAllot.html">企业权限管理
+            </a>
           </li>
           <li class="ul-item">
-            <a class="slider-link active" href="/other/customer.html">公海名单</a>
+            <a class="slider-link active " href="/other/sysSetting.html">系统设置</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link " href="/other/customer.html">公海名单</a>
           </li>
         </ul>
       </div>
@@ -96,13 +100,7 @@
           
           
         </el-table>
-        <div class="footer" style="width: 100%;margin-top:1rem;">
-          <template>
-            <el-pagination :current-page="currentPage" :page-size="pagesize" :page-sizes="10" :total="total"
-              @current-change="handleCurrentChange" background layout="total,prev, pager, next, jumper">
-            </el-pagination>
-          </template>
-        </div>
+        
            
        
       </div>
@@ -129,51 +127,28 @@
       },
       created() {
         this.getTableData(this.DATA)
-        this.getTotal(this.DATA)
+        
       },
       methods: {
-        getTableDataURL(URL, options) {        //根据URL和参数对象生成附加参数的URL
-          URL += "?";
-          for (let [key, value] of Object.entries(options)) {
-            if (value !== "") URL += "" + key + "=" + value + "&";
-          }
-          return URL.slice(0, URL.length - 1);
-        },
-        getCountURL(URL, options) {
-          URL += "?";                //根据URL和参数对象生成附加参数不带page的URL
-          for (let [key, value] of Object.entries(options)) {
-            if (value !== "" && key !== 'page') URL += "" + key + "=" + value + "&";
-          }
-          return URL.slice(0, URL.length - 1);
-        },
+        
         initForm(obj) {
           for (let key in obj) {
             obj[key] = "";
           }
         },
-        // searchData() {
-        //   this.DATA.page = 1
-        //   this.getTableData(this.DATA);
-        //   this.getTotal(this.DATA)
-        // },
+       
         handleCurrentChange(size) {
-          this.currentPage = currentPage;
-          this.DATA.page = currentPage;
+          
+          this.DATA.page = size;
           this.getTableData(this.DATA);
         },
 
-        // changeTable1() {                //改变表一任何一个单选框
-        //   this.getTotal(this.DATA).then(() => {
-        //     this.getTableData(this.DATA)
-        //   }).catch(err => {
-        //     this.$message.error(err);
-        //   })
-        // },
+        
 
         getTableData(options) {
-          let URL = "http://lcj525.vipgz4.idcfengye.com/getPhoneRecordDept"
+          let URL = "http://lcj525.vipgz4.idcfengye.com/systemSettings"
           // this.loading = true;
-          URL = this.getTableDataURL(URL, options);
+          
           return new Promise(resolve => {
             fetch(URL)
               .then(res => res.json())
@@ -187,21 +162,7 @@
               });
           });
         },
-        getTotal(options) {
-          return new Promise(resolve => {
-            let URL = "http://lcj525.vipgz4.idcfengye.com/getPhoneRecordDeptCount"           //获取表一所有数据总数
-            URL = this.getCountURL(URL, options);
-            console.log(URL)
-            fetch(URL)
-              .then(res => res.json())
-              .then(json => {
-                console.log(json)
-                this.total = json.count;
-                
-                resolve();
-              });
-          });
-        },
+        
 
         edit(currentRow){
           this.$prompt('编辑时间', {
@@ -210,10 +171,10 @@
             
 
           }).then(({ value }) => {
-            let URL = 'http://lcj525.vipgz4.idcfengye.com/signUp'
+            let URL = 'http://lcj525.vipgz4.idcfengye.com/updateSystemSettings'
             this.allotForm={
               id:currentRow.id,
-              name : value
+              value : value
             }
             var opt = {
               method: "POST",
@@ -231,12 +192,13 @@
                     type: 'success',
                     message: '您已经成功修改为 '+ value,
 
-                  });
+                  })
+                  this.getTableData()
                   resolve();
                 })
                 .catch(error=>{
                   this.$message({
-                    type: 'success',
+                    type: 'error',
                     message: '修改失败',
 
                   });

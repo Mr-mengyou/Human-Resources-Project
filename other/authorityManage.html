@@ -68,6 +68,10 @@
             </a>
           </li>
           <li class="ul-item">
+            <a class="slider-link " href="/other/companyAllot.html">企业权限管理
+            </a>
+          </li>
+          <li class="ul-item">
             <a class="slider-link " href="/other/sysSetting.html">系统设置</a>
           </li>
           <li class="ul-item">
@@ -80,27 +84,33 @@
     <div class="main">
       <!-- 主体  -->
       <div id="app">
+        <el-row>
+          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 10px;">
+            <el-input placeholder="请输入员工姓名" clearable v-model="DATA.name" @change="searchData">
+          </el-col>
+          <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 10px;">
+            <el-input placeholder="请输入部门名" clearable v-model="DATA.deptName" @change="searchData">
+          </el-col>
+          
+         
+      </el-row>
         
         <el-table :data="tableData" style="width: 100%;margin-top: 20px;" v-loading="loading" border>
             <el-table-column prop="idWork" align="center" label="工号">
             </el-table-column>
-            <el-table-column prop="employeeName" align="center" label="员工姓名" width="60">
+            <el-table-column prop="name" align="center" label="员工姓名" width="100">
             </el-table-column>
-            <el-table-column prop="gender" align="center" label="性别" width="40">
-            </el-table-column>
-            <el-table-column prop="idNumber" align="center" label="身份证号" width="180">
+            <el-table-column prop="gender" align="center" label="性别" width="60">
             </el-table-column>
             <el-table-column prop="phoneNumber" align="center" label="电话号码">
             </el-table-column>
-  
-            <el-table-column prop="position" align="center" label="岗位">
+            <el-table-column prop="position" align="center" label="岗位" :show-overflow-tooltip="true">
             </el-table-column>
             <el-table-column prop="inductionTime" align="center" label="入职时间">
             </el-table-column>
-            <el-table-column prop="deptName" align="center" label="部门名">
+            <el-table-column prop="deptName" align="center" label="部门名" :show-overflow-tooltip="true">
             </el-table-column>
-            <el-table-column prop="password" align="center" label="登录密码">
-            </el-table-column>
+            
             <el-table-column label="操作" fixed="right" align="center" width="120">
               <template slot-scope="scope">
                 <el-button size="small" type="primary" @click="permissAllot(scope.row)">
@@ -124,7 +134,7 @@
               show-checkbox
               node-key="id"
               ref="tree"
-              :default-checked-keys="[10]"
+              
               
               :props="defaultProps">
             </el-tree>
@@ -153,7 +163,7 @@
           label: '业务员',
           children: [{
             id: 10,
-            label: '电话名单',
+            label: '电话名单',            
           },
           {
             id: 11,
@@ -285,17 +295,16 @@
           
           DATA: {
             page: 1,
-            pagesize: 10,
+            
             name: '',
-            employeeName:'',
-            idNumber: "",
-            phoneNumber: ""
+            
+            deptName:"",
           },
           currentPage: 1,
           pagesize: 10,
           total: "",
           tableData: [
-          { employeeName: '张三', gender: '男', idNumber: '500227199801233288x', phoneNumber: '15736063175', idWork: "2017441552", deptName: "销售部", position: "数据专员", password: "12121", inductionTime: "2020-12-12" }
+          // { employeeName: '张三', gender: '男', idNumber: '500227199801233288x', phoneNumber: '15736063175', idWork: "2017441552", deptName: "销售部", position: "数据专员", password: "12121", inductionTime: "2020-12-12" }
           ]
         }
       },
@@ -329,8 +338,8 @@
           this.getTotal(this.DATA)
         },
         handleCurrentChange(size) {
-          this.currentPage = currentPage;
-          this.DATA.page = currentPage;
+         
+          this.DATA.page = size;
           this.getTableData(this.DATA);
         },
 
@@ -343,7 +352,7 @@
         },
 
         getTableData(options) {
-          let URL = "http://lcj525.vipgz4.idcfengye.com/getPhoneRecordDept"
+          let URL = "http://lcj525.vipgz4.idcfengye.com/employee"
           // this.loading = true;
           URL = this.getTableDataURL(URL, options);
           return new Promise(resolve => {
@@ -361,7 +370,7 @@
         },
         getTotal(options) {
           return new Promise(resolve => {
-            let URL = "http://lcj525.vipgz4.idcfengye.com/getPhoneRecordDeptCount"           //获取表一所有数据总数
+            let URL = "http://lcj525.vipgz4.idcfengye.com/employeeCount"           //获取表一所有数据总数
             URL = this.getCountURL(URL, options);
             console.log(URL)
             fetch(URL)
@@ -377,15 +386,22 @@
 
         
 
-        permissAllot(){
+        permissAllot(currentRow){
           this.allotDialog = true
-          
+          let URL = `http://lcj525.vipgz4.idcfengye.com/permissions?phone=${currentRow.phone}`
+          fetch(URL)
+          .then(res=>res.json())
+          .then(json=>{
+            
+          })
 
 
         },
         allot(){
-          console.log(this.$refs.tree.setCurrentKey(1))
+          console.log(this.$refs.tree.getCheckedKeys())
         },
+
+        
         
         
 

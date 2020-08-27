@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="/admin/css/index.css">
 <script type="text/javascript" src="/admin/js/vue.js"></script>
 <script src="/admin/js/element.js"></script>
-<title>数据专员——面试名单</title>
+<title>市场部——面试名单</title>
 
 <body>
   <header class="header">
@@ -43,37 +43,29 @@
       <div id="app">
         <el-row>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入姓名" v-model="DATA.name" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入姓名" clearable v-model="DATA.customerName" @change="searchData">
           </el-col>
           <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="输入身份证号" v-model="DATA.idNumber" @keyup.enter.native="searchData">
+            <el-input placeholder="输入身份证号" clearable v-model="DATA.idNumber" @change="searchData">
+          </el-col>
+          
+          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
+            <el-input placeholder="请输入电话号码" clearable v-model="DATA.phoneNumber" @change="searchData">
           </el-col>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入电话号码" v-model="DATA.phoneNumber" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入区域" clearable v-model="DATA.address" @change="searchData">
           </el-col>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入推荐企业" v-model="DATA.recommendEnterprise" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入面试时间" clearable v-model="DATA.interviewTime" @change="searchData">
           </el-col>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入区域" v-model="DATA.address" @keyup.enter.native="searchData">
-          </el-col>
-          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入面试时间" v-model="DATA.interviewTime" @keyup.enter.native="searchData">
-          </el-col>
-          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入报名时间" v-model="DATA.signUpTime" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入部门名" clearable v-model="DATA.deptName" @change="searchData">
           </el-col>
           <el-col :span="3" style="margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入推荐人" v-model="DATA.customerName" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入推荐人" clearable v-model="DATA.employeeName" @change="searchData">
           </el-col>
-
-          <el-col :span="6" style="margin-left: 20px;margin-top: 30px;margin-bottom: 20px;">
-            <span style="font-size: 14px;">性别</span>
-            <el-radio-group v-model="DATA.gender" size="mini" @change="changeTable1">
-              <el-radio label="男">男</el-radio>
-              <el-radio label="女">女</el-radio>
-            </el-radio-group>
-          </el-col>
+          
+          
 
         </el-row>
         <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
@@ -102,8 +94,6 @@
           <el-table-column prop="recommendJob" align="center" label="推荐岗位" :show-overflow-tooltip="true">
           </el-table-column>
           <el-table-column prop="deptName" align="center" label="部门名" :show-overflow-tooltip="true">
-          </el-table-column>
-          <el-table-column prop="signUpTime" align="center" label="报名时间" width="140">
           </el-table-column>
           <el-table-column prop="interviewTime" align="center" label="面试时间" width="140">
           </el-table-column>
@@ -143,17 +133,16 @@
           loading: false,
           DATA: {
             page: 1,
-            customerName: "",
+            employeeName: "",
             deptName: "",
             address: "",
             date: "",
             idNumber: "",
             gender: "",/*多条件查询——性别单选框的默认选项*/
-            hasCertificate: "", /*多条件查询——是否为有证书单选框的默认选项*/
-            isDisability: "",/*多条件查询——是否为残疾人单选框的默认选项*/
+          
             phoneNumber: "",
             recommendEnterprise: "",
-            signUpTime: "",
+            
             interviewTime: "",
           },
           currentPage: 1,
@@ -190,12 +179,13 @@
         },
         searchData() {            //表一所有搜索框
           this.DATA.page = 1
-          this.getTableData(this.DATA);
+          this.getTableData(this.DATA)
+          this.getTotal(this.DATA)
         },
 
         handleCurrentChange(size) {       //改变表一page
-          this.currentPage = currentPage;
-          this.DATA.page = currentPage;
+          
+          this.DATA.page = size;
           this.getTableData(this.DATA2);
         },
 
@@ -209,7 +199,7 @@
 
         getTableData(options) {
           this.loading = true;
-          let URL = "http://lcj525.vipgz4.idcfengye.com/interviewListAll"
+          let URL = "http://lcj525.vipgz4.idcfengye.com/interviewListAllMarket"
           URL = this.getTableDataURL(URL, options);
           return new Promise(resolve => {
             fetch(URL)
@@ -227,7 +217,7 @@
         },
         getTotal(options) {
           return new Promise(resolve => {
-            let URL = "http://lcj525.vipgz4.idcfengye.com/interviewListAllCount"           //获取表一所有数据总数
+            let URL = "http://lcj525.vipgz4.idcfengye.com/interviewListAllMarketCount"           //获取表一所有数据总数
             URL = this.getCountURL(URL, options);
             console.log(URL)
             fetch(URL)
@@ -316,6 +306,11 @@
           });
 
         },
+
+
+        handleCancel(value) {
+          this.DATA.gender = value == this.DATA.gender ? '' : value
+        }
       },
     });
   </script>

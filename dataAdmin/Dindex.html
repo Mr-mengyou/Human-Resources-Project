@@ -78,41 +78,35 @@
       <div id="app">
         <el-row>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入姓名" clearable v-model="DATA.name" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入姓名" clearable v-model="DATA.name" @change="searchData">
           </el-col>
           <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="输入身份证号" clearable v-model="DATA.idNumber" @keyup.enter.native="searchData">
+            <el-input placeholder="输入身份证号" clearable v-model="DATA.idNumber" @change="searchData">
           </el-col>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入电话号码" clearable v-model="DATA.phoneNumber" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入电话号码" clearable v-model="DATA.phoneNumber" @change="searchData">
+          </el-col>
+          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">    
+              <el-select v-model="DATA.recommendEnterprise" clearable @change="getenterpriseName" placeholder="请选择企业">
+                <el-option v-for="item in enterOptions"  :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
           </el-col>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入推荐企业" clearable v-model="DATA.recommendEnterprise"
-              @keyup.enter.native="searchData">
+            <el-input placeholder="请输入区域" clearable v-model="DATA.address" @change="searchData">
           </el-col>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入区域" clearable v-model="DATA.address" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入面试时间" clearable v-model="DATA.interviewTime" @change="searchData">
           </el-col>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入面试时间" clearable v-model="DATA.interviewTime" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入报名时间" clearable v-model="DATA.signUpTime" @change="searchData">
           </el-col>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入报名时间" clearable v-model="DATA.signUpTime" @keyup.enter.native="searchData">
-          </el-col>
-          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入部门名" clearable v-model="DATA.deptName" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入部门名" clearable v-model="DATA.deptName" @change="searchData">
           </el-col>
           <el-col :span="3" style="margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入推荐人" clearable v-model="DATA.employeeName" @keyup.enter.native="searchData">
-          </el-col>
-
-
-          <el-col :span="6" style="margin-left: 20px;margin-top: 30px;margin-bottom: 20px;">
-            <span style="font-size: 14px;">性别：</span>
-            <el-radio-group v-model="DATA.gender" size="mini" @change="changeTable1">
-              <el-radio label="男" @click.native.prevent='handleCancel("男")'>男</el-radio>
-              <el-radio label="女" @click.native.prevent='handleCancel("女")'>女</el-radio>
-            </el-radio-group>
+            <el-input placeholder="请输入推荐人" clearable v-model="DATA.employeeName" @change="searchData">
+              
           </el-col>
         </el-row>
 
@@ -223,18 +217,31 @@
               </el-radio-group>
             </el-form-item>
             <el-form-item label="推荐企业" :label-width="formLabelWidth">
-              <el-input v-model="update_form.recommendEnterprise" autocomplete="off" size="small"></el-input>
+              <el-select v-model="update_form.recommendEnterprise" @change="updateEnterprise" placeholder="请选择">
+                <el-option v-for="item in enterOptions"  :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
             </el-form-item>
             <el-form-item label="推荐岗位" :label-width="formLabelWidth">
-              <el-input v-model="update_form.recommendJob" autocomplete="off" size="small"></el-input>
+              <el-select v-model="update_form.recommendJob"  placeholder="请选择">
+                <el-option v-for="item in jobOptions" :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
             </el-form-item>
-            <el-form-item label="面试时间" :label-width="formLabelWidth">
-              <el-input v-model="update_form.signUpTime" autocomplete="off" size="small"></el-input>
+            <el-form-item label="面试时间" :label-width="formLabelWidth"
+            label="面试时间" 
+            :label-width="formLabelWidth" 
+            prop="interviewTime" 
+            :rules="[
+            { validator: validateDate, trigger: ['blur', 'change'] }
+          ]"  
+            >
+              <el-input v-model="update_form.interviewTime" autocomplete="off" size="small"></el-input>
             </el-form-item>
           </el-form>
           <div slot="footer" class="dialog-footer" style="text-align: center;">
-            <el-button @click="dialogFormVisible3 = false">取 消</el-button>
-            <el-button type="primary" @click="update">提交</el-button>
+            <el-button @click="updateDialog = false">取 消</el-button>
+            <el-button type="primary" @click="update('update_form')">提交</el-button>
           </div>
         </el-dialog>
 
@@ -252,13 +259,15 @@
           formLabelWidth: '70px', /*表单Label长度*/
           //编辑表单
           update_form: "",
+          companyName:"",
           options: [{ value: '本科', label: '本科' }, { value: '专科', label: '专科' }, { value: '高中', label: '高中' }, { value: '研究生', label: '研究生' }, { value: '博士', label: '博士' }, { value: '初中', label: '初中' }, { value: '其它', label: '其它' }],
-
+          enterOptions:[],
+          jobOptions:[],
           // 查询
           DATA: {
             name: '',
             page: 1,
-            pagesize: 10,
+            
             employeeName: "",
             deptName: "",
             address: "",
@@ -284,6 +293,7 @@
       created() {
         this.getTableData(this.DATA)
         this.getTotal(this.DATA)
+        this.getenterprise()
       },
       methods: {
         getTableDataURL(URL, options) {        //根据URL和参数对象生成附加参数的URL
@@ -370,6 +380,14 @@
             return item;
           })
         },
+        validateDate(rule, value, callback){
+          let dateRule = /^((([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))0229))$/
+          if (dateRule.test(value)==false) {        
+              callback(new Error('请输入正确得时间格式，如2017-01-01'))
+          } else {
+            callback()
+          }
+        },
 
 
 
@@ -377,25 +395,27 @@
         {
           // console.log(rowId)
           this.updateDialog = true
-
+          this.updateEnterprise(rowId.recommendEnterprise)
           this.update_form = Object.assign({}, rowId)
           console.log(this.update_form)
           this.update_form.signUpInfoId = this.update_form.signUpId
           // this.update_form.name = this.update_form.customerName
 
 
-          // this.update_form.gender === '女' ? this.update_form.gender = 1 : this.update_form.gender = 0
+          this.update_form.gender === '女' ? this.update_form.gender = 1 : this.update_form.gender = 0
           this.update_form.hasCertificate === '无' ? this.update_form.hasCertificate = 0 : this.update_form.hasCertificate = 1
           this.update_form.isDisability === '否' ? this.update_form.isDisability = 0 : this.update_form.isDisability = 1
 
 
         },
 
-        update() {                               //提交编辑表单
-
-          console.log(JSON.stringify(this.update_form))
-          let URL = "http://lcj525.vipgz4.idcfengye.com/updataSignUp"
+        update(formName) {                               //提交编辑表单
+        
+          this.$refs[formName].validate((valid) => {
+          if (valid) {
+            let URL = "http://lcj525.vipgz4.idcfengye.com/updateSignUp"
           this.update_form.name = this.update_form.customerName
+          this.update_form.gender === 0 ? this.update_form.gender = '男' : this.update_form.gender = '女'
           delete this.update_form.customerName
           delete this.update_form.signUpId
           var opt = {
@@ -409,12 +429,36 @@
             fetch(URL, opt)
               .then(res => res.json())
               .then(json => {
+                this.updateDialog = false
+                if(json.statusCode == 1){
+                  this.$message({
+                    type : 'success',
+                    message : '修改成功'
+                  })
+                }
                 this.getTableData(this.DATA)
                 this.getTotal(this.DATA)
-                this.updateDialog = false
+                
                 resolve();
-              });
+              })
+              .catch(err=>{
+                this.$message({
+                  type : 'error',
+                  message : '修改失败'
+                })
+              })
           })
+          }
+          else{
+            this.$message({
+              type : 'error',
+              message : '请正确填写时间格式'
+            })
+            return false;
+          }
+          
+          })
+          
         },
 
         through(currentRow) {
@@ -488,9 +532,71 @@
 
         },
 
-        handleCancel(value) {
-          this.DATA.gender = value == this.DATA.gender ? '' : value
-        }
+        // handleCancel(value) {
+        //   this.DATA.gender = value == this.DATA.gender ? '' : value
+        // },
+        
+
+        getenterpriseName(val){
+          
+          this.getTableData(this.DATA);
+          this.getTotal(this.DATA)
+        },
+
+        getenterprise(){
+          let URL = "http://lcj525.vipgz4.idcfengye.com/enterpriseName"
+          fetch(URL)
+          .then(res=>res.json())
+          .then(json=>{
+            for (var i=0; i<json.length; i++)
+            {
+              
+              json[i].value =json[i].enterpriseName 
+              json[i].label =json[i].enterpriseName 
+              delete json[i].id , delete json[i].phone,  delete json[i].place, delete json[i].roomAndBoard, delete json[i].time, delete json[i].welfare
+              delete json[i].address , delete json[i].head, delete json[i].enterpriseName
+              
+            }
+            this.enterOptions = json
+            
+          })
+        },
+
+        updateEnterprise(val){
+          let URL = "http://lcj525.vipgz4.idcfengye.com/enterpriseName"
+          fetch(URL)
+          .then(res=>res.json())
+          .then(json=>{
+            for (var i=0; i<json.length; i++)
+            {
+              
+              json[i].value =json[i].enterpriseName 
+              json[i].label =json[i].enterpriseName 
+              delete json[i].id , delete json[i].phone,  delete json[i].place, delete json[i].roomAndBoard, delete json[i].time, delete json[i].welfare
+              delete json[i].address , delete json[i].head, delete json[i].enterpriseName
+              
+            }
+            this.enterOptions = json
+            
+          })
+          this.companyName = val
+          this.update_form.recommendJob = ""
+          let URLJob = `http://lcj525.vipgz4.idcfengye.com/enterpriseJob?enterpriseName=${this.companyName}`
+          fetch(URLJob)
+          .then(res=>res.json())
+          .then(json=>{
+            console.log(json)
+            for (var i=0;i<json.length;i++){
+              json[i].value =json[i].job
+              json[i].label =json[i].job
+              delete json[i].id , delete json[i].number , delete json[i].wage , delete json[i].enterpriseId
+
+            }
+            this.jobOptions = json
+          })
+
+        },
+
 
 
 

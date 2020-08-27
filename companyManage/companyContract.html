@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8" />
+
+<link rel="stylesheet" href="/admin/css/style.css" />
+<link rel="stylesheet" href="/admin/css/other.css" />
+<!-- <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" /> -->
+<link rel="stylesheet" href="/admin/css/index.css">
+<script type="text/javascript" src="/admin/js/vue.js"></script>
+<script src="/admin/js/element.js"></script>
+<title>企业管理——企业合同</title>
+<style>
+  .el-dialog {
+    width: 80%;
+    font-family: "微软雅黑";
+    font-weight: bold;
+  }
+
+  .el-form-item label:after {
+    content: "";
+    display: inline-block;
+    width: 100%;
+  }
+
+  .el-form-item__label {
+    text-align: justify;
+    height: 50px;
+  }
+
+  .el-form-item.is-required .el-form-item__label:before {
+    content: none !important;
+  }
+
+  .el-form-item {
+    width: 45%;
+    margin-left: 30px;
+  }
+
+  /* .el-radio:focus:not(.is-focus):not(:active) {
+  -webkit-box-shadow: 0 0 2px 2px #fff;
+  box-shadow: 0 0 2px 2px #fff;
+  }
+  .el-radio__inner {
+    border-left: 1px solid #d8dce5
+  } */
+</style>
+
+<body>
+  <header class="header">
+    <div class="container flex">
+      <div class="left">
+        <img class="logo" src="/admin/images/2.jpg" />
+      </div>
+      <div class="right flex">
+        <p class="font">用户1</p>
+        <p class="font exit">退出</p>
+      </div>
+    </div>
+  </header>
+  <div class="body flex">
+    <div class="slider">
+      <div class="slider-body">
+        <ul>
+          <li class="ul-item active">
+            <a class="slider-link " href="/companyManage/companyInfo.html">企业简章</a>
+          </li>
+          
+          <li class="ul-item active">
+            <a class="slider-link active" href="/companyManage/companyContract.html">企业合同</a>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+    <div class="main">
+      <!-- 主体  -->
+      <div id="app">
+        <el-row>
+          <el-col :span="3" style="margin-top: 20px;margin-bottom: 20px;width: 200px;">
+            <el-input placeholder="请输入企业名称" clearable v-model="DATA.enterpriseName" @change="searchData">
+          </el-col>
+          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;float: right;">
+            <el-button type="primary" @click="addEnterprise">添加</el-button>
+          </el-col>
+        </el-row>
+
+        <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
+          <el-table-column fixed prop="enterpriseName" align="center" center label="企业名称" width="100" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="address" align="center" label="地址" width="120" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="signingTime" align="center" label="签约时间" width="120" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="type" align="center" label="签约类型" width="80">
+          </el-table-column>
+          <el-table-column prop="duration" align="center" label="签约时长" width="80">
+          </el-table-column>
+          <el-table-column prop="expireTime" align="center" label="合同到期时间" width="110" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="enterpriseHead" align="center" label="负责人" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="phone" align="center" label="联系电话" width="120" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="contractor" align="center" label="签约人" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column label="操作" fixed="right" align="center" width="218">
+            <template slot-scope="scope">
+              <el-button size="small" type="primary" @click="updateList(scope.row)">
+                编辑
+              </el-button>
+              <el-button size="small" type="danger" @click="deleteContract(scope.row)">
+                删除
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <div class="footer" style="width: 100%;margin-top:1rem;">
+          <template>
+            <div class="block">
+              <el-pagination @current-change="handleCurrentChange" :current-page="currentPage" :page-size="10"
+                layout="total, prev, pager, next, jumper" :total="total">
+              </el-pagination>
+            </div>
+          </template>
+        </div>
+
+
+        <!-- 编辑表单 -->
+        <el-dialog title="编辑——企业合同" :visible.sync="updateDialog">
+          <el-form :inline="true" :model="updateForm" ref="updateForm" style="margin-left: 80px;" class="demo-ruleForm">
+            <el-form-item label="企业名称" :label-width="formLabelWidth">
+              <el-input v-model="updateForm.enterpriseName" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="地址" :label-width="formLabelWidth">
+              <el-input v-model="updateForm.address" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="签约时间" :label-width="formLabelWidth">
+              <el-input v-model="updateForm.signingTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="签约类型" :label-width="formLabelWidth">
+              <el-input v-model="updateForm.type" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="签约时长" :label-width="formLabelWidth">
+              <el-input v-model="updateForm.duration" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="合同到期时间" :label-width="formLabelWidth">
+              <el-input v-model="updateForm.expireTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="负责人" :label-width="formLabelWidth">
+              <el-input v-model="updateForm.enterpriseHead" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="联系电话" :label-width="formLabelWidth">
+              <el-input v-model="updateForm.phone" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="签约人" :label-width="formLabelWidth">
+              <el-input v-model="updateForm.contractor" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer" style="text-align: center;">
+            <el-button @click="updateDialog = false">取 消</el-button>
+            <el-button type="primary" @click="update">提交</el-button>
+          </div>
+        </el-dialog>
+
+
+        <el-dialog title="添加——企业简章" :visible.sync="addDialog">
+          <el-form :inline="true" :model="addForm" ref="addForm" style="margin-left: 80px;" class="demo-ruleForm">
+            <el-form-item label="企业名称" :label-width="formLabelWidth">
+              <el-input v-model="addForm.enterpriseName" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="地址" :label-width="formLabelWidth">
+              <el-input v-model="addForm.address" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="签约时间" :label-width="formLabelWidth">
+              <el-input v-model="addForm.signingTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="签约类型" :label-width="formLabelWidth">
+              <el-input v-model="addForm.type" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="签约时长" :label-width="formLabelWidth">
+              <el-input v-model="addForm.duration" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="合同到期时间" :label-width="formLabelWidth">
+              <el-input v-model="addForm.expireTime" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="负责人" :label-width="formLabelWidth">
+              <el-input v-model="addForm.enterpriseHead" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="联系电话" :label-width="formLabelWidth">
+              <el-input v-model="addForm.phone" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+            <el-form-item label="签约人" :label-width="formLabelWidth">
+              <el-input v-model="addForm.contractor" autocomplete="off" size="small"></el-input>
+            </el-form-item>
+          </el-form>
+          <div slot="footer" class="dialog-footer" style="text-align: center;">
+            <el-button @click="addDialog = false">取 消</el-button>
+            <el-button type="primary" @click="add">添加</el-button>
+          </div>
+        </el-dialog>
+
+      </div>
+    </div>
+  </div>
+  <script>
+    new Vue({
+      el: '#app',
+      data: function () {
+        return {
+          total: "",
+          loading: false,
+          updateDialog: false,
+          addDialog: false,
+          formLabelWidth: '100px', /*表单Label长度*/
+          //编辑表单
+          updateForm: {},
+          addForm: {},
+
+          // 查询
+          DATA: {
+            name: '',
+            page: 1,
+            enterpriseName: '',
+          },
+
+          currentPage: 1,
+          pagesize: 10,
+          total: "",
+          tableData: [
+            // {id:"1", name: '张三', gender: '女', age: '12', cardNumber: '500227199801233288x', phoneNumber: '15736063175', certificate: "有", education: "大专", isDisabled: "否", inv_date: "2020-8-15-23:00" }
+          ]
+        }
+      },
+
+      created() {
+        this.getTableData(this.DATA)
+        this.getTotal(this.DATA)
+      },
+      methods: {
+        getTableDataURL(URL, options) {        //根据URL和参数对象生成附加参数的URL
+          URL += "?";
+          for (let [key, value] of Object.entries(options)) {
+            if (value !== "") URL += "" + key + "=" + value + "&";
+          }
+          return URL.slice(0, URL.length - 1);
+        },
+        getCountURL(URL, options) {
+          URL += "?";                //根据URL和参数对象生成附加参数不带page的URL
+          for (let [key, value] of Object.entries(options)) {
+            if (value !== "" && key !== 'page') URL += "" + key + "=" + value + "&";
+          }
+          return URL.slice(0, URL.length - 1);
+        },
+        initForm(obj) {
+          for (let key in obj) {    //对象键值全部变为空
+            obj[key] = "";
+          }
+        },
+        searchData() {            //表一所有搜索框
+
+          this.getTableData(this.DATA);
+          this.getTotal(this.DATA)
+        },
+
+        handleCurrentChange(size) {       //改变表一page
+
+          this.DATA.page = size;
+          this.getTableData(this.DATA);
+        },
+
+        changeTable1() {                //改变表一任何一个单选框
+          this.getTotal(this.DATA).then(() => {
+            this.getTableData(this.DATA)
+          }).catch(err => {
+            this.$message.error(err);
+          })
+        },
+
+
+        getTableData(options) {              //获取表格数据
+
+
+          this.loading = true;
+          let URL = "http://lcj525.vipgz4.idcfengye.com/enterpriseContract"
+          URL = this.getTableDataURL(URL, options);
+          return new Promise(resolve => {
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+
+                this.tableData = json
+
+                resolve();
+                setTimeout(() => {
+                  this.loading = false;
+                }, 500);
+              });
+          });
+        },
+
+
+        getTotal(options) {
+          return new Promise(resolve => {
+            let URL = "http://lcj525.vipgz4.idcfengye.com/enterpriseContractCount"           //获取表一所有数据总数
+            URL = this.getCountURL(URL, options);
+            console.log(URL)
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+                this.total = json.count;
+                resolve();
+              });
+          });
+        },
+        addEnterprise(){
+          this.addDialog = true
+        },
+        add(){
+          let URL = "http://lcj525.vipgz4.idcfengye.com/addEnterpriseContract"
+          let opt = {
+            method : 'post',
+            body : JSON.stringify(this.addForm),
+            headers:{
+              'content-type' : 'application/json'
+            },
+          }
+          fetch(URL,opt)
+          .then(res=>res.json())
+          .then(json=>{
+            this.addDialog = false
+            this.$message({
+              type : 'success',
+              message : '添加成功'
+            })
+            this.getTableData(this.DATA)
+            this.getTotal(this.DATA)
+          })
+          .catch(error=>{
+            this.$message({
+              type : 'error',
+              message : '添加失败'
+            })
+          })
+
+        },
+
+        updateList(rowId)                         //进入编辑弹窗前，获取当前行数据
+        {
+          this.updateDialog = true
+          this.updateForm = Object.assign({}, rowId)
+        },
+
+        update() {                               //提交编辑表单
+
+
+          let URL = "http://lcj525.vipgz4.idcfengye.com/updateEnterpriseContract"
+          var opt = {
+            method: "POST",
+            body: JSON.stringify(this.updateForm),
+            headers: {
+              "content-type": 'application/json'
+            }
+          }
+          fetch(URL, opt)
+            .then(res => res.json())
+            .then(json => {
+              this.updateDialog = false
+              this.$message({
+                type: 'success',
+                message: '修改成功'
+              })
+              this.getTableData(this.DATA)
+              this.getTotal(this.DATA)
+            })
+            .catch(error=>{
+              this.$message({
+                type : 'error',
+                message : '修改失败'
+              })
+            })
+        },
+
+       
+       
+        deleteContract(currentRow) {
+          
+          let URL = `http://lcj525.vipgz4.idcfengye.com/deleteEnterpriseContract?id=${currentRow.id}`
+          
+          fetch(URL)
+            .then(res => res.json())
+            .then(json => {
+              this.$message({
+                type: 'success',
+                message: '删除成功'
+              })
+              this.getTableData(this.DATA)
+              this.getTotal(this.DATA)
+            })
+            .catch(error => {
+              this.$message({
+                type: 'error',
+                message: '删除失败'
+              })
+              this.getTableData(this.DATA)
+              this.getTotal(this.DATA)
+            })
+        },
+
+
+
+
+        handleCancel(value) {
+          this.DATA.gender = value == this.DATA.gender ? '' : value
+        }
+
+
+
+
+      },
+    });
+  </script>
+</body>
+
+</html>

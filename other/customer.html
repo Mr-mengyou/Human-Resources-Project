@@ -70,6 +70,10 @@
             </a>
           </li>
           <li class="ul-item">
+            <a class="slider-link " href="/other/companyAllot.html">企业权限管理
+            </a>
+          </li>
+          <li class="ul-item">
             <a class="slider-link " href="/other/sysSetting.html">系统设置</a>
           </li>
           <li class="ul-item">
@@ -126,14 +130,20 @@
             </el-table-column>
             <el-table-column prop="state" align="center" label="状态" :show-overflow-tooltip="true">
             </el-table-column>
-            <el-table-column label="操作" fixed="right" align="center" width="150">
+            <el-table-column label="操作" fixed="right" align="center" width="200">
             <template slot-scope="scope">
               <el-button size="small" type="primary" @click="editForm(scope.row)">
                 编辑
               </el-button>
               <el-button size="small" type="warning" @click="handleAllot(scope.row)">
                 分配
-              </el-button>     
+              </el-button>  
+              <el-button size="small" type="danger" style="margin-top: 5px;" @click="handleAllot(scope.row)">
+                删除
+              </el-button> 
+              <el-button size="small" type="info" @click="handleAllot(scope.row)">
+                黑名单
+              </el-button>    
             </template>
           </el-table-column>
         </el-table>
@@ -311,13 +321,13 @@
           pagesize: 10,
           total: "",
           tableData: [
-            { name: '张三', gender: '女', age: '12', cardNumber: '500227199801233288x', phoneNumber: '15736063175', education: "大专" }
+            // { name: '张三', gender: '女', age: '12', cardNumber: '500227199801233288x', phoneNumber: '15736063175', education: "大专" }
           ]
         }
       },
       created() {
-        // this.getTableData(this.DATA)
-        // this.getTotal(this.DATA)
+        this.getTableData(this.DATA)
+        this.getTotal(this.DATA)
       },
       methods: {
         getTableDataURL(URL, options) {        //根据URL和参数对象生成附加参数的URL
@@ -423,6 +433,7 @@
           this.updateForm.isDisability === '是' ? this.updateForm.isDisability = 0 : this.updateForm.isDisability = 1
         },
         edit(){
+          this.updateForm.gender === 0 ? this.updateForm.gender = '男'  : this.updateForm.gender = '女'
           let URL = "http://lcj525.vipgz4.idcfengye.com/updateCustomer"
           let opt = {
             method : 'post',
@@ -436,7 +447,7 @@
           .then(json=>{
             this.editDialog = false
             this.$message({
-              type : 'info',
+              type : 'success',
               message: '编辑成功'
             })
             this.getTableData(this.DATA)
@@ -455,17 +466,23 @@
           .then(res=>res.json())
           .then(json=>{
             for (var i = 0,l = json.length;i<l;i++){
-              json[i].label = json[i].value
-              json[i].value = json[i].id + "|"+json[i].value
+              json[i].label = json[i].name
+              json[i].value = json[i].name + "|"+ json[i].id + "|" +currentRow.id
+              
             }
             this.options3 = json
             
           })
         },
         allot(){
-          let URL = "http://lcj525.vipgz4.idcfengye.com/distribution"
-          this.allotForm.id = this.allotForm.value.split("|")
+          console.log(this.options3)
           
+          let URL = "http://lcj525.vipgz4.idcfengye.com/distribution"
+          let value = this.allotForm.name 
+          var detailValue = value.split('|',3)
+          this.allotForm.id = detailValue[2]
+          this.allotForm.employeeId= detailValue[1]
+          delete this.allotForm.name
           let opt = {
             method : 'post',
             body : JSON.stringify(this.allotForm),
@@ -476,6 +493,20 @@
           fetch(URL,opt)
           .then(res=>res.json())
           .then(json=>{
+            if(json.statusCode==-2){
+              this.$message({
+                type : 'error',
+                message : '分配失败'
+              })
+            }
+            else if(json.statusCode == 1)
+            {
+              this.$message({
+                type : 'success',
+                message : '分配成功'
+              })
+              this.allotDialog = false
+            }
             
           })
         },

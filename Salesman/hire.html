@@ -91,15 +91,15 @@
       <div id="app">
         <div style="display: flex;flex-direction: row;flex-wrap: wrap;margin-bottom:2rem;margin-top: 2rem;">
           <div class="mobileSize">
-            <el-input placeholder="请输入姓名" v-model="DATA.name" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入姓名" clearable v-model="DATA.name" @change="searchData">
             </el-input>
           </div>
           <div class="mobileSize">
-            <el-input placeholder="输入身份证号" v-model="DATA.idNumber" @keyup.enter.native="searchData">
+            <el-input placeholder="输入身份证号" clearable v-model="DATA.idNumber" @change="searchData">
             </el-input>
           </div>
           <div class="mobileSize">
-            <el-input placeholder="请输入电话号码" v-model="DATA.phoneNumber" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入电话号码" clearable v-model="DATA.phoneNumber" @change="searchData">
             </el-input>
           </div>
         </div>
@@ -147,7 +147,7 @@
           formLabelWidth:'100px', 
           DATA: {
             page: 1,
-            pagesize: 10,
+           
             name: '',
             idNumber: "",
             phoneNumber: ""
@@ -190,8 +190,8 @@
           this.getTotal(this.DATA)
         },
         handleCurrentChange(size) {
-          this.currentPage = currentPage;
-          this.DATA.page = currentPage;
+          
+          this.DATA.page = size;
           this.getTableData(this.DATA);
         },
 

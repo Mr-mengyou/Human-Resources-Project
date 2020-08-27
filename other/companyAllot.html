@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8" />
+
+<link rel="stylesheet" href="/admin/css/style.css" />
+<link rel="stylesheet" href="/admin/css/other.css" />
+<!-- <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" /> -->
+<link rel="stylesheet" href="/admin/css/index.css">
+<script type="text/javascript" src="/admin/js/vue.js"></script>
+<script src="/admin/js/element.js"></script>
+<title>其它——企业权限管理</title>
+<style>
+  .el-dialog {
+    width: 80%;
+    font-family: "微软雅黑";
+    font-weight: bold;
+  }
+
+  .el-form-item label:after {
+    content: "";
+    display: inline-block;
+    width: 100%;
+  }
+
+  .el-form-item__label {
+    text-align: justify;
+    height: 50px;
+  }
+
+  .el-form-item.is-required .el-form-item__label:before {
+    content: none !important;
+  }
+
+  .el-form-item {
+    width: 45%;
+    margin-left: 30px;
+  }
+
+  /* .el-radio:focus:not(.is-focus):not(:active) {
+  -webkit-box-shadow: 0 0 2px 2px #fff;
+  box-shadow: 0 0 2px 2px #fff;
+  }
+  .el-radio__inner {
+    border-left: 1px solid #d8dce5
+  } */
+</style>
+
+<body>
+  <header class="header">
+    <div class="container flex">
+      <div class="left">
+        <img class="logo" src="/admin/images/2.jpg" />
+      </div>
+      <div class="right flex">
+        <p class="font">用户1</p>
+        <p class="font exit">退出</p>
+      </div>
+    </div>
+  </header>
+  <div class="body flex">
+    <div class="slider">
+      <div class="slider-body">
+        <ul>
+          <li class="ul-item">
+            <a class="slider-link " href="/other/authorityManage.html">权限分配
+            </a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link active " href="/other/companyAllot.html">企业权限管理
+            </a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link  " href="/other/sysSetting.html">系统设置</a>
+          </li>
+          <li class="ul-item">
+            <a class="slider-link " href="/other/customer.html">公海名单</a>
+          </li>
+
+        </ul>
+      </div>
+    </div>
+    <div class="main">
+      <!-- 主体  -->
+      <div id="app">
+        <el-row>
+          <el-col :span="3" style="margin-top: 20px;margin-bottom: 20px;width: 200px;">
+            <el-input placeholder="请输入业务员名字" clearable v-model="DATA.name" @change="searchData">
+          </el-col>
+          
+        </el-row>
+
+        <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
+          <el-table-column fixed prop="idWork" align="center" center label="工号" width="180" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="name" align="center" label="业务员名字" width="120" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="idNumber" align="center" label="身份证号码" width="180" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="gender" align="center" label="性别" width="80">
+          </el-table-column>
+          <el-table-column prop="phone" align="center" label="电话" width="150">
+          </el-table-column>
+          <el-table-column prop="position" align="center" label="岗位" width="210" :show-overflow-tooltip="true">
+          </el-table-column>
+          
+          <el-table-column label="操作" fixed="right" align="center" width="218">
+            <template slot-scope="scope">
+              <el-button size="small" type="primary" @click="detail(scope.row)">
+                详情
+              </el-button>
+              
+            </template>
+          </el-table-column>
+        </el-table>
+
+        <el-dialog title="详情——驻场负责人管理" :visible.sync="detailDialog">
+          <el-button  type="primary" style="float: right;margin-bottom: 10px;" @click="addEnterprise">
+            添加
+          </el-button> 
+          <el-table :data="tableData2" style="width: 100%" v-loading="loading" border>
+            <el-table-column prop="enterpriseName" align="center" center label="企业名称" :show-overflow-tooltip="true">
+            </el-table-column>
+            <el-table-column label="操作" fixed="right" align="center" >
+              <template slot-scope="scope">
+                <el-button size="small" type="primary" @click="deleteEnterprise(scope.row)">
+                  删除
+                </el-button> 
+              </template>
+            </el-table-column>
+          </el-table>
+          <div slot="footer" class="dialog-footer" style="text-align: center;">
+            <el-button @click="detailDialog = false">取 消</el-button>
+            
+          </div>
+        </el-dialog>
+        
+
+        
+
+      </div>
+    </div>
+  </div>
+  <script>
+    new Vue({
+      el: '#app',
+      data: function () {
+        return {
+          total: "",
+          loading: false,
+          detailDialog:false,
+         
+          formLabelWidth: '100px', /*表单Label长度*/
+          //编辑表单
+          detailForm : {},
+          addForm: {},
+
+          // 查询
+          DATA: {
+            name: '',
+            page: 1,
+            name: '',
+          },
+
+          currentPage: 1,
+          pagesize: 10,
+          total: "",
+          tableData: [],
+          tableData2:[],
+        }
+      },
+
+      created() {
+        this.getTableData(this.DATA)
+        
+      },
+      methods: {
+        getTableDataURL(URL, options) {        //根据URL和参数对象生成附加参数的URL
+          URL += "?";
+          for (let [key, value] of Object.entries(options)) {
+            if (value !== "") URL += "" + key + "=" + value + "&";
+          }
+          return URL.slice(0, URL.length - 1);
+        },
+        
+        initForm(obj) {
+          for (let key in obj) {    //对象键值全部变为空
+            obj[key] = "";
+          }
+        },
+        searchData() {            //表一所有搜索框
+
+          this.getTableData(this.DATA);
+          
+        },
+
+        getTableData(options) {              //获取表格数据
+
+
+          this.loading = true;
+          let URL = "http://lcj525.vipgz4.idcfengye.com/market"
+          URL = this.getTableDataURL(URL, options);
+          return new Promise(resolve => {
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+
+                this.tableData = json
+
+                resolve();
+                setTimeout(() => {
+                  this.loading = false;
+                }, 500);
+              });
+          });
+        },
+
+        headEnterprise(name){
+          let URL = `http://lcj525.vipgz4.idcfengye.com/headEnterprise?name=${name}`
+          fetch(URL)
+          .then(res=>res.json())
+          .then(json=>{
+            this.tableData2 = json
+  
+          })
+        },
+        detail(currentRow){
+          this.detailDialog = true
+          this.headEnterprise(currentRow.name)
+          this.addForm.name = currentRow.name
+        },
+
+        
+        deleteEnterprise(currentRow) {
+          
+          let URL = `http://lcj525.vipgz4.idcfengye.com/deleteEnterpriseDemandHead?id=${currentRow.id}`
+          
+          fetch(URL)
+            .then(res => res.json())
+            .then(json => {
+              this.$message({
+                type: 'success',
+                message: '删除成功'
+              })
+              this.headEnterprise(currentRow.name)
+              
+            })
+            .catch(error => {
+              this.$message({
+                type: 'error',
+                message: '删除失败'
+              })
+              this.headEnterprise(currentRow.name)
+              
+            })
+        },
+
+       
+        
+        addEnterprise(){
+          this.$prompt('企业名称', {
+            confirmButtonText: '添加',
+            cancelButtonText: '取消',
+            
+
+          }).then(({ value }) => {
+            let URL = 'http://lcj525.vipgz4.idcfengye.com/addEnterpriseHead'
+            this.addForm.enterpriseName = value
+            var opt = {
+              method: "POST",
+              body: JSON.stringify(this.addForm),
+              headers: {
+                "content-type": 'application/json'
+              }
+
+            }
+            return new Promise(resolve => {
+              fetch(URL, opt)
+                .then(res => res.json())
+                .then(json => {
+                  this.$message({
+                    type: 'success',
+                    message: ' 您已经成功添加企业名称为：' + value,
+
+                  })
+                  this.headEnterprise(this.addForm.name)
+                  resolve();
+                });
+            })
+
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '取消输入'
+            });
+          });
+          
+        },
+        
+
+
+
+
+        handleCancel(value) {
+          this.DATA.gender = value == this.DATA.gender ? '' : value
+        }
+
+
+
+
+      },
+    });
+  </script>
+</body>
+
+</html>

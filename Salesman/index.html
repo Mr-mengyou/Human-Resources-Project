@@ -179,7 +179,7 @@
               </el-radio-group>
             </el-form-item>
             <el-form-item label="身份证" :label-width="formLabelWidth">
-              <el-input v-model="add_form.cardNumber" autocomplete="off" size="small"></el-input>
+              <el-input v-model="add_form.idNumber" autocomplete="off" size="small"></el-input>
             </el-form-item>
             <el-form-item label="年龄" :label-width="formLabelWidth">
               <el-input v-model="add_form.age" autocomplete="off" size="small"></el-input>
@@ -216,7 +216,7 @@
             </el-form-item>
             <el-form-item label="数据来源" :label-width="formLabelWidth">
               <el-select v-model="add_form.source_data" placeholder="请选择">
-                <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+                <el-option v-for="item in options2" :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
               </el-select>
             </el-form-item>
@@ -263,6 +263,18 @@
               <el-input v-model="update_form.address" autocomplete="off" size="small"></el-input>
             </el-form-item>
 
+            <el-form-item label="推荐企业" :label-width="formLabelWidth">
+              <el-select v-model="update_form.recommendEnterprise" @change="getenterpriseName" placeholder="请选择">
+                <el-option v-for="item in enterOptions"  :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="推荐岗位" :label-width="formLabelWidth">
+              <el-select v-model="update_form.recommendJob"  placeholder="请选择">
+                <el-option v-for="item in jobOptions" :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
+            </el-form-item>
 
             <el-form-item label="专业技能" :label-width="formLabelWidth">
               <el-input v-model="update_form.professionalSkills" autocomplete="off" size="small"></el-input>
@@ -282,7 +294,7 @@
             </el-form-item>
             <el-form-item label="数据来源" :label-width="formLabelWidth">
               <el-select v-model="update_form.sourceOfData" placeholder="请选择">
-                <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+                <el-option v-for="item in options2" :key="item.value" :label="item.label" :value="item.value">
                 </el-option>
               </el-select>
             </el-form-item>
@@ -333,45 +345,45 @@
         <!-- 多条件查询 -->
         <el-row>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入姓名" v-model="DATA.name" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入姓名" clearable v-model="DATA.name" @change="searchData">
           </el-col>
           <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="输入身份证号" v-model="DATA.idNumber" @keyup.enter.native="searchData">
+            <el-input placeholder="输入身份证号" clearable v-model="DATA.idNumber" @change="searchData">
           </el-col>
           <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入电话号码" v-model="DATA.phoneNumber" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入电话号码" clearable v-model="DATA.phoneNumber" @change="searchData">
           </el-col>
           <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入专业技能" v-model="DATA.professionalSkills" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入专业技能" clearable v-model="DATA.professionalSkills" @change="searchData">
           </el-col>
           <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入数据来源" v-model="DATA.sourceOfData" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入数据来源" clearable v-model="DATA.sourceOfData" @change="searchData">
           </el-col>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入学历" v-model="DATA.education" @keyup.enter.native="searchData">
+            <el-input placeholder="请输入学历" clearable v-model="DATA.education" @change="searchData">
           </el-col>
 
           <el-col :span="6" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
             <span style="font-size: 14px;">性别</span>
             <el-radio-group v-model="DATA.gender" size="mini" @change="changeTable1">
-              <el-radio label="男">男</el-radio>
-              <el-radio label="女">女</el-radio>
+              <el-radio label="男" @click.native.prevent='handleCancel("男")'>男</el-radio>
+              <el-radio label="女" @click.native.prevent='handleCancel("女")'>女</el-radio>
             </el-radio-group>
           </el-col>
 
           <el-col :span="6" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
             <span style="font-size: 14px;">是否有证书</span>
             <el-radio-group v-model="DATA.hasCertificate" size="mini" @change="changeTable1">
-              <el-radio label="0">是</el-radio>
-              <el-radio label="1">否</el-radio>
+              <el-radio label="0" @click.native.prevent='handleCancel1("0")'>是</el-radio>
+              <el-radio label="1" @click.native.prevent='handleCancel1("1")'>否</el-radio>
             </el-radio-group>
           </el-col>
 
           <el-col :span="7" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
             <span style="font-size: 14px;">是否为残疾人</span>
             <el-radio-group v-model="DATA.isDisability" size="mini" @change="changeTable1">
-              <el-radio label="0">是</el-radio>
-              <el-radio label="1">否</el-radio>
+              <el-radio label="0" @click.native.prevent='handleCancel2("0")'>是</el-radio>
+              <el-radio label="1" @click.native.prevent='handleCancel2("1")'>否</el-radio>
             </el-radio-group>
           </el-col>
 
@@ -446,22 +458,22 @@
         <strong style="margin-top: 1em;font-size: 20px;">电话总名单</strong>
         <el-row>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入姓名" v-model="DATA2.name" @keyup.enter.native="searchData2">
+            <el-input placeholder="请输入姓名" clearable v-model="DATA2.name" @change="searchData2">
           </el-col>
           <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="输入身份证号" v-model="DATA2.idNumber" @keyup.enter.native="searchData2">
+            <el-input placeholder="输入身份证号" clearable v-model="DATA2.idNumber" @change="searchData2">
           </el-col>
           <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入电话号码" v-model="DATA2.phoneNumber" @keyup.enter.native="searchData2">
+            <el-input placeholder="请输入电话号码" clearable v-model="DATA2.phoneNumber" @change="searchData2">
           </el-col>
           <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入专业技能" v-model="DATA2.professionalSkills" @keyup.enter.native="searchData2">
+            <el-input placeholder="请输入专业技能" clearable v-model="DATA2.professionalSkills" @change="searchData2">
           </el-col>
           <el-col :span="4" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入数据来源" v-model="DATA2.sourceOfData" @keyup.enter.native="searchData2">
+            <el-input placeholder="请输入数据来源" clearable v-model="DATA2.sourceOfData" @change="searchData2">
           </el-col>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入学历" v-model="DATA2.education" @keyup.enter.native="searchData2">
+            <el-input placeholder="请输入学历" clearable v-model="DATA2.education" @change="searchData2">
           </el-col>
 
           <el-col :span="6" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
@@ -520,13 +532,13 @@
           <el-table-column prop="note" label="备注" align="center" :show-overflow-tooltip="true">
           </el-table-column>
           <el-table-column label="操作" fixed="right" align="center" width="230">
-            <el-button size="small" type="primary">
+            <el-button size="small" type="primary" @click="updatePhone(scope.row)">
               编辑
             </el-button>
-            <el-button size="small" type="success">
+            <el-button size="small" type="success" @click="through(scope.row)">
               通过
             </el-button>
-            <el-button size="small" type="danger">
+            <el-button size="small" type="danger" @click="backData(scope.row.phoneCallListId)">
               退回
             </el-button>
           </el-table-column>
@@ -596,12 +608,14 @@
           
           dialogFormVisible1: false, //新增事务弹窗
           dialogFormVisible2: false, //新增电话名单的弹窗
-
+          companyName : "",
           affair_form: {
             content: '',
             time1: '',
             time2: '',
           },
+          enterOptions:[],
+          jobOptions:[],
 
           callForm:{
             loginName:'',
@@ -693,6 +707,32 @@
           }
           ],
 
+
+          options2: [{
+            value: '抖音',
+            label: '抖音'
+          },
+          {
+            value: '快手',
+            label: '快手'
+          }, {
+            value: '58',
+            label: '58'
+          }, {
+            value: '汇博',
+            label: '汇博'
+          }, {
+            value: 'Boos',
+            label: 'Boos'
+          }, {
+            value: '分配',
+            label: '分配'
+          },
+          {
+            value: '其它',
+            label: '其它'
+          }
+          ],
           // 表格
           DATA: {
             page: 1,
@@ -838,7 +878,7 @@
           });
         },
         getTotal(options) {
-          console.log("1")
+          
           return new Promise(resolve => {
             let URL = "http://lcj525.vipgz4.idcfengye.com/callAllListCount"           //获取表一所有数据总数
             URL = this.getCountURL(URL, options);
@@ -883,8 +923,8 @@
         filterData(tableData) {
           return tableData.map(item => {
             item.isWechatAdded === 1 ? item.isWechatAdded = '是' : item.isWechatAdded = '否'
-            item.hasCertificate === 1 ? item.hasCertificate = '是' : item.hasCertificate = '否'
-            item.isDisability === 1 ? item.isDisability = '是' : item.isDisability = '否'
+            item.hasCertificate === 0 ? item.hasCertificate = '是' : item.hasCertificate = '否'
+            item.isDisability === 0 ? item.isDisability = '是' : item.isDisability = '否'
             return item;
           })
         },
@@ -933,10 +973,7 @@
             fetch(URL, opt)
               .then(res => res.json())
               .then(json => {
-                // this.affair_table.push({
-                //   date:this.affair_form.date + " " + this.affair_form.date2,
-                //   content:this.affair_form.textarea,
-                // })
+                
 
                 this.getTransaction()     //重新刷新一次，请求获取事务名单
 
@@ -975,10 +1012,25 @@
             fetch(URL, phoneForm)
               .then(res => res.json())
               .then(json => {
+                this.dialogFormVisible2 = false
                 this.getTableData(this.DATA)
                 this.getTotal(this.DATA)
-                this.dialogFormVisible2 = false
-                console.log("ok")
+                if(json.statusCode == 1)
+                {
+                  this.$message({
+                    type : 'success',
+                    message : '添加成功'
+                  })
+
+                }
+                
+                
+              })
+              .catch(err=>{
+                this.$message({
+                    type : 'error',
+                    message : '添加失败'
+                  })
               })
           })
 
@@ -988,14 +1040,14 @@
           this.dialogFormVisible3 = true
           this.update_form = Object.assign({}, updateInfo)
           console.log(this.update_form)
-          
-          this.update_form.cild = this.update_form.customerId
+          this.getenterpriseName(updateInfo.recommendEnterprise)//得到企业
+          this.update_form.ciId = this.update_form.customerId
           this.update_form.pclId = this.update_form.phoneCallListId
           delete this.update_form.customerId
           delete this.update_form.phoneCallListId
           delete this.update_form.employeeId
           this.update_form.isWechatAdded === '是' ? this.update_form.isWechatAdded = 1 : this.update_form.isWechatAdded = 0
-          // this.update_form.gender === '女' ? this.update_form.gender = 1 : this.update_form.gender = 0
+          this.update_form.gender === '女' ? this.update_form.gender = 1 : this.update_form.gender = 0
           this.update_form.hasCertificate === '无' ? this.update_form.hasCertificate = 0 : this.update_form.hasCertificate = 1
           this.update_form.isDisability === '否' ? this.update_form.isDisability = 0 : this.update_form.isDisability = 1
         },
@@ -1003,12 +1055,12 @@
         update() {
           //编辑 重新提交表单
           let URL = "http://lcj525.vipgz4.idcfengye.com/updatePhone"
-          let _this = this
-
+          this.update_form.gender === 0 ? this.update_form.gender = '男' : this.update_form.gender = '女'
+          
           
           var opt = {
             method: "POST",
-            body: JSON.stringify(_this.update_form),
+            body: JSON.stringify(this.update_form),
             headers: {
               "content-type": 'application/json'
             }
@@ -1017,11 +1069,28 @@
             fetch(URL, opt)
               .then(res => res.json())
               .then(json => {
+                if(json.statusCode == 1){
+                 
+                  this.$message({
+                  type : 'success',
+                  message : '修改成功'
+                })
+                }
+                this.dialogFormVisible3 = false
+                
                 this.getTableData(this.DATA)
                 this.getTotal(this.DATA)
-                this.dialogFormVisible3 = false
+                this.getTableData(this.DATA2)
+                this.getTotal(this.DATA2)
+                
                 resolve();
-              });
+              })
+              .catch(err=>{
+                this.$message({
+                  type : 'error',
+                  message : '修改失败'
+                })
+              })
           })
         },
 
@@ -1030,8 +1099,8 @@
           this.$prompt('面试时间', {
             confirmButtonText: '通过',
             cancelButtonText: '取消',
-            inputPattern: /^((([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))0229))-([0-1]?[0-9]|2[0-3]):([0-5][0-9])$/,
-            inputErrorMessage:'面试时间格式不正确,例如：2020-08-02-21:00',
+            inputPattern: /^((([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))0229))$/,
+            inputErrorMessage:'面试时间格式不正确,例如：2020-08-02',
 
           }).then(({ value }) => {
             let URL = 'http://lcj525.vipgz4.idcfengye.com/signUp'
@@ -1053,12 +1122,14 @@
               fetch(URL, opt)
                 .then(res => res.json())
                 .then(json => {
-                  this.$message({
+                  if (json.statusCode == 1){
+                    this.$message({
                     type: 'success',
                     message: currentRow.name + '的面试时间是: ' + value,
-
                   });
                   resolve();
+                  }
+                  
                 });
             })
 
@@ -1086,7 +1157,7 @@
             let URL = 'https://yunzhitel-recorder.oss-cn-shenzhen.aliyuncs.com/'
             
             if (json.messageType === 'phoneCallLog') {
-              alert('录音地址为:' + URL + json.data.filepath)
+              // alert('录音地址为:' + URL + json.data.filepath)
             }
             if (json.messageType === 'phoneCall'){
               
@@ -1211,7 +1282,8 @@
             fetch(URL)
             .then(res=>res.json())
             .then(json=>{
-              this.getTableData(this.DATA.page=5)
+              
+              this.getTableData(this.DATA)
               this.getTotal(this.DATA)
               this.getTableData2(this.DATA2)
               this.getTotal2(this.DATA2)
@@ -1268,14 +1340,64 @@
           this.dialogFormVisible2 = false
         },
 
-        // 事务内容删除、完成
-        delte_affair_table(rowId) {
-
-          // this.$delete(this.affair_table,rowId)
-
-
+        handleCancel(value) {
+          this.DATA.gender = value == this.DATA.gender ? '' : value
+          this.DATA.page = 1
+          this.getTableData(this.DATA)
+          this.getTotal(this.DATA)
+        },
+        handleCancel1(value){
+          this.DATA.hasCertificate = value == this.DATA.hasCertificate ? '' : value
+          this.DATA.page = 1
+          this.getTableData(this.DATA)
+          this.getTotal(this.DATA)
 
         },
+        handleCancel2(value){
+          this.DATA.isDisability = value == this.DATA.isDisability ? '' : value
+          this.DATA.page = 1
+          this.getTableData(this.DATA)
+          this.getTotal(this.DATA)
+
+        },
+
+        getenterpriseName(val=this.update_form.recommendEnterprise){
+          let URL = "http://lcj525.vipgz4.idcfengye.com/enterpriseName"
+          fetch(URL)
+          .then(res=>res.json())
+          .then(json=>{
+            for (var i=0; i<json.length; i++)
+            {
+              
+              json[i].value =json[i].enterpriseName 
+              json[i].label =json[i].enterpriseName 
+              delete json[i].id , delete json[i].phone,  delete json[i].place, delete json[i].roomAndBoard, delete json[i].time, delete json[i].welfare
+              delete json[i].address , delete json[i].head, delete json[i].enterpriseName
+              
+            }
+            this.enterOptions = json
+            
+          })
+          this.companyName = val
+          this.update_form.recommendJob = ""
+          let URLJob = `http://lcj525.vipgz4.idcfengye.com/enterpriseJob?enterpriseName=${this.companyName}`
+          fetch(URLJob)
+          .then(res=>res.json())
+          .then(json=>{
+            console.log(json)
+            for (var i=0;i<json.length;i++){
+              json[i].value =json[i].job
+              json[i].label =json[i].job
+              delete json[i].id , delete json[i].number , delete json[i].wage , delete json[i].enterpriseId
+
+            }
+            this.jobOptions = json
+          })
+          
+          
+        },
+
+        
 
       },
     });
