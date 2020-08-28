@@ -16,7 +16,7 @@
   }
 
   .el-dialog {
-    width: 500px;
+    width:  80%;
   }
 
   .el-form-item label:after {
@@ -35,7 +35,8 @@
   }
 
   .el-form-item {
-    width: 75%;
+    width: 45%;
+    margin-left: 30px;
   }
 
 </style>
@@ -85,11 +86,21 @@
             <el-input placeholder="请输入电话号码" clearable v-model="DATA.phoneNumber" @change="searchData">
           </el-col>
           
-          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入推荐企业" clearable v-model="DATA.recommendEnterprise" @change="searchData">
-          </el-col>
+          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">    
+            <el-select v-model="DATA.recommendEnterprise" clearable @change="getenterpriseName" placeholder="请选择企业">
+              <el-option v-for="item in enterOptions"  :key="item.value" :label="item.label" :value="item.value">
+              </el-option>
+            </el-select>
+        </el-col>
           <el-col :span="3" style="margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入在职状态" clearable v-model="DATA.state" @change="searchData">
+            <el-select v-model="DATA.state"  @change="changeStatus" clearable placeholder="请输入在职状态">
+              <el-option
+                v-for="item in options"
+                :key="item.value"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
           </el-col>
           
 
@@ -120,6 +131,8 @@
           <el-table-column prop="insurance" align="center" label="保险类别" :show-overflow-tooltip="true">
           </el-table-column>
           <el-table-column prop="unit" align="center" label="参保单位" :show-overflow-tooltip="true">
+          </el-table-column>
+          <el-table-column prop="inductionTime" align="center" width="100" label="入职时间" :show-overflow-tooltip="true">
           </el-table-column>
           <el-table-column prop="departureTime" align="center" width="100" label="离职时间" :show-overflow-tooltip="true">
           </el-table-column>
@@ -152,7 +165,7 @@
 
 
         <el-dialog title="编辑表单" :visible.sync="editDialog">
-          <el-form :model="update_form" ref="update_form" style="margin-left: 80px;" class="demo-ruleForm">
+          <el-form :inline="true" :model="update_form" ref="update_form" style="margin-left: 80px;" class="demo-ruleForm">
             <el-form-item label="姓名" :label-width="formLabelWidth">
               <el-input v-model="update_form.customerName" autocomplete="off" size="small"></el-input>
             </el-form-item>
@@ -171,19 +184,35 @@
             <el-form-item label="电话" :label-width="formLabelWidth">
               <el-input v-model="update_form.phoneNumber" autocomplete="off" size="small"></el-input>
             </el-form-item>
-            <el-form-item label="入职状态" :label-width="formLabelWidth">
-              <el-input v-model="update_form.state" autocomplete="off" size="small"></el-input>
+            <el-form-item label="在职状态" :label-width="formLabelWidth">
+              <el-input v-model="update_form.state" :disabled="true" autocomplete="off" size="small"></el-input>
             </el-form-item>
             <el-form-item label="推荐企业" :label-width="formLabelWidth">
-              <el-input v-model="update_form.recommendEnterprise" autocomplete="off" size="small"></el-input>
+              <el-select v-model="update_form.recommendEnterprise" @change="updateEnterprise" placeholder="请选择">
+                <el-option v-for="item in enterOptions"  :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
             </el-form-item>
             <el-form-item label="推荐岗位" :label-width="formLabelWidth">
-              <el-input v-model="update_form.recommendJob" autocomplete="off" size="small"></el-input>
+              <el-select v-model="update_form.recommendJob"  placeholder="请选择">
+                <el-option v-for="item in jobOptions" :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
             </el-form-item>
-            <el-form-item label="入职时间" :label-width="formLabelWidth">
+            <el-form-item label="入职时间" :label-width="formLabelWidth"
+            prop="inductionTime" 
+            :rules="[
+            { validator: validateDate, trigger: ['blur', 'change'] }
+          ]"  
+            >
               <el-input v-model="update_form.inductionTime" autocomplete="off" size="small"></el-input>
             </el-form-item>
-            <el-form-item label="合同到期时间" :label-width="formLabelWidth">
+            <el-form-item label="合同到期时间" :label-width="formLabelWidth"
+            prop="contractExpireTime" 
+            :rules="[
+            { validator: validateDate, trigger: ['blur', 'change'] }
+          ]"
+            >
               <el-input v-model="update_form.contractExpireTime" autocomplete="off" size="small"></el-input>
             </el-form-item>
             <el-form-item label="紧急联系人" :label-width="formLabelWidth">
@@ -199,44 +228,67 @@
               <el-input v-model="update_form.unit" autocomplete="off" size="small"></el-input>
             </el-form-item>
             <el-form-item label="离职时间" :label-width="formLabelWidth">
-              <el-input v-model="update_form.departureTime" autocomplete="off" size="small"></el-input>
+              <el-input v-model="update_form.departureTime" :disabled="true" autocomplete="off" size="small"></el-input>
             </el-form-item>
         
           </el-form>
           <div slot="footer" class="dialog-footer" style="text-align: center;">
-            <el-button @click="dialogFormVisible3 = false">取 消</el-button>
-            <el-button type="primary" @click="update">提交</el-button>
+            <el-button @click="editDialog = false">取 消</el-button>
+            <el-button type="primary" @click="update('update_form')">提交</el-button>
           </div>
         </el-dialog>
 
 
         <el-dialog title="申请工伤" :visible.sync="applyDialog">
-          <el-form :model="applyForm" ref="applyForm" style="margin-left: 80px;" class="demo-ruleForm">
-            <el-form-item label="出险时间" :label-width="formLabelWidth">
+          <el-form :inline="true" :model="applyForm" ref="applyForm" style="margin-left: 80px;" class="demo-ruleForm">
+            <el-form-item label="出险时间" :label-width="formLabelWidth"
+            prop="outOfTime" 
+            :rules="[
+            { validator: validateDate, trigger: ['blur', 'change'] }
+          ]"  
+            >
               <el-input v-model="applyForm.outOfTime" autocomplete="off" size="small"></el-input>
             </el-form-item>
             <el-form-item label="治疗医院" :label-width="formLabelWidth">
               <el-input v-model="applyForm.hospital" autocomplete="off" size="small"></el-input>
             </el-form-item>
-            <el-form-item label="出院时间" :label-width="formLabelWidth">
+            <el-form-item label="出院时间" :label-width="formLabelWidth"
+            prop="dischargeTime" 
+            :rules="[
+            { validator: validateDate, trigger: ['blur', 'change'] }
+          ]"
+            >
               <el-input v-model="applyForm.dischargeTime" autocomplete="off" size="small"></el-input>
             </el-form-item>
             <el-form-item label="治疗费" :label-width="formLabelWidth">
               <el-input v-model="applyForm.cost" autocomplete="off" size="small"></el-input>
             </el-form-item>
-            <el-form-item label="报案时间" :label-width="formLabelWidth">
+            <el-form-item label="报案时间" :label-width="formLabelWidth"
+            prop="reportTime" 
+            :rules="[
+            { validator: validateDate, trigger: ['blur', 'change'] }
+          ]"
+            >
               <el-input v-model="applyForm.reportTime" autocomplete="off" size="small"></el-input>
             </el-form-item>
-            <el-form-item label="工伤认定时间" :label-width="formLabelWidth">
+            <el-form-item label="工伤认定时间" :label-width="formLabelWidth"
+            prop="submitIdentifiedTime" 
+            :rules="[
+            { validator: validateDate, trigger: ['blur', 'change'] }
+          ]"
+            >
               <el-input v-model="applyForm.submitIdentifiedTime" autocomplete="off" size="small"></el-input>
             </el-form-item>
             <el-form-item label="认定结果" :label-width="formLabelWidth">
               <el-input v-model="applyForm.identifiedResults" autocomplete="off" size="small"></el-input>
             </el-form-item>
-            <el-form-item label="入职时间" :label-width="formLabelWidth">
-              <el-input v-model="applyForm.inductionTime" autocomplete="off" size="small"></el-input>
-            </el-form-item>
-            <el-form-item label="工伤鉴定时间" :label-width="formLabelWidth">
+            
+            <el-form-item label="工伤鉴定时间" :label-width="formLabelWidth"
+            prop="submitIdentificationTime" 
+            :rules="[
+            { validator: validateDate, trigger: ['blur', 'change'] }
+          ]"
+            >
               <el-input v-model="applyForm.submitIdentificationTime" autocomplete="off" size="small"></el-input>
             </el-form-item>
             <el-form-item label="鉴定结果" :label-width="formLabelWidth">
@@ -270,10 +322,18 @@
           editDialog:false,
           applyDialog:false,
           formLabelWidth:'100px',
+          options: [{
+          value: '在职',
+          label: '在职'
+          }, {
+          value: '离职',
+          label: '离职'
+          }, ],
           update_form:{},
-          applyForm: {
-
-          },
+          applyForm: {},
+          enterOptions:[],
+          jobOptions:[],
+          companyName:"",
           DATA: {
             page: 1,
             name: "",
@@ -294,6 +354,7 @@
       created() {
         this.getTableData(this.DATA)
         this.getTotal(this.DATA)
+        this.getenterprise()
       },
       methods: {
         getTableDataURL(URL, options) {        //根据URL和参数对象生成附加参数的URL
@@ -371,14 +432,27 @@
             return item;
           })
         },
+        validateDate(rule, value, callback){
+          let dateRule = /^((([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))0229))$/
+          if (dateRule.test(value)==false) {        
+              callback(new Error('请输入正确得时间格式，如2017-01-01'))
+          } else {
+            callback()
+          }
+        },
 
         updateList(currentRow){
           this.editDialog = true
+          this.updateEnterprise(currentRow.recommendEnterprise)
           this.update_form = Object.assign({},currentRow)
           this.update_form.gender === '男' ? this.update_form.gender = 0 : this.update_form.gender = 1
         },
-        update(currentRow){
-          this.update_form.gender === 0 ? this.update_form.gender = '男' : this.update_form.gender = '女'
+        update(formName){
+
+          this.$refs[formName].validate((valid) => {
+          if (valid) {
+            this.update_form.gender === 0 ? this.update_form.gender = '男' : this.update_form.gender = '女'
+            this.update_form.name = this.update_form.customerName
           let URL = 'http://lcj525.vipgz4.idcfengye.com/updateOnTheJob'
           let opt = {
             method : 'post',
@@ -390,11 +464,32 @@
           fetch(URL,opt)
           .then(res=>res.json())
           .then(json=>{
-            this.$message({
+            this.editDialog = false
+            if(json.statusCode == 1){
+              this.$message({
               type: 'success',
               message: '修改成功'
-            });
+            })
+            }
+            this.getTableData(this.DATA)
+            this.getTotal(this.DATA)
           })
+          .catch(err=>{
+              this.$message({
+                type : 'error',
+                message : '修改失败'
+              })
+            })
+          }else{
+            this.$message({
+              type : 'error',
+              message : '请正确填写时间格式'
+            })
+            return false;
+          }
+          
+          })
+          
         },
         applyInjury(currentRow){
           this.applyDialog = true
@@ -416,10 +511,14 @@
           .then(res=>res.json())
           .then(json=>{
             this.applyDialog = false
-            this.$message({
+            if(json.statusCode == 1){
+              this.$message({
               type: 'success',
               message: '申请工伤成功'
             })
+            }
+            this.getTableData(this.DATA)
+            this.getTotal(this.DATA) 
           })
           .catch(error=>{
             this.$message({
@@ -428,18 +527,82 @@
             })
           })
         },
+
+
         dimission(currentRow){
-          let URL = ''
-          let opt = {}
-          fetch(URL,opt)
+          let URL = `http://lcj525.vipgz4.idcfengye.com/updateState?id=${currentRow.id}`
+          
+          fetch(URL)
           .then(res=>res.json())
           .then(json=>{
-            this.$message({
+            if(json.statusCode == 1){
+              this.$message({
               type : 'success',
-              message : currentRow.name + ' 离职成功'
+              message : currentRow.customerName + ' 离职成功'
             })
+            }
+            this.getTableData(this.DATA)
+            this.getTotal(this.DATA)
+            
           })
         },
+
+        getenterpriseName(val){                       //当查询框的下拉框选择时获取数据
+          
+          this.getTableData(this.DATA);
+          this.getTotal(this.DATA)
+        },
+
+        getenterprise(){                      //查询框的推荐企业获取
+          let URL = "http://lcj525.vipgz4.idcfengye.com/enterpriseName"
+          fetch(URL)
+          .then(res=>res.json())
+          .then(json=>{
+            for (var i=0; i<json.length; i++)
+            {
+              
+              json[i].value =json[i].enterpriseName 
+              json[i].label =json[i].enterpriseName 
+              delete json[i].id , delete json[i].phone,  delete json[i].place, delete json[i].roomAndBoard, delete json[i].time, delete json[i].welfare
+              delete json[i].address , delete json[i].head, delete json[i].enterpriseName
+              
+            }
+            this.enterOptions = json
+            
+          })
+        },
+
+        updateEnterprise(val){               //编辑表单的推荐企业以及推荐岗位
+          this.getenterprise()
+          this.companyName = val
+          this.update_form.recommendJob = ""
+          let URLJob = `http://lcj525.vipgz4.idcfengye.com/enterpriseJob?enterpriseName=${this.companyName}`
+          fetch(URLJob)
+          .then(res=>res.json())
+          .then(json=>{
+            console.log(json)
+            for (var i=0;i<json.length;i++){
+              json[i].value =json[i].job
+              json[i].label =json[i].job
+              delete json[i].id , delete json[i].number , delete json[i].wage , delete json[i].enterpriseId
+
+            }
+            this.jobOptions = json
+          })
+
+        },
+
+        changeStatus(val){
+          
+          this.getTableData(this.DATA);
+          this.getTotal(this.DATA)
+        },
+
+
+
+
+
+
       },
     });
   </script>

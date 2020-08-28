@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="/admin/css/index.css">
 <script type="text/javascript" src="/admin/js/vue.js"></script>
 <script src="/admin/js/element.js"></script>
-<title>系统设置</title>
+<title>数据报表</title>
 <style>
   .el-card {
     height: 100px;
@@ -46,6 +46,7 @@
     color: #303133 !important;
   } */
 </style>
+
 <body>
   <header class="header">
     <div class="container flex">
@@ -62,7 +63,7 @@
     <div class="slider">
       <div class="slider-body">
         <ul>
-          
+
           <li class="ul-item">
             <a class="slider-link " href="/other/authorityManage.html">权限分配
             </a>
@@ -72,13 +73,13 @@
             </a>
           </li>
           <li class="ul-item">
-            <a class="slider-link active " href="/other/sysSetting.html">系统设置</a>
+            <a class="slider-link  " href="/other/sysSetting.html">系统设置</a>
           </li>
           <li class="ul-item">
             <a class="slider-link " href="/other/customer.html">公海名单</a>
           </li>
           <li class="ul-item">
-            <a class="slider-link  " href="/other/dataReport.html">数据报表</a>
+            <a class="slider-link active " href="/other/dataReport.html">数据报表</a>
           </li>
         </ul>
       </div>
@@ -86,26 +87,41 @@
     <div class="main">
       <!-- 主体  -->
       <div id="app">
-        
+        <el-row>
+          <el-col :span="3" style="margin-right: 30px;margin-top: 20px;margin-bottom: 20px;">
+            <el-input placeholder="请输入员工姓名" clearable v-model="DATA.name" @change="searchData"></el-input>
+          </el-col>
+          <el-col :span="3" style="margin-right: 100px;margin-top: 20px;margin-bottom: 20px;">
+            <el-date-picker v-model="DATA.startTime" type="date" placeholder="选择起始月份" @change="searchData">
+            </el-date-picker>
+
+          </el-col>
+
+          <el-col :span="3" style="margin-top: 20px;margin-bottom: 20px;">
+            <el-date-picker v-model="DATA.deadline" type="date" placeholder="选择截止月份" @change="searchData">
+            </el-date-picker>
+          </el-col>
+        </el-row>
+
         <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
-         
-          <el-table-column prop="item" align="center" label="系统需要设置的项">
+
+          <el-table-column prop="enterpriseName" align="center" label="企业名称">
           </el-table-column>
-          <el-table-column prop="value" align="center" label="项的值" >
+          <el-table-column prop="signUpCount" align="center" label="报名人数">
           </el-table-column>
-          <el-table-column label="操作" fixed="right" align="center" width="220">
-            <template slot-scope="scope">
-              <el-button size="small" type="primary" @click="edit(scope.row)">
-                编辑
-              </el-button>
-            </template>
+          <el-table-column prop="waitInductionCount" align="center" label="面试合格人数">
           </el-table-column>
-          
-          
+          <el-table-column prop="inductionCount" align="center" label="入职人数">
+          </el-table-column>
+          <el-table-column prop="onTheJobCount" align="center" label="在职人数">
+          </el-table-column>
+
+
+
         </el-table>
-        
-           
-       
+
+
+
       </div>
     </div>
   </div>
@@ -115,11 +131,15 @@
       data: function () {
         return {
           loading: false,
-          editDialog:false,
-          formLabelWidth:'100px',
+
           
-          
-          
+          DATA: {
+            page: 1,
+            enterpriseName: "",
+            startTime: "",
+            deadline: "",
+          },
+
           currentPage: 1,
           pagesize: 10,
           total: "",
@@ -134,96 +154,42 @@
       },
       methods: {
         
+
         initForm(obj) {
           for (let key in obj) {
             obj[key] = "";
           }
         },
-       
-        handleCurrentChange(size) {
+
+        searchData() {            //表一所有搜索框
+          this.DATA.page = 1
+          this.getTableData(this.DATA)
           
+        },
+
+        handleCurrentChange(size) {
+
           this.DATA.page = size;
           this.getTableData(this.DATA);
         },
 
-        
-
-        getTableData(options) {
-          let URL = "http://lcj525.vipgz4.idcfengye.com/systemSettings"
-          // this.loading = true;
-          
-          return new Promise(resolve => {
-            fetch(URL)
-              .then(res => res.json())
-              .then(json => {
-                this.tableData = json;
-                
-                resolve();
-                setTimeout(() => {
-                  this.loading = false;
-                }, 500);
-              });
-          });
+        getTableData(options) {   
+          this.loading = true;
+          let URL = "http://lcj525.vipgz4.idcfengye.com/enterpriseName"
+          fetch(URL)
+          .then(res=>res.json())
+          .then(json=>{
+            console.log(json)
+          })
+         
         },
-        
-
-        edit(currentRow){
-          this.$prompt('编辑时间', {
-            confirmButtonText: '确定编辑',
-            cancelButtonText: '取消编辑',
-            
-
-          }).then(({ value }) => {
-            let URL = 'http://lcj525.vipgz4.idcfengye.com/updateSystemSettings'
-            this.allotForm={
-              id:currentRow.id,
-              value : value
-            }
-            var opt = {
-              method: "POST",
-              body: JSON.stringify(this.allotForm),
-              headers: {
-                "content-type": 'application/json'
-              }
-
-            }
-            return new Promise(resolve => {
-              fetch(URL, opt)
-                .then(res => res.json())
-                .then(json => {
-                  this.$message({
-                    type: 'success',
-                    message: '您已经成功修改为 '+ value,
-
-                  })
-                  this.getTableData()
-                  resolve();
-                })
-                .catch(error=>{
-                  this.$message({
-                    type: 'error',
-                    message: '修改失败',
-
-                  });
-                  
-                })
-               
-            })
-
-          }).catch(() => {
-            this.$message({
-              type: 'info',
-              message: '取消输入'
-            });
-          });
-        }
 
         
-        
 
 
 
-        
+
+
       },
     });
   </script>

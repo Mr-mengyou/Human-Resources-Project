@@ -209,7 +209,7 @@
 
         getTableData(options) {
           let URL = "http://lcj525.vipgz4.idcfengye.com/getPhoneRecordDept"
-          // this.loading = true;
+          this.loading = true
           URL = this.getTableDataURL(URL, options);
           return new Promise(resolve => {
             fetch(URL)

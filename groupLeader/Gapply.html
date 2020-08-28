@@ -16,7 +16,7 @@
   }
 
   .el-dialog {
-    width: 500px;
+    width: 80%;
   }
 
   .el-form-item label:after {
@@ -35,7 +35,8 @@
   }
 
   .el-form-item {
-    width: 75%;
+    width: 45%;
+    margin-left: 30px;
   }
 
 
@@ -150,9 +151,9 @@
 
         <!-- 编辑表单 -->
         <el-dialog title="编辑表单" :visible.sync="editDialog">
-          <el-form :model="update_form" ref="update_form" style="margin-left: 80px;" class="demo-ruleForm">
+          <el-form :inline="true" :model="update_form" ref="update_form" style="margin-left: 80px;" class="demo-ruleForm">
             <el-form-item label="姓名" :label-width="formLabelWidth">
-              <el-input v-model="update_form.name" autocomplete="off" size="small"></el-input>
+              <el-input v-model="update_form.customerName" autocomplete="off" size="small"></el-input>
             </el-form-item>
             <el-form-item label="性别" :label-width="formLabelWidth">
               <el-radio-group v-model="update_form.gender">
@@ -197,22 +198,33 @@
               </el-radio-group>
             </el-form-item>
             <el-form-item label="推荐企业" :label-width="formLabelWidth">
-              <el-input v-model="update_form.recommendEnterprise" autocomplete="off" size="small"></el-input>
+              <el-select v-model="update_form.recommendEnterprise" @change="getenterpriseName" placeholder="请选择">
+                <el-option v-for="item in enterOptions"  :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
             </el-form-item>
             <el-form-item label="推荐岗位" :label-width="formLabelWidth">
-              <el-input v-model="update_form.recommendJob" autocomplete="off" size="small"></el-input>
+              <el-select v-model="update_form.recommendJob"  placeholder="请选择">
+                <el-option v-for="item in jobOptions" :key="item.value" :label="item.label" :value="item.value">
+                </el-option>
+              </el-select>
             </el-form-item>
-            <el-form-item label="面试时间" :label-width="formLabelWidth">
+            <el-form-item label="面试时间" :label-width="formLabelWidth"
+            prop="signUpTime" 
+            :rules="[
+            { validator: validateDate, trigger: ['blur', 'change'] }
+          ]"
+            >
               <el-input v-model="update_form.signUpTime" autocomplete="off" size="small"></el-input>
             </el-form-item>
             <el-form-item label="员工姓名" :label-width="formLabelWidth">
-              <el-input v-model="update_form.employeeName" autocomplete="off" size="small"></el-input>
+              <el-input v-model="update_form.employeeName" :disabled="true" autocomplete="off" size="small"></el-input>
             </el-form-item>
         
           </el-form>
           <div slot="footer" class="dialog-footer" style="text-align: center;">
-            <el-button @click="dialogFormVisible3 = false">取 消</el-button>
-            <el-button type="primary" @click="update">提交</el-button>
+            <el-button @click="editDialog = false">取 消</el-button>
+            <el-button type="primary" @click="update('update_form')">提交</el-button>
           </div>
         </el-dialog>
 
@@ -227,6 +239,9 @@
           loading: false,
           editDialog:false,
           formLabelWidth:'70px',
+          companyName : "",
+          enterOptions:[],
+          jobOptions:[],
           //编辑表单
           update_form: {},
           options: [{
@@ -361,12 +376,20 @@
 
         filterData(tableData) {
           return tableData.map(item => {
-            // item.isWechatAdded === 1 ? item.isWechatAdded = '是' : item.isWechatAdded = '否'
-            item.gender === 1 ? item.gender = '男':item.gender = '女'
-            item.hasCertificate === 1 ? item.hasCertificate = '是' : item.hasCertificate = '否'
-            item.isDisability === 1 ? item.isDisability = '是' : item.isDisability = '否'
+            
+            item.hasCertificate === 0 ? item.hasCertificate = '是' : item.hasCertificate = '否'
+            item.isDisability === 0 ? item.isDisability = '是' : item.isDisability = '否'
             return item;
           })
+        },
+
+        validateDate(rule, value, callback){
+          let dateRule = /^((([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))0229))$/
+          if (dateRule.test(value)==false) {        
+              callback(new Error('请输入正确得时间格式，如2017-01-01'))
+          } else {
+            callback()
+          }
         },
 
 
@@ -375,17 +398,22 @@
           // console.log(updateInfo)
           this.editDialog = true
           this.update_form = Object.assign({}, updateInfo)
+          this.getenterpriseName(updateInfo.recommendEnterprise)
+          
           this.update_form.signUpInfoId = this.update_form.id
           console.log(this.update_form)
           this.update_form.gender === '女' ? this.update_form.gender = 1 : this.update_form.gender = 0
-          this.update_form.hasCertificate === '无' ? this.update_form.hasCertificate = 0 : this.update_form.hasCertificate = 1
-          this.update_form.isDisability === '否' ? this.update_form.isDisability = 0 : this.update_form.isDisability = 1
+          this.update_form.hasCertificate === '是' ? this.update_form.hasCertificate = 0 : this.update_form.hasCertificate = 1
+          this.update_form.isDisability === '是' ? this.update_form.isDisability = 0 : this.update_form.isDisability = 1
         },
 
-        update() {
+        update(formName) {
           //编辑 重新提交表单
-          let URL = "http://lcj525.vipgz4.idcfengye.com/updateSignUp"
-          let _this = this
+          this.$refs[formName].validate((valid) => {
+          if (valid) {
+            let URL = "http://lcj525.vipgz4.idcfengye.com/updateSignUp"
+          
+          this.update_form.name = this.update_form.customerName
           this.update_form.gender == 0 ? this.update_form.gender = '男' : this.update_form.gender = '女'
           var opt = {
             method: "POST",
@@ -398,12 +426,78 @@
             fetch(URL, opt)
               .then(res => res.json())
               .then(json => {
-                this.getTableData(this.DATA)
-                // this.getTotal(this.DATA)
-                this.editDialog = false
-                resolve();
-              });
+                
+                if(json.statusCode == 1){
+                  this.editDialog = false
+                  this.$message({
+                    type : 'success',
+                    message : '修改成功'
+                  })
+                  this.getTableData(this.DATA)
+                  this.getTotal(this.DATA)
+                }
+                else{
+                  this.$message({
+                    type : 'error',
+                    message : '修改失败'
+                  })
+                }
+                
+                
+                resolve()
+              })
+              .catch(err=>{
+                this.$message({
+                    type : 'error',
+                    message : '修改失败'
+                  })
+              })
           })
+
+          }else{
+            this.$message({
+              type : 'error',
+              message : '请正确填写时间格式'
+            })
+            return false;
+          }
+          })
+          
+        },
+
+        getenterpriseName(val){
+          let URL = "http://lcj525.vipgz4.idcfengye.com/enterpriseName"
+          fetch(URL)
+          .then(res=>res.json())
+          .then(json=>{
+            for (var i=0; i<json.length; i++)
+            {
+              
+              json[i].value =json[i].enterpriseName 
+              json[i].label =json[i].enterpriseName 
+              delete json[i].id , delete json[i].phone,  delete json[i].place, delete json[i].roomAndBoard, delete json[i].time, delete json[i].welfare
+              delete json[i].address , delete json[i].head, delete json[i].enterpriseName
+              
+            }
+            this.enterOptions = json
+            
+          })
+          this.companyName = val
+          this.update_form.recommendJob = ""
+          let URLJob = `http://lcj525.vipgz4.idcfengye.com/enterpriseJob?enterpriseName=${this.companyName}`
+          fetch(URLJob)
+          .then(res=>res.json())
+          .then(json=>{
+            console.log(json)
+            for (var i=0;i<json.length;i++){
+              json[i].value =json[i].job
+              json[i].label =json[i].job
+              delete json[i].id , delete json[i].number , delete json[i].wage , delete json[i].enterpriseId
+
+            }
+            this.jobOptions = json
+          })
+           
         },
       },
     });

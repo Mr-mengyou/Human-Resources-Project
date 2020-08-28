@@ -93,13 +93,21 @@
             <el-input placeholder="请输入区域" clearable v-model="DATA.address" @change="searchData">
           </el-col>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入面试时间" clearable v-model="DATA.interviewTime" @change="searchData">
-          </el-col>
-          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
             <el-input placeholder="请输入部门名" clearable v-model="DATA.deptName" @change="searchData">
           </el-col>
           <el-col :span="3" style="margin-top: 20px;margin-bottom: 20px;">
             <el-input placeholder="请输入推荐人" clearable v-model="DATA.employeeName" @change="searchData">
+          </el-col>
+          <el-col :span="2" style="margin-top: 20px;margin-bottom: 20px;">
+            <el-date-picker
+              v-model="DATA.interviewTime"
+              type="date"
+              clearable
+              format="yyyy 年 MM 月 dd 日"
+              value-format="yyyy-MM-dd"
+              @change = "changeDate2"
+              placeholder="选择面试日期">
+            </el-date-picker>
           </el-col>
 
           
@@ -308,7 +316,7 @@
           }
         },
         searchData() {            //表一所有搜索框
-          // this.DATA.page = 1
+          this.DATA.page = 1
           this.getTableData(this.DATA)
           this.getTotal(this.DATA)
         },
@@ -327,6 +335,7 @@
         },
 
         getTableData(options) {
+          options.interviewTime === null ?  options.interviewTime = "" : 
           this.loading = true;
           let URL = "http://lcj525.vipgz4.idcfengye.com/interviewListAll"
           URL = this.getTableDataURL(URL, options);
@@ -465,12 +474,20 @@
           fetch(URL,opt)
             .then(res => res.json())
             .then(json => {
-              this.$message({
-              type: 'success',
-              message: currentRow.customerName + '成功通过面试'
-            })
+              if(json.statusCode == 1){
+                this.$message({
+                type: 'success',
+                message: currentRow.customerName + '成功通过面试'
+              })
+              }
               this.getTableData(this.DATA)
               this.getTotal(this.DATA)
+            })
+            .catch(err=>{
+              this.$message({
+                type: 'error',
+                message: currentRow.customerName + '通过面试失败'
+              })
             })
 
         },
@@ -500,15 +517,25 @@
               fetch(URL, opt)
                 .then(res => res.json())
                 .then(json => {
-                  this.$message({
+                  if(json.statusCode == 1){
+                    this.$message({
                     type: 'success',
                     message: currentRow.customerName + ' 的退回原因为：' + value
 
-                  });
+                  })
+                  } 
                   this.getTableData(this.DATA)
                   this.getTotal(this.DATA)
-                  resolve();
-                });
+                  resolve()
+                  
+                })
+                .catch(err=>{
+                  this.$message({
+                    type: 'error',
+                    message: currentRow.customerName + ' 退回失败'
+
+                  })
+                })
             })
 
           }).catch(() => {
@@ -568,16 +595,29 @@
           fetch(URLJob)
           .then(res=>res.json())
           .then(json=>{
-            console.log(json)
+            
             for (var i=0;i<json.length;i++){
               json[i].value =json[i].job
               json[i].label =json[i].job
               delete json[i].id , delete json[i].number , delete json[i].wage , delete json[i].enterpriseId
-
             }
             this.jobOptions = json
           })
 
+        },
+
+        changeDate2(val){
+          if(val === null)
+          {
+            this.DATA.interviewTime =" "
+            this.DATA.page = 1
+            this.getTableData(this.DATA)
+            this.getTotal(this.DATA)
+          }
+          
+            this.DATA.page = 1
+            this.getTableData(this.DATA)
+            this.getTotal(this.DATA)
         },
         
 

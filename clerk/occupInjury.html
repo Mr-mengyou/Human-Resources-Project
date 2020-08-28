@@ -67,20 +67,17 @@
       <div class="slider-body">
         <ul>
           <li class="ul-item">
-            <a class="slider-link " href="/groupLeader/directorPhone.html">通话记录</a>
-          </li>
-          <li class="ul-item">
-            <a class="slider-link  " href="/groupLeader/staffManagement.html">员工管理</a>
-          </li>
-          <li class="ul-item">
-            <a class="slider-link" href="/groupLeader/staffRecord.html">档案管理</a>
-          </li>
-          <li class="ul-item">
-            <a class="slider-link " href="/groupLeader/leaveManagement.html">离职管理</a>
-          </li>
-          <li class="ul-item">
-            <a class="slider-link active" href="/dataAdmin/occupInjury.html">工伤名单</a>
-          </li>
+            <a class="slider-link " href="/clerk/staffManage.html">员工管理</a>
+        </li>
+        <li class="ul-item">
+            <a class="slider-link" href="/clerk/staffRecord.html">档案管理</a>
+        </li>
+        <li class="ul-item">
+            <a class="slider-link " href="/clerk/leaveManage.html">离职管理</a>
+        </li>
+        <li class="ul-item">
+            <a class="slider-link  active" href="/clerk/occupInjury.html">工伤名单</a>
+        </li>
 
         </ul>
       </div>
@@ -156,28 +153,53 @@
             <el-form-item label="参保单位" :label-width="formLabelWidth">
               <el-input v-model="detailForm.unit" :disabled="true" autocomplete="off" size="small"></el-input>
             </el-form-item>
-            <el-form-item label="出险时间" :label-width="formLabelWidth">
+            <el-form-item label="出险时间" :label-width="formLabelWidth"
+            prop="outOfTime" 
+            :rules="[
+            { validator: validateDate, trigger: ['blur', 'change'] }
+          ]"
+            >
               <el-input v-model="detailForm.outOfTime" autocomplete="off" size="small"></el-input>
             </el-form-item>
             <el-form-item label="治疗医院" :label-width="formLabelWidth">
               <el-input v-model="detailForm.hospital" autocomplete="off" size="small"></el-input>
             </el-form-item>
-            <el-form-item label="出院时间" :label-width="formLabelWidth">
+            <el-form-item label="出院时间" :label-width="formLabelWidth"
+            prop="dischargeTime" 
+            :rules="[
+            { validator: validateDate, trigger: ['blur', 'change'] }
+          ]"
+            >
               <el-input v-model="detailForm.dischargeTime" autocomplete="off" size="small"></el-input>
             </el-form-item>
             <el-form-item label="治疗费" :label-width="formLabelWidth">
               <el-input v-model="detailForm.cost" autocomplete="off" size="small"></el-input>
             </el-form-item>
-            <el-form-item label="报案时间" :label-width="formLabelWidth">
+            <el-form-item label="报案时间" :label-width="formLabelWidth"
+            prop="reportTime" 
+            :rules="[
+            { validator: validateDate, trigger: ['blur', 'change'] }
+          ]"
+            >
               <el-input v-model="detailForm.reportTime" autocomplete="off" size="small"></el-input>
             </el-form-item>
-            <el-form-item label="工伤认定时间" :label-width="formLabelWidth">
+            <el-form-item label="工伤认定时间" :label-width="formLabelWidth"
+            prop="submitIdentifiedTime" 
+            :rules="[
+            { validator: validateDate, trigger: ['blur', 'change'] }
+          ]"
+            >
               <el-input v-model="detailForm.submitIdentifiedTime" autocomplete="off" size="small"></el-input>
             </el-form-item>
             <el-form-item label="认定结果" :label-width="formLabelWidth">
               <el-input v-model="detailForm.identifiedResults" autocomplete="off" size="small"></el-input>
             </el-form-item>
-            <el-form-item label="工伤鉴定时间" :label-width="formLabelWidth">
+            <el-form-item label="工伤鉴定时间" :label-width="formLabelWidth"
+            prop="submitIdentificationTime" 
+            :rules="[
+            { validator: validateDate, trigger: ['blur', 'change'] }
+          ]"
+            >
               <el-input v-model="detailForm.submitIdentificationTime" autocomplete="off" size="small"></el-input>
             </el-form-item>
             <el-form-item label="鉴定结果" :label-width="formLabelWidth">
@@ -197,7 +219,7 @@
           </el-form>
           <div slot="footer" class="dialog-footer" style="text-align: center;">
             <el-button @click="detailDialog = false">取 消</el-button>
-            <el-button type="primary" @click="edit">提交</el-button>
+            <el-button type="primary" @click="edit('detailForm')">提交</el-button>
           </div>
         </el-dialog>
 
@@ -260,7 +282,7 @@
         handleCurrentChange(size) {       //改变表一page
 
           this.DATA.page = size;
-          this.getTableData(this.DATA2);
+          this.getTableData(this.DATA);
         },
 
         changeTable1() {                //改变表一任何一个单选框
@@ -299,12 +321,24 @@
               });
           });
         },
+
+        validateDate(rule, value, callback){
+          let dateRule = /^((([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))0229))$/
+          if (dateRule.test(value)==false) {        
+              callback(new Error('请输入正确得时间格式，如2017-01-01'))
+          } else {
+            callback()
+          }
+        },
+
         detail(currentRow) {
           this.detailDialog = true
           this.detailForm = Object.assign({}, currentRow)
         },
-        edit() {
-          let URL = "http://lcj525.vipgz4.idcfengye.com/updateInjury"
+        edit(formName) {
+          this.$refs[formName].validate((valid) => {
+          if (valid) {
+            let URL = "http://lcj525.vipgz4.idcfengye.com/updateInjury"
           let opt = {
             method: 'post',
             body: JSON.stringify(this.detailForm),
@@ -326,13 +360,20 @@
               }
               else{
                 this.$message({
-                  type: 'danger',
+                  type: 'error',
                   message: '修改失败'
                 })
               }
-
-
             })
+          }else{
+              this.detailDialog = false
+                this.$message({
+                type: 'error',
+                message: '修改失败'
+              })
+            }
+          })
+          
         },
       },
     });

@@ -79,6 +79,9 @@
           <li class="ul-item">
             <a class="slider-link active" href="/other/customer.html">公海名单</a>
           </li>
+          <li class="ul-item">
+            <a class="slider-link  " href="/other/dataReport.html">数据报表</a>
+          </li>
         </ul>
       </div>
     </div>
@@ -138,10 +141,10 @@
               <el-button size="small" type="warning" @click="handleAllot(scope.row)">
                 分配
               </el-button>  
-              <el-button size="small" type="danger" style="margin-top: 5px;" @click="handleAllot(scope.row)">
+              <el-button size="small" type="danger" style="margin-top: 5px;" @click="deleteCustomer(scope.row)">
                 删除
               </el-button> 
-              <el-button size="small" type="info" @click="handleAllot(scope.row)">
+              <el-button size="small" type="info" @click="updateByState(scope.row)">
                 黑名单
               </el-button>    
             </template>
@@ -212,7 +215,12 @@
             <el-form-item label="备注" :label-width="formLabelWidth">
               <el-input v-model="updateForm.note" autocomplete="off" size="small"></el-input>
             </el-form-item>
-            <el-form-item label="插入时间" :label-width="formLabelWidth">
+            <el-form-item label="插入时间" :label-width="formLabelWidth"
+            prop="addedTime" 
+            :rules="[
+            { validator: validateDate, trigger: ['blur', 'change'] }
+          ]"
+            >
               <el-input v-model="updateForm.addedTime" autocomplete="off" size="small"></el-input>
             </el-form-item>
             <el-form-item label="添加人" :label-width="formLabelWidth">
@@ -228,7 +236,7 @@
           </el-form>
           <div slot="footer" class="dialog-footer" style="text-align: center;">
             <el-button @click="editDialog = false">取 消</el-button>
-            <el-button type="primary" @click="edit">编辑</el-button>
+            <el-button type="primary" @click="edit('updateForm')">编辑</el-button>
           </div>
         </el-dialog>
 
@@ -240,9 +248,6 @@
                 </el-option>
               </el-select>
             </el-form-item>
-           
-            
-
           </el-form>
           <div slot="footer" class="dialog-footer" style="text-align: center;">
             <el-button @click="allotDialog = false">取 消</el-button>
@@ -281,28 +286,24 @@
           },
           ],
           options: [{
-            value: '本科',
-            label: '本科'
+            value: '抖音',
+            label: '抖音'
           },
           {
-            value: '专科',
-            label: '专科'
+            value: '快手',
+            label: '快手'
           }, {
-            value: '高中',
-            label: '高中'
+            value: '58',
+            label: '58'
           }, {
-            value: '研究生',
-            label: '研究生'
+            value: '汇博',
+            label: '汇博'
           }, {
-            value: '博士',
-            label: '博士'
+            value: 'Boos',
+            label: 'Boos'
           }, {
-            value: '初中',
-            label: '初中'
-          },
-          {
-            value: '小学',
-            label: '小学'
+            value: '分配',
+            label: '分配'
           },
           {
             value: '其它',
@@ -413,15 +414,21 @@
             if(item.state == 0 ){item.state = '可分配'}
             else if(item.state == 1){item.state = '不可分配'}
             else if (item.state == 2){item.state = '黑名单'}
-            item.hasCertificate === 1 ? item.hasCertificate = '有' : item.hasCertificate = '无'
-            item.isDisability === 1 ? item.isDisability = '是' : item.isDisability = '否'
+            item.hasCertificate === 0 ? item.hasCertificate = '有' : item.hasCertificate = '无'
+            item.isDisability === 0 ? item.isDisability = '是' : item.isDisability = '否'
             
             return item;
           })
         },
 
-        
-
+        validateDate(rule, value, callback){
+          let dateRule = /^((([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))0229))$/
+          if (dateRule.test(value)==false) {        
+              callback(new Error('请输入正确得时间格式，如2017-01-01'))
+          } else {
+            callback()
+          }
+        },
    
         editForm(currentRow) {
           this.editDialog = true
@@ -432,27 +439,51 @@
           this.updateForm.hasCertificate === '有' ? this.updateForm.hasCertificate = 0 : this.updateForm.hasCertificate = 1
           this.updateForm.isDisability === '是' ? this.updateForm.isDisability = 0 : this.updateForm.isDisability = 1
         },
-        edit(){
-          this.updateForm.gender === 0 ? this.updateForm.gender = '男'  : this.updateForm.gender = '女'
-          let URL = "http://lcj525.vipgz4.idcfengye.com/updateCustomer"
-          let opt = {
-            method : 'post',
-            body : JSON.stringify(this.updateForm),
-            headers:{
-              'content-type':'application/json'
-            },
+        edit(formName){
+          this.$refs[formName].validate((valid) => {
+          if (valid) {
+            this.updateForm.gender === 0 ? this.updateForm.gender = '男'  : this.updateForm.gender = '女'
+            let URL = "http://lcj525.vipgz4.idcfengye.com/updateCustomer"
+            let opt = {
+              method : 'post',
+              body : JSON.stringify(this.updateForm),
+              headers:{
+                'content-type':'application/json'
+              },
           }
           fetch(URL,opt)
           .then(res=>res.json())
           .then(json=>{
-            this.editDialog = false
-            this.$message({
+            if(json.statusCode == 1){
+              this.editDialog = false
+              this.$message({
               type : 'success',
               message: '编辑成功'
             })
             this.getTableData(this.DATA)
             this.getTotal(this.DATA)
+
+            }
+            else{
+              this.editDialog = false
+              this.$message({
+              type : 'error',
+              message: '编辑失败'
+            })
+            this.getTableData(this.DATA)
+            this.getTotal(this.DATA)
+            }
+            
           })
+          }else{
+              this.editDialog = false
+                this.$message({
+                type: 'error',
+                message: '修改失败'
+              })
+            }
+          })
+          
         },
         handleAllot(currentRow){
           this.allotDialog = true
@@ -512,9 +543,75 @@
         },
 
         
-
+        deleteCustomer(currentRow){
+          let URL = `http://lcj525.vipgz4.idcfengye.com/deleteCustomer?id=${currentRow.id}`
+          fetch(URL)
+          .then(res=>res.json())
+          .then(json=>{
+            if(json.statusCode == 1)
+            {
+              this.$message({
+                type:'success',
+                message : currentRow.name +'删除成功'
+              })
+            }
+            else{
+              this.$message({
+                type:'error',
+                message : currentRow.name +'删除失败'
+              })
+            }
+            this.getTableData(this.DATA)
+            this.getTotal(this.DATA)
+          })
+          .catch(err=>{
+            this.$message({
+                type:'error',
+                message : currentRow.name +'删除失败'
+              })
+          })
+        },
         
+        updateByState(currentRow){
+          let URL = "http://lcj525.vipgz4.idcfengye.com/updateByState" 
+          
+          let updateByStateForm = {
+            id : currentRow.id,
+            state : 2,
+          }
+          let opt = {
+            method : 'post',
+            body : JSON.stringify(updateByStateForm),
+            headers : {
+              'content-type' : 'application/json'
+            },
+          }
+          fetch(URL,opt)
+          .then(res=>res.json())
+          .then(json=>{
+            if(json.statusCode == 1){
+              this.$message({
+                type : 'success',
+                message : currentRow.name + '成功加入黑名单'
+              })
+            }
+            else{
+              this.$message({
+                type : 'error',
+                message : currentRow.name + '加入黑名单失败'
+              })
+            }
+            this.getTableData(this.DATA)
+            this.getTotal(this.DATA)
+          }) 
+          .catch(err=>{
+            this.$message({
+                type : 'error',
+                message : currentRow.name + '加入黑名单失败'
+              })
+          })         
 
+        },
         
       },
     });

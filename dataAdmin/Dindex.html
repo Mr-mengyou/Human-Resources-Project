@@ -96,18 +96,35 @@
             <el-input placeholder="请输入区域" clearable v-model="DATA.address" @change="searchData">
           </el-col>
           <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入面试时间" clearable v-model="DATA.interviewTime" @change="searchData">
-          </el-col>
-          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
-            <el-input placeholder="请输入报名时间" clearable v-model="DATA.signUpTime" @change="searchData">
-          </el-col>
-          <el-col :span="3" style="margin-right: 10px;margin-top: 20px;margin-bottom: 20px;">
             <el-input placeholder="请输入部门名" clearable v-model="DATA.deptName" @change="searchData">
           </el-col>
           <el-col :span="3" style="margin-top: 20px;margin-bottom: 20px;">
             <el-input placeholder="请输入推荐人" clearable v-model="DATA.employeeName" @change="searchData">
-              
           </el-col>
+          
+          <el-col :span="2" style="margin-right: 150px;margin-top: 20px;margin-bottom: 20px;">
+            <el-date-picker
+              v-model="DATA.signUpTime"
+              type="date"
+              clearable
+              format="yyyy 年 MM 月 dd 日"
+              value-format="yyyy-MM-dd"
+              @change = "changeDate"
+              placeholder="选择报名日期">
+            </el-date-picker>
+          </el-col>
+          <el-col :span="2" style="margin-top: 20px;margin-bottom: 20px;">
+            <el-date-picker
+              v-model="DATA.interviewTime"
+              type="date"
+              clearable
+              format="yyyy 年 MM 月 dd 日"
+              value-format="yyyy-MM-dd"
+              @change = "changeDate2"
+              placeholder="选择面试日期">
+            </el-date-picker>
+          </el-col>
+          
         </el-row>
 
         <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
@@ -159,11 +176,9 @@
         </el-table>
         <div class="footer" style="width: 100%;margin-top:1rem;">
           <template>
-            <div class="block">
               <el-pagination @current-change="handleCurrentChange" :current-page="currentPage" :page-size="10"
-                layout="total, prev, pager, next, jumper" :total="total">
+              background  layout="total, prev, pager, next, jumper" :total="total">
               </el-pagination>
-            </div>
           </template>
         </div>
 
@@ -229,8 +244,6 @@
               </el-select>
             </el-form-item>
             <el-form-item label="面试时间" :label-width="formLabelWidth"
-            label="面试时间" 
-            :label-width="formLabelWidth" 
             prop="interviewTime" 
             :rules="[
             { validator: validateDate, trigger: ['blur', 'change'] }
@@ -316,7 +329,7 @@
           }
         },
         searchData() {            //表一所有搜索框
-
+          this.DATA.page = 1
           this.getTableData(this.DATA);
           this.getTotal(this.DATA)
         },
@@ -338,7 +351,11 @@
 
         getTableData(options) {              //获取表格数据
 
-
+          // if(options.signUpTime == null){
+          //   options.signUpTime = ""
+          // }
+          options.signUpTime === null ?  options.signUpTime = "" : 
+          options.interviewTime === null ?  options.interviewTime = "" : 
           this.loading = true;
           let URL = "http://lcj525.vipgz4.idcfengye.com/signUpListAll"
           URL = this.getTableDataURL(URL, options);
@@ -479,10 +496,20 @@
           fetch(URL, opt)
             .then(res => res.json())
             .then(json => {
+              if(json.statusCode == 1){
+                this.$message({
+                  type : 'success',
+                  message : currentRow.name + '通过报名'
+                })
+              }
               this.getTableData(this.DATA)
               this.getTotal(this.DATA)
-              console.log("1")
-
+            })
+            .catch(err=>{
+              this.$message({
+                  type : 'error',
+                  message : currentRow.name + '通过报名失败'
+              })
             })
 
         },
@@ -512,15 +539,24 @@
               fetch(URL, opt)
                 .then(res => res.json())
                 .then(json => {
-                  this.$message({
+                  if(json.statusCode == 1){
+                    this.$message({
                     type: 'success',
                     message: currentRow.customerName + ' 的退回原因为：' + value
 
-                  });
+                  })
+                  }
                   this.getTableData(this.DATA)
                   this.getTotal(this.DATA)
-                  resolve();
-                });
+                  resolve()
+                })
+                .catch(err=>{
+                  this.$message({
+                    type: 'error',
+                    message: currentRow.customerName + '退回失败' 
+
+                  })
+                })
             })
 
           }).catch(() => {
@@ -535,15 +571,43 @@
         // handleCancel(value) {
         //   this.DATA.gender = value == this.DATA.gender ? '' : value
         // },
+
+        changeDate(val){
+          if(val === null)
+          {
+            this.DATA.signUpTime =" "
+            // this.DATA.page = 1
+            this.getTableData(this.DATA)
+            this.getTotal(this.DATA)
+          }
+          
+            this.DATA.page = 1
+            this.getTableData(this.DATA)
+            this.getTotal(this.DATA)
+        },
+
+        changeDate2(val){
+          if(val === null)
+          {
+            this.DATA.interviewTime =" "
+            this.DATA.page = 1
+            this.getTableData(this.DATA)
+            this.getTotal(this.DATA)
+          }
+          
+            this.DATA.page = 1
+            this.getTableData(this.DATA)
+            this.getTotal(this.DATA)
+        },
         
 
-        getenterpriseName(val){
+        getenterpriseName(val){                       //当查询框的下拉框选择时获取数据
           
           this.getTableData(this.DATA);
           this.getTotal(this.DATA)
         },
 
-        getenterprise(){
+        getenterprise(){                      //查询框的推荐企业获取
           let URL = "http://lcj525.vipgz4.idcfengye.com/enterpriseName"
           fetch(URL)
           .then(res=>res.json())
@@ -562,23 +626,8 @@
           })
         },
 
-        updateEnterprise(val){
-          let URL = "http://lcj525.vipgz4.idcfengye.com/enterpriseName"
-          fetch(URL)
-          .then(res=>res.json())
-          .then(json=>{
-            for (var i=0; i<json.length; i++)
-            {
-              
-              json[i].value =json[i].enterpriseName 
-              json[i].label =json[i].enterpriseName 
-              delete json[i].id , delete json[i].phone,  delete json[i].place, delete json[i].roomAndBoard, delete json[i].time, delete json[i].welfare
-              delete json[i].address , delete json[i].head, delete json[i].enterpriseName
-              
-            }
-            this.enterOptions = json
-            
-          })
+        updateEnterprise(val){               //编辑表单的推荐企业以及推荐岗位
+          this.getenterprise()
           this.companyName = val
           this.update_form.recommendJob = ""
           let URLJob = `http://lcj525.vipgz4.idcfengye.com/enterpriseJob?enterpriseName=${this.companyName}`
