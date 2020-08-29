@@ -15,8 +15,11 @@
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
   }
 
-  .el-dialog {
+  /* .el-dialog {
     width: 500px;
+  } */
+  .el-dialog {
+    width:  80%;
   }
 
   .el-form-item label:after {
@@ -34,8 +37,12 @@
     content: none !important;
   }
 
-  .el-form-item {
+  /* .el-form-item {
     width: 75%;
+  } */
+  .el-form-item {
+    width: 45%;
+    margin-left: 30px;
   }
 </style>
 <body>
@@ -171,7 +178,7 @@
 
 
         <el-dialog title="编辑表单" :visible.sync="editDialog">
-          <el-form :model="update_form" ref="update_form" style="margin-left: 80px;" class="demo-ruleForm">
+          <el-form :inline="true" :model="update_form" ref="update_form" style="margin-left: 80px;" class="demo-ruleForm">
             <el-form-item label="姓名" :label-width="formLabelWidth">
               <el-input v-model="update_form.customerName" autocomplete="off" size="small"></el-input>
             </el-form-item>

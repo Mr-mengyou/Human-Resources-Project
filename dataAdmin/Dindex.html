@@ -67,7 +67,7 @@
             <a class="slider-link" href="/dataAdmin/qualify.html">待入职名单</a>
           </li>
           <li class="ul-item">
-            <a class="slider-link" href="/dataAdmin/havaJob.html">在职名单</a>
+            <a class="slider-link" href="/dataAdmin/haveJob.html">在职名单</a>
           </li>
 
         </ul>
@@ -100,8 +100,7 @@
           </el-col>
           <el-col :span="3" style="margin-top: 20px;margin-bottom: 20px;">
             <el-input placeholder="请输入推荐人" clearable v-model="DATA.employeeName" @change="searchData">
-          </el-col>
-          
+          </el-col>         
           <el-col :span="2" style="margin-right: 150px;margin-top: 20px;margin-bottom: 20px;">
             <el-date-picker
               v-model="DATA.signUpTime"
@@ -124,6 +123,21 @@
               placeholder="选择面试日期">
             </el-date-picker>
           </el-col>
+          
+          <el-col :span="2" style="float: right;margin-top: 20px;margin-bottom: 20px;margin-right: 50px;">
+            
+            <el-upload
+                    class="upload-demo"
+                    ref = 'upload'
+                   
+                    >
+                    <el-button size="small" type="primary">点击批量上传</el-button>
+                    
+         </el-upload> 
+
+
+          </el-col>
+          
           
         </el-row>
 

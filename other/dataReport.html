@@ -92,28 +92,35 @@
             <el-input placeholder="请输入员工姓名" clearable v-model="DATA.name" @change="searchData"></el-input>
           </el-col>
           <el-col :span="3" style="margin-right: 100px;margin-top: 20px;margin-bottom: 20px;">
-            <el-date-picker v-model="DATA.startTime" type="date" placeholder="选择起始月份" @change="searchData">
+            <el-date-picker 
+            v-model="DATA.startTime"
+            type="date" 
+            value-format="yyyy-MM-dd"
+            placeholder="选择起始时间" 
+            @change="searchData">
             </el-date-picker>
 
           </el-col>
 
           <el-col :span="3" style="margin-top: 20px;margin-bottom: 20px;">
-            <el-date-picker v-model="DATA.deadline" type="date" placeholder="选择截止月份" @change="searchData">
+            <el-date-picker v-model="DATA.deadline" type="date" value-format="yyyy-MM-dd" placeholder="选择截止时间" @change="searchData">
             </el-date-picker>
           </el-col>
         </el-row>
 
-        <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
+        <el-table :data="tableData"  style="width: 100%"  v-loading="loading" border>
 
-          <el-table-column prop="enterpriseName" align="center" label="企业名称">
+          <el-table-column prop="name" align="center"  label="员工姓名">
           </el-table-column>
-          <el-table-column prop="signUpCount" align="center" label="报名人数">
+          <el-table-column prop="signUpCount" align="center" sortable label="报名人数">
           </el-table-column>
-          <el-table-column prop="waitInductionCount" align="center" label="面试合格人数">
+          <el-table-column prop="waitInductionCount" align="center" sortable label="面试合格人数">
           </el-table-column>
-          <el-table-column prop="inductionCount" align="center" label="入职人数">
+          <el-table-column prop="inductionCount" align="center" sortable label="入职人数">
           </el-table-column>
-          <el-table-column prop="onTheJobCount" align="center" label="在职人数">
+          <el-table-column prop="onTheJobCount" align="center" sortable label="在职人数">
+          </el-table-column>
+          <el-table-column prop="phoneCount" align="center" sortable label="电话量">
           </el-table-column>
 
 
@@ -134,14 +141,14 @@
 
           
           DATA: {
-            page: 1,
-            enterpriseName: "",
+            
+            name: "",
             startTime: "",
             deadline: "",
           },
 
-          currentPage: 1,
-          pagesize: 10,
+          // currentPage: 1,
+          // pagesize: 10,
           total: "",
           tableData: [
             // { name: '张三', gender: '女', age: '12', cardNumber: '500227199801233288x', phoneNumber: '15736063175', education: "大专" }
@@ -153,6 +160,13 @@
         
       },
       methods: {
+        getTableDataURL(URL, options) {        //根据URL和参数对象生成附加参数的URL
+          URL += "?";
+          for (let [key, value] of Object.entries(options)) {
+            if (value !== "") URL += "" + key + "=" + value + "&";
+          }
+          return URL.slice(0, URL.length - 1);
+        },
         
 
         initForm(obj) {
@@ -162,25 +176,32 @@
         },
 
         searchData() {            //表一所有搜索框
-          this.DATA.page = 1
+          if(this.DATA.startTime == null){
+            this.DATA.startTime = ""
+          }
           this.getTableData(this.DATA)
           
         },
 
-        handleCurrentChange(size) {
-
-          this.DATA.page = size;
-          this.getTableData(this.DATA);
-        },
 
         getTableData(options) {   
-          this.loading = true;
-          let URL = "http://lcj525.vipgz4.idcfengye.com/enterpriseName"
-          fetch(URL)
-          .then(res=>res.json())
-          .then(json=>{
-            console.log(json)
-          })
+        
+          this.loading = true
+          let URL = "http://lcj525.vipgz4.idcfengye.com/dataReport"
+          URL = this.getTableDataURL(URL,options)
+          return new Promise(resolve => {
+            fetch(URL)
+              .then(res => res.json())
+              .then(json => {
+                
+                this.tableData = json
+
+                resolve();
+                setTimeout(() => {
+                  this.loading = false;
+                }, 500);
+              });
+          });
          
         },
 

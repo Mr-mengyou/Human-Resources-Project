@@ -105,7 +105,7 @@
             </el-table-column>
             <el-table-column prop="gender" align="center" label="性别" width="60">
             </el-table-column>
-            <el-table-column prop="phoneNumber" align="center" label="电话号码">
+            <el-table-column prop="phone" align="center" label="电话号码">
             </el-table-column>
             <el-table-column prop="position" align="center" label="岗位" :show-overflow-tooltip="true">
             </el-table-column>
@@ -158,6 +158,7 @@
       el: '#app',
       data: function () {
         return {
+          currentPhone : "",
           loading: false,
           allotDialog:false,
           permissionsList : [],
@@ -176,7 +177,7 @@
             permissions : '2',   
           },{
             id: 12,
-            label: '电话名单',
+            label: '电话记录名单',
             permissions : '3',   
           },{
             id: 13,
@@ -420,37 +421,70 @@
         
 
         permissAllot(currentRow){
+          this.currentPhone = currentRow.phone
           this.allotDialog = true
           let URL = `http://lcj525.vipgz4.idcfengye.com/permissions?phone=${currentRow.phone}`
           fetch(URL)
           .then(res => res.json())
           .then(json=>{
             this.permissionsList = json
-            let allPermissions = []
-            let allId = []
-            for(let i = 0;i<this.data.length;i++){
+            let dataPermissions = []  
+            let dataId = []         
+            let jsonPermissions = []
+            let jsonState = []
+            
+            for(let i = 0;i<this.data.length;i++){   
               let children = this.data[i].children
               for(let i =0;i<children.length;i++){
-                allPermissions.push(children[i].permissions)
-                allId.push(children[i].id)
+                dataPermissions.push(children[i].permissions)
+                dataId.push(children[i].id)
               }
             }
-            let allState = []
+            
             for(let i = 0;i<json.length;i++){
-              if(allPermissions.includes(json[i].permissions)===true){
-                allState.push(json[i].state)
-                
+              jsonPermissions.push(json[i].permissions)
+              if(dataPermissions.includes(json[i].permissions)===true){
+                jsonState.push(json[i].state)     
               }
             }
-            console.log(allId)
-            console.log(allState)
+            // console.log('dataPermissions'+ dataPermissions)  //获取data中的权限
+            // console.log('dataId'+dataId)           //获取data中的id
+            // console.log('jsonState'+jsonState)        //获取json中的state
+            // console.log('jsonPermissions'+jsonPermissions)  //获取json中的权限
+            
+            
             let checkKey = []
-            for (var k = 0;k<allId.length;k++){
-              if(allState[k]==1){
-                checkKey.push(allId[k])
+            for (let i = 0;i<dataPermissions.length;i++){
+              for(let j = 0;j<jsonPermissions.length;j++){
+                if(dataPermissions[i] == jsonPermissions[j]){
+                  if(jsonState[j]==1){
+                   checkKey.push(jsonPermissions[j])
+                  }
+                }
               }
             }
-            this.$refs.tree.setCheckedKeys(checkKey)
+            console.log(checkKey)       //得到已经选择的permissions权限数字，而不是权限对应的ID
+            let checkId = []
+            for(let i = 0;i<this.data.length;i++){   
+              let children = this.data[i].children
+              for(let i =0;i<children.length;i++){
+                if(checkKey.includes(children[i].permissions)){
+                  checkId.push(children[i].id)
+                  // console.log(children[i].id)
+                }
+                // dataPermissions.push(children[i].permissions)
+                // dataId.push(children[i].id)
+              }
+            }
+
+
+            
+            // for (var k = 0;k<dataId.length;k++){
+            //   if(jsonState[k]==1){
+            //     checkKey.push(dataId[k])
+            //   }
+            // }
+            this.$refs.tree.setCheckedKeys(checkId)
           
           
           })
@@ -476,12 +510,47 @@
             }
           
 
-          for(let i=0 ;i <currentPermissions.length;i++){
-            currentPermissions[i].id = this.permissionsList[i].id
+          // for(let i=0 ;i <currentPermissions.length;i++){
+          //   currentPermissions[i].id = this.permissionsList[i].id
+          // }
+          for(let i =0;i<currentPermissions.length;i++){
+            currentPermissions[i].phone = this.currentPhone
           }
           console.log(currentPermissions)
 
-          let URL = ""
+          let URL = "http://lcj525.vipgz4.idcfengye.com/addPermissions"
+          let opt = {
+            method : 'post',
+            body : JSON.stringify(currentPermissions),
+            headers:{
+              'content-type': 'application/json'
+            },
+          }
+          fetch(URL,opt)
+          .then(res=>res.json())
+          .then(json=>{
+            if(json.total == 29){
+              this.$message({
+                type : 'success',
+                message : '权限分配成功'
+              })
+              this.allotDialog = false
+            }
+            else{
+              this.$message({
+                type : 'error',
+                message : '权限分配失败'
+              })
+              this.allotDialog = false
+            }
+          })
+          .catch(err=>{
+            this.$message({
+                type : 'error',
+                message : '权限分配失败'
+              })
+              this.allotDialog = false
+          })
          
         },
 

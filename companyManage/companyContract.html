@@ -69,7 +69,7 @@
             <a class="slider-link active" href="/companyManage/companyContract.html">企业合同</a>
           </li>
           <li class="ul-item active">
-            <a class="slider-link active " href="/companyManage/companyReport.html">企业报表</a>
+            <a class="slider-link  " href="/companyManage/companyReport.html">企业报表</a>
           </li>
 
         </ul>
@@ -87,7 +87,7 @@
           </el-col>
         </el-row>
 
-        <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
+        <el-table :data="tableData" style="width: 100%" :cell-style="timeStyle" v-loading="loading" border>
           <el-table-column fixed prop="enterpriseName" align="center" center label="企业名称" width="100" :show-overflow-tooltip="true">
           </el-table-column>
           <el-table-column prop="address" align="center" label="地址" width="120" :show-overflow-tooltip="true">
@@ -121,7 +121,7 @@
           <template>
             <div class="block">
               <el-pagination @current-change="handleCurrentChange" :current-page="currentPage" :page-size="10"
-                layout="total, prev, pager, next, jumper" :total="total">
+              background  layout="total, prev, pager, next, jumper" :total="total">
               </el-pagination>
             </div>
           </template>
@@ -414,6 +414,20 @@
 
         handleCancel(value) {
           this.DATA.gender = value == this.DATA.gender ? '' : value
+        },
+
+        timeStyle(row) {
+          for(let i =0;i<this.tableData.length;i++){
+            if(this.tableData[i].expireTime==null){
+
+            }
+            else if( new Date(this.tableData[i].expireTime).getTime()< new Date().getTime() ){
+              if(row.rowIndex === i ) {
+                return "color: red"  
+                }
+            }
+          }
+        
         }
 
 

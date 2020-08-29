@@ -82,34 +82,44 @@
       <div id="app">
         <el-row>
           <el-col :span="3" style="margin-right: 30px;margin-top: 20px;margin-bottom: 20px;">
-            <el-select v-model="DATA.recommendEnterprise" @change="getenterpriseName" placeholder="请选择">
+            <el-select v-model="DATA.enterpriseName" clearable @change="getenterpriseName" placeholder="请选择">
               <el-option v-for="item in enterOptions"  :key="item.value" :label="item.label" :value="item.value">
               </el-option>
             </el-select>
           </el-col>
           <el-col :span="3" style="margin-right: 100px;margin-top: 20px;margin-bottom: 20px;">
-            <el-date-picker v-model="DATA.startTime" type="date" placeholder="选择起始时间">
+            <el-date-picker 
+            v-model="DATA.startTime"
+            type="date"
+            value-format="yyyy-MM-dd" 
+            @change="searchData"
+            placeholder="选择起始时间">
             </el-date-picker>
 
           </el-col>
 
           <el-col :span="3" style="margin-top: 20px;margin-bottom: 20px;">
-            <el-date-picker v-model="DATA.deadline" type="date" placeholder="选择截止时间">
+            <el-date-picker 
+            v-model="DATA.deadline" 
+            type="date" 
+            value-format="yyyy-MM-dd" 
+            @change="searchData"
+            placeholder="选择截止时间">
             </el-date-picker>
           </el-col>
         </el-row>
 
         <el-table :data="tableData" style="width: 100%" v-loading="loading" border>
 
-          <el-table-column prop="name" align="center" label="业务员姓名">
+          <el-table-column prop="enterpriseName" align="center"  label="企业名称">
           </el-table-column>
-          <el-table-column prop="signUpCount" align="center" label="报名人数">
+          <el-table-column prop="signUpCount" align="center" sortable label="报名人数">
           </el-table-column>
-          <el-table-column prop="waitInductionCount" align="center" label="面试合格人数">
+          <el-table-column prop="waitInductionCount" align="center" sortable label="面试合格人数">
           </el-table-column>
-          <el-table-column prop="phoneCount" align="center" label="电话量">
+          <el-table-column prop="inductionCount" align="center" sortable label="入职人数">
           </el-table-column>
-          <el-table-column prop="onTheJobCount" align="center" label="在职人数">
+          <el-table-column prop="onTheJobCount" align="center" sortable label="在职人数">
           </el-table-column>
 
 
@@ -130,8 +140,8 @@
           enterOptions:[],
           formLabelWidth: '100px',
           DATA: {
-            page: 1,
-            name: "",
+            
+            enterpriseName: "",
             startTime: "",
             deadline: "",
           },
@@ -163,27 +173,22 @@
         },
 
         searchData() {            //表一所有搜索框
-          this.DATA.page = 1
+          
           this.getTableData(this.DATA)
-          this.getTotal(this.DATA)
+          
         },
 
-        handleCurrentChange(size) {
-
-          this.DATA.page = size;
-          this.getTableData(this.DATA);
-        },
+        
 
         getTableData(options) {   //获取表一数据
-        console.log("o")
-          this.loading = true;
+          this.loading = true
           let URL = "http://lcj525.vipgz4.idcfengye.com/enterpriseReport"
           URL = this.getTableDataURL(URL, options);
           return new Promise(resolve => {
             fetch(URL)
               .then(res => res.json())
               .then(json => {
-
+                
                 this.tableData = json;
 
                 resolve();

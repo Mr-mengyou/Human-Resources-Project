@@ -133,7 +133,7 @@
         </div>
 
         <!-- 编辑表单 -->
-        <el-dialog title="编辑表单" :visible.sync="editDialog">
+        <el-dialog title="编辑表单" :visible.sync="editDialog" @close="closeEdit">
             
           <el-form :inline="true" :model="update_form" ref="update_form" style="margin-left: 100px;" class="demo-ruleForm">
             
@@ -146,7 +146,12 @@
             <el-form-item label="参保单位" :label-width="formLabelWidth">
               <el-input v-model="update_form.unit"  autocomplete="off" size="small"></el-input>  
             </el-form-item>
-            <el-form-item label="合同到期时间" :label-width="formLabelWidth">
+            <el-form-item label="合同到期时间" :label-width="formLabelWidth"
+            prop="contractExpireTime" 
+            :rules="[
+            { validator: validateDate, trigger: ['blur', 'change'] }
+          ]"   
+            >
               <el-input v-model="update_form.contractExpireTime"  autocomplete="off" size="small"></el-input>  
             </el-form-item>
             <el-form-item label="保险类别" :label-width="formLabelWidth">
@@ -185,7 +190,12 @@
             <el-form-item label="结算所属周期" :label-width="formLabelWidth">
                 <el-input v-model="update_form.cycle"  autocomplete="off" size="small"></el-input>  
             </el-form-item>
-            <el-form-item label="结算时间" :label-width="formLabelWidth">
+            <el-form-item label="结算时间" :label-width="formLabelWidth"
+            prop="settlementTime" 
+            :rules="[
+            { validator: validateDate, trigger: ['blur', 'change'] }
+          ]"   
+            >
                 <el-input v-model="update_form.settlementTime"  autocomplete="off" size="small"></el-input>  
             </el-form-item>
             <el-form-item label="结算状态" :label-width="formLabelWidth">
@@ -194,7 +204,8 @@
             <el-form-item label="凭证" :label-width="formLabelWidth">
                 <el-upload
                     class="upload-demo"
-                    action="http://lcj525.vipgz4.idcfengye.com/updateSettlement"
+                    ref = 'upload'
+                    action="http://lcj525.vipgz4.idcfengye.com/upLoadFile"
                     :before-remove="beforeRemove"
                     :before-upload="beforeUpload"
                     :on-success="uploadSuccess"
@@ -219,8 +230,8 @@
         
           </el-form>
           <div slot="footer" class="dialog-footer" style="text-align: center;">
-            <el-button @click="dialogFormVisible3 = false">取 消</el-button>
-            <el-button type="primary" @click="update">提交</el-button>
+            <el-button @click="cancel">取 消</el-button>
+            <el-button type="primary" @click="update('update_form')">提交</el-button>
           </div>
         </el-dialog>
 
@@ -305,8 +316,8 @@
           this.getTotal(this.DATA)
         },
         handleCurrentChange(size) {
-          this.currentPage = currentPage;
-          this.DATA.page = currentPage;
+         
+          this.DATA.page = size;
           this.getTableData(this.DATA);
         },
         changeTable1() {                //改变表一任何一个单选框
@@ -327,8 +338,7 @@
               .then(json => {
                 
 
-                this.tableData = json;
-
+                this.tableData = json
                 resolve();
                 setTimeout(() => {
                   this.loading = false;
@@ -352,21 +362,67 @@
           });
         },
 
+        validateDate(rule, value, callback){
+          let dateRule = /^((([0-9]{3}[1-9]|[0-9]{2}[1-9][0-9]{1}|[0-9]{1}[1-9][0-9]{2}|[1-9][0-9]{3})-(((0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01]))|((0[469]|11)-(0[1-9]|[12][0-9]|30))|(02-(0[1-9]|[1][0-9]|2[0-8]))))|((([0-9]{2})(0[48]|[2468][048]|[13579][26])|((0[48]|[2468][048]|[3579][26])00))0229))$/
+          if (value == "") {        
+            callback()
+            
+          } else if(dateRule.test(value)==false ){          
+            callback(new Error('请输入正确得时间格式，如2017-01-01'))
+          }   
+          else {
+            callback()
+          }
+        },
+
+
+
    
         updateList(currentRow) {
           // console.log(updateInfo)
           this.editDialog = true
           
           this.update_form = Object.assign({}, currentRow)
-          
+          let photo = {
+              url : this.update_form.credentials
+          }
+          this.fileList.push(photo)
           
         },
 
-        update() {
+        update(formName) {
+          this.$refs[formName].validate(valid => {
+          if (valid) {
+            this.$refs.upload.submit();
+            
+          } else {
+            
+            return false;
+          }
+        });
+
+
+
           //编辑 重新提交表单
+          
+        },
+        changeStatus(val){
+          this.DATA.page = 1
+          this.getTableData(this.DATA);
+          this.getTotal(this.DATA)
+        },
+
+        uploadSuccess(response, file, fileList) {
+        // var uploadpath = response.uploadPath
+        // console.log(uploadPath)
+       
+          let uploadurl =  response
+          // let URL = "http://127.0.0.1:8000/activity/addActivity"
+          this.update_form.credentials = uploadurl
+          
           let URL = "http://lcj525.vipgz4.idcfengye.com/updateSettlement"
-          delete this.update_form.name,this.update_form.idNumber,this.update_form.gender,this.update_form.phoneNumber,this.update_form.recommendEnterprise,this.update_form.recommendJob,this.update_form.inductionTime,this.update_form.state,this.update_form.contractExpireTime,
-          this.update_form.emergencyContact,this.update_form.emergencyContactPhone,this.update_form.insurance,this.update_form.unit
+          delete this.update_form.name, delete this.update_form.idNumber, delete this.update_form.gender, delete this.update_form.phoneNumber, delete this.update_form.recommendEnterprise, delete this.update_form.recommendJob, delete this.update_form.inductionTime, delete this.update_form.state, delete this.update_form.contractExpireTime,
+          delete this.update_form.emergencyContact, delete this.update_form.emergencyContactPhone, delete this.update_form.insurance, delete this.update_form.unit, delete this.update_form.age
           var opt = {
             method: "POST",
             body: JSON.stringify(this.update_form),
@@ -378,30 +434,19 @@
             fetch(URL, opt)
               .then(res => res.json())
               .then(json => {
-                this.getTableData(this.DATA)
-                // this.getTotal(this.DATA)
                 this.editDialog = false
+                if(json.statusCode == 1){
+                  this.$message({
+                    type:'success',
+                    message : '修改成功'
+                  })
+                  this.fileList = []
+                }
+                this.getTableData(this.DATA)
+                this.getTotal(this.DATA)
                 resolve();
               });
-          })
-        },
-        changeStatus(val){
-          this.DATA.page = 1
-          this.getTableData(this.DATA);
-          this.getTotal(this.DATA)
-        },
-
-        uploadSuccess(response, file, fileList) {
-        // var uploadpath = response.uploadPath
-        // console.log(uploadPath)
-        console.log(response.code)
-        if (response.code == 0) {
-          let uploadurl =  response.uploadPath
-          let URL = "http://127.0.0.1:8000/activity/addActivity"
-          this.ruleForm['uploadurl'] = uploadurl
-          
-        }
-        
+          })     
       },
       uploadFalse(response, file, fileList) {
         this.$message({
@@ -410,7 +455,8 @@
         });
       },
       beforeUpload(file) {
-        this.ruleForm.filename = file.name;
+        this.update_form.file = file.name
+        
         const extension = file.name.split(".")[1] === "jpg";
         const extension2 = file.name.split(".")[1] === "png";
         if (!extension && !extension2) {
@@ -432,6 +478,14 @@
       beforeRemove(file, fileList) {
         return this.$confirm(`确定移除 ${file.name}？`);
       },
+      cancel(){
+        this.editDialog = false
+        this.fileList = []
+      },
+      closeEdit(){
+        this.editDialog = false
+        this.fileList = []
+      }
       },
     });
   </script>
